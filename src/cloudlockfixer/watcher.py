@@ -90,10 +90,10 @@ class PreventiveWatcher:
                 self.provider.pause()
             else:
                 self._paused_by_us = False
-            log.info("Praeventiv-Waechter: %s pausiert (hohe Aenderungsrate).",
+            log.info("Preventive watcher: %s paused (high change rate).",
                      self.provider.name)
         elif action == "resume":
             self.provider.resume()
-            log.info("Praeventiv-Waechter: %s wieder gestartet (Ruhe).",
+            log.info("Preventive watcher: %s resumed (idle).",
                      self.provider.name)
         return action

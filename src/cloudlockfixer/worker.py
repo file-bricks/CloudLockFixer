@@ -55,25 +55,25 @@ def run_once(queue: Queue, force_pause: bool = False) -> dict:
         if prov.pause():
             paused.append(prov)
             summary["paused_providers"].append(prov.name)
-            log.info("Sync-Provider pausiert: %s", prov.name)
+            log.info("Sync provider paused: %s", prov.name)
 
     try:
         for t in pending:
             t.status = "running"
             t.retry_count += 1
             t.last_try = datetime.now(timezone.utc).isoformat()
-            log.info("Task %s Versuch %d: %s", t.id, t.retry_count, t.describe())
+            log.info("Task %s attempt %d: %s", t.id, t.retry_count, t.describe())
             if execute_chain(t):
                 summary["done"] += 1
-                log.info("Task %s erledigt.", t.id)
+                log.info("Task %s completed.", t.id)
             else:
                 t.status = "pending"  # bleibt fuer naechsten Lauf
                 summary["failed_again"] += 1
-                log.warning("Task %s offen: %s", t.id, t.last_error)
+                log.warning("Task %s still open: %s", t.id, t.last_error)
         queue.save()
     finally:
         for prov in paused:
             if prov.resume():
-                log.info("Sync-Provider wieder gestartet: %s", prov.name)
+                log.info("Sync provider resumed: %s", prov.name)
 
     return summary

@@ -25,3 +25,12 @@ def load() -> dict:
 def save(settings: dict) -> None:
     _path().write_text(json.dumps(settings, ensure_ascii=False, indent=2),
                        encoding="utf-8")
+
+
+def resolve_language(cfg: dict) -> str:
+    """Map stored "auto"/"de"/"en" -> concrete "de"/"en"."""
+    lang = cfg.get("language", "auto")
+    if lang in ("de", "en"):
+        return lang
+    from .i18n import detect_language
+    return detect_language()

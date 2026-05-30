@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import sys
 
+from .i18n import t
 from .paths import launcher, pythonw
 
-# Kaskaden-Basis fuer Ordner (Directory) und Dateien (*)
 _BASES = [
     r"Software\Classes\Directory\shell\CloudLockFixer",
     r"Software\Classes\*\shell\CloudLockFixer",
 ]
 _OPS = [
-    ("01rename", "Verzoegert umbenennen", "rename"),
-    ("02move", "Verzoegert verschieben", "move"),
-    ("03delete", "Verzoegert loeschen", "delete"),
+    ("01rename", "ctx_delayed_rename", "rename"),
+    ("02move", "ctx_delayed_move", "move"),
+    ("03delete", "ctx_delayed_delete", "delete"),
 ]
 
 
@@ -43,10 +43,10 @@ def install() -> bool:
                 winreg.SetValueEx(k, "MUIVerb", 0, winreg.REG_SZ, "CloudLockFixer")
                 # leerer SubCommands-Wert aktiviert die shell-Unterverben
                 winreg.SetValueEx(k, "subcommands", 0, winreg.REG_SZ, "")
-            for key, label, op in _OPS:
+            for key, label_key, op in _OPS:
                 vk = base + r"\shell\\" + key
                 with winreg.CreateKey(winreg.HKEY_CURRENT_USER, vk) as k:
-                    winreg.SetValueEx(k, "MUIVerb", 0, winreg.REG_SZ, label)
+                    winreg.SetValueEx(k, "MUIVerb", 0, winreg.REG_SZ, t(label_key))
                 with winreg.CreateKey(winreg.HKEY_CURRENT_USER, vk + r"\command") as k:
                     winreg.SetValueEx(k, None, 0, winreg.REG_SZ, _command(op))
         return True

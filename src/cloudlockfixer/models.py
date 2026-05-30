@@ -129,7 +129,7 @@ class Queue:
         kommentiert sie in der txt-Datei aus (so werden sie nicht doppelt
         aufgenommen, bleiben aber als Historie sichtbar)."""
         if not self.txt_path.exists():
-            self.txt_path.write_text(_TXT_HEADER, encoding="utf-8")
+            self.txt_path.write_text(_txt_header(), encoding="utf-8")
             return
         lines = self.txt_path.read_text(encoding="utf-8").splitlines()
         changed = False
@@ -142,7 +142,8 @@ class Queue:
             try:
                 task = parse_txt_line(line)
             except ValueError as e:
-                out.append(f"# FEHLER: {e}")
+                from .i18n import t
+                out.append(f"# {t('parse_error')}: {e}")
                 out.append(f"# {line}")
                 changed = True
                 continue
@@ -181,11 +182,6 @@ class Queue:
         tmp.replace(self.json_path)
 
 
-_TXT_HEADER = """# CloudLockFixer — Aufgaben-Queue (eine Zeile = ein Task)
-# Syntax (Pfade mit Leerzeichen in Anfuehrungszeichen):
-#   rename <pfad> <neuerName>
-#   move <quelle> <ziel>
-#   delete <pfad>
-#   Verkettung mit &&:   move <a> <b> && delete <c>
-# Aufgenommene Zeilen werden automatisch zu '#>' auskommentiert.
-"""
+def _txt_header() -> str:
+    from .i18n import t
+    return t("queue_txt_header")

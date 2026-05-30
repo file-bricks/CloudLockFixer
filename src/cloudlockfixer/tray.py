@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from . import autostart, contextmenu, settings, watcher
+from .i18n import t
 from .models import Queue, Step, Task
 from .paths import data_dir, log_file
 from .providers import OneDriveProvider
@@ -27,7 +28,6 @@ INTERVAL_CHOICES_MIN = [30, 60, 90, 120, 180, 240, 360, 720]
 
 
 def _icon_paths() -> list[str]:
-    """Mögliche Orte der icon.ico (gebündelt in der EXE bzw. im Projekt)."""
     out = []
     base = getattr(sys, "_MEIPASS", None)
     if base:
@@ -38,8 +38,6 @@ def _icon_paths() -> list[str]:
 
 
 def _make_icon(color: str = "#2e9e44") -> QIcon:
-    """App-Icon: bevorzugt die icon.ico (grüne Wolke + Schloss); fällt sonst
-    auf ein programmatisch gezeichnetes Wolken-Icon zurück."""
     for cand in _icon_paths():
         if os.path.exists(cand):
             ic = QIcon(cand)
@@ -51,7 +49,6 @@ def _make_icon(color: str = "#2e9e44") -> QIcon:
     p.setRenderHint(QPainter.Antialiasing)
     p.setBrush(QColor(color))
     p.setPen(Qt.NoPen)
-    # einfache Wolke aus drei Ellipsen + Basis
     p.drawEllipse(8, 26, 28, 26)
     p.drawEllipse(26, 18, 30, 28)
     p.drawRoundedRect(10, 38, 46, 16, 8, 8)
@@ -90,7 +87,6 @@ class TrayApp:
         self.timer.timeout.connect(lambda: self.run_async(False))
         self._apply_interval()
 
-        # Praeventiv-Waechter (opt-in)
         self.watcher = watcher.PreventiveWatcher(
             OneDriveProvider(), watch_dirs=self.settings.get("watch_dirs", []))
         self._watch_running = False
@@ -100,7 +96,7 @@ class TrayApp:
             self.watch_timer.start(int(self.watcher.window_s * 1000))
 
         self._refresh_status()
-        QTimer.singleShot(3000, lambda: self.run_async(False))  # kurz nach Start
+        QTimer.singleShot(3000, lambda: self.run_async(False))
 
     # ── Menü ────────────────────────────────────────────────────────
     def _build_menu(self) -> None:
@@ -109,16 +105,16 @@ class TrayApp:
         self.menu.addAction(self.status_action)
         self.menu.addSeparator()
 
-        self.menu.addAction(QAction("Task hinzufügen…", self.menu,
+        self.menu.addAction(QAction(t("add_task"), self.menu,
                                     triggered=self.add_task_dialog))
-        self.menu.addAction(QAction("Jetzt ausführen", self.menu,
+        self.menu.addAction(QAction(t("run_now"), self.menu,
                                     triggered=lambda: self.run_async(False)))
-        self.menu.addAction(QAction("Jetzt ausführen (mit OneDrive-Pause)", self.menu,
+        self.menu.addAction(QAction(t("run_now_with_pause"), self.menu,
                                     triggered=lambda: self.run_async(True)))
-        self.menu.addAction(QAction("Queue/Log öffnen", self.menu,
+        self.menu.addAction(QAction(t("open_queue_log"), self.menu,
                                     triggered=self._open_data_dir))
 
-        interval_menu = self.menu.addMenu("Intervall")
+        interval_menu = self.menu.addMenu(t("interval_menu"))
         grp = QActionGroup(self.menu)
         grp.setExclusive(True)
         cur = int(self.settings.get("interval_min", settings.DEFAULT_INTERVAL_MIN))
@@ -131,28 +127,42 @@ class TrayApp:
             grp.addAction(a)
             interval_menu.addAction(a)
 
-        self.autostart_action = QAction("Mit Windows starten", self.menu,
+        self.autostart_action = QAction(t("autostart_label"), self.menu,
                                         checkable=True)
         self.autostart_action.setChecked(autostart.is_enabled())
         self.autostart_action.triggered.connect(self._toggle_autostart)
         self.menu.addAction(self.autostart_action)
 
-        self.context_action = QAction("Explorer-Kontextmenü", self.menu,
+        self.context_action = QAction(t("context_menu_label"), self.menu,
                                       checkable=True)
         self.context_action.setChecked(contextmenu.is_installed())
         self.context_action.triggered.connect(self._toggle_context)
         self.menu.addAction(self.context_action)
 
-        self.watcher_action = QAction("Präventiv-Wächter (OneDrive)", self.menu,
+        self.watcher_action = QAction(t("watcher_label"), self.menu,
                                       checkable=True)
         self.watcher_action.setChecked(bool(self.settings.get("watcher_enabled")))
         self.watcher_action.triggered.connect(self._toggle_watcher)
         self.menu.addAction(self.watcher_action)
-        self.menu.addAction(QAction("Wächter-Ordner hinzufügen…", self.menu,
+        self.menu.addAction(QAction(t("add_watch_dir"), self.menu,
                                     triggered=self._add_watch_dir))
 
+        # Sprache / Language
+        lang_menu = self.menu.addMenu(t("language_menu"))
+        lang_grp = QActionGroup(self.menu)
+        lang_grp.setExclusive(True)
+        cur_lang = self.settings.get("language", "auto")
+        for code, label in [("auto", t("language_auto")),
+                            ("de", "Deutsch"), ("en", "English")]:
+            a = QAction(label, self.menu, checkable=True)
+            a.setChecked(code == cur_lang)
+            a.triggered.connect(lambda _=False, c=code: self._set_language(c))
+            lang_grp.addAction(a)
+            lang_menu.addAction(a)
+
         self.menu.addSeparator()
-        self.menu.addAction(QAction("Beenden", self.menu, triggered=self.app.quit))
+        self.menu.addAction(QAction(t("quit_label"), self.menu,
+                                    triggered=self.app.quit))
 
     def _on_activated(self, reason):
         if reason == QSystemTrayIcon.Trigger:
@@ -161,41 +171,44 @@ class TrayApp:
     # ── Aktionen ────────────────────────────────────────────────────
     def add_task_dialog(self) -> None:
         action, ok = QInputDialog.getItem(
-            None, "CloudLockFixer", "Aktion wählen:",
-            ["Umbenennen", "Verschieben", "Löschen"], 0, False)
+            None, "CloudLockFixer", t("action_choose"),
+            [t("action_rename"), t("action_move"), t("action_delete")], 0, False)
         if not ok:
             return
-        src = QFileDialog.getExistingDirectory(None, "Ordner wählen")
+        src = QFileDialog.getExistingDirectory(None, t("choose_folder"))
         if not src:
             return
-        if action == "Umbenennen":
-            new, ok = QInputDialog.getText(None, "Umbenennen", "Neuer Name:")
+        if action == t("action_rename"):
+            new, ok = QInputDialog.getText(None, t("action_rename"),
+                                           t("rename_prompt"))
             if not ok or not new.strip():
                 return
             task = Task(chain=[Step(op="rename", src=src, arg=new.strip())])
-        elif action == "Verschieben":
-            dst_parent = QFileDialog.getExistingDirectory(None, "Zielordner wählen")
+        elif action == t("action_move"):
+            dst_parent = QFileDialog.getExistingDirectory(None, t("choose_target"))
             if not dst_parent:
                 return
             name = os.path.basename(src.rstrip("/\\"))
             task = Task(chain=[Step(op="move", src=src,
                                     arg=os.path.join(dst_parent, name))])
         else:
-            if QMessageBox.question(None, "Löschen",
-                                    f"'{src}' verzögert löschen?") != QMessageBox.StandardButton.Yes:
+            if QMessageBox.question(
+                    None, t("confirm_delete_title"),
+                    t("confirm_delete", src=src)
+            ) != QMessageBox.StandardButton.Yes:
                 return
             task = Task(chain=[Step(op="delete", src=src)])
         self.queue.add(task)
         self._refresh_status()
         self.tray.showMessage("CloudLockFixer",
-                              f"Eingereiht: {task.describe()}",
+                              t("queued_notification", desc=task.describe()),
                               _make_icon(), 4000)
 
     def run_async(self, force_pause: bool) -> None:
         if self._running:
             return
         self._running = True
-        self._set_status("läuft…")
+        self._set_status(t("status_running"))
 
         def job():
             try:
@@ -211,7 +224,7 @@ class TrayApp:
         self._refresh_status()
         if s.get("done"):
             self.tray.showMessage("CloudLockFixer",
-                                  f"{s['done']} Aktion(en) erledigt.",
+                                  t("actions_done", n=s["done"]),
                                   _make_icon(), 4000)
 
     def _toggle_autostart(self, checked: bool) -> None:
@@ -234,6 +247,12 @@ class TrayApp:
         except (OSError, AttributeError):
             pass
 
+    def _set_language(self, code: str) -> None:
+        self.settings["language"] = code
+        settings.save(self.settings)
+        self.tray.showMessage("CloudLockFixer", t("restart_required"),
+                              _make_icon(), 4000)
+
     # ── Status ──────────────────────────────────────────────────────
     def _set_status(self, text: str) -> None:
         self.status_action.setText(text)
@@ -242,9 +261,10 @@ class TrayApp:
     def _refresh_status(self) -> None:
         self.queue.load()
         n = len(self.queue.pending)
-        failed = sum(1 for t in self.queue.tasks
-                     if t.status == "pending" and t.retry_count > 0)
-        txt = "keine offenen Aufgaben" if n == 0 else f"{n} offen ({failed} mit Fehlversuch)"
+        failed = sum(1 for t_ in self.queue.tasks
+                     if t_.status == "pending" and t_.retry_count > 0)
+        txt = (t("status_no_tasks") if n == 0
+               else t("status_open", n=n, failed=failed))
         self._set_status(txt)
 
     # ── P2: Kontextmenü ─────────────────────────────────────────────
@@ -264,7 +284,7 @@ class TrayApp:
             self.watch_timer.stop()
 
     def _add_watch_dir(self) -> None:
-        d = QFileDialog.getExistingDirectory(None, "Ordner für Präventiv-Wächter")
+        d = QFileDialog.getExistingDirectory(None, t("watcher_dir_title"))
         if not d:
             return
         dirs = self.settings.get("watch_dirs", [])
@@ -273,7 +293,7 @@ class TrayApp:
             self.settings["watch_dirs"] = dirs
             settings.save(self.settings)
             self.watcher.watch_dirs = dirs
-        self.tray.showMessage("CloudLockFixer", f"Wächter-Ordner: {d}",
+        self.tray.showMessage("CloudLockFixer", t("watch_dir_added", d=d),
                               _make_icon(), 3000)
 
     def _watcher_tick(self) -> None:
@@ -297,19 +317,24 @@ def main() -> int:
         format="%(asctime)s %(levelname)s %(message)s",
         handlers=[logging.FileHandler(log_file(), encoding="utf-8")],
     )
+
+    # Language must be resolved before any UI strings are used
+    from . import i18n
+    cfg = settings.load()
+    i18n.set_language(settings.resolve_language(cfg))
+
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
 
-    # Single-Instance-Guard
     from PySide6.QtCore import QSharedMemory
     guard = QSharedMemory("CloudLockFixer_singleton")
     if not guard.create(1):
-        QMessageBox.information(None, "CloudLockFixer", "Läuft bereits.")
+        QMessageBox.information(None, "CloudLockFixer", t("already_running"))
         return 0
-    app._clf_guard = guard  # Referenz halten
+    app._clf_guard = guard
 
     if not QSystemTrayIcon.isSystemTrayAvailable():
-        QMessageBox.critical(None, "CloudLockFixer", "Kein System-Tray verfügbar.")
+        QMessageBox.critical(None, "CloudLockFixer", t("no_tray"))
         return 1
 
     TrayApp(app)

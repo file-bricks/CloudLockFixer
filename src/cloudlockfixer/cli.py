@@ -1,4 +1,4 @@
-"""CLI — fuer LLM/Skripte und manuelles Einreihen.
+"""CLI — für LLM/Skripte und manuelles Einreihen.
 
 Beispiele:
   clf add --rename "C:\\...\\AltOrdner" "NeuName"
@@ -14,6 +14,8 @@ import argparse
 import logging
 import sys
 
+from . import i18n, settings
+from .i18n import t
 from .models import Queue, Step, Task, parse_txt_line
 from .paths import data_dir, log_file
 from .worker import run_once
@@ -29,10 +31,13 @@ def _setup_logging() -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="clf", description="CloudLockFixer CLI")
+    cfg = settings.load()
+    i18n.set_language(settings.resolve_language(cfg))
+
+    parser = argparse.ArgumentParser(prog="clf", description=t("cli_desc"))
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_add = sub.add_parser("add", help="Task einreihen")
+    p_add = sub.add_parser("add", help=t("cli_add_help"))
     g = p_add.add_mutually_exclusive_group(required=True)
     g.add_argument("--rename", nargs=2, metavar=("PFAD", "NEUNAME"))
     g.add_argument("--move", nargs=2, metavar=("QUELLE", "ZIEL"))
@@ -40,18 +45,18 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--chain", metavar="AUSDRUCK",
                    help="z.B. 'move \"a\" \"b\" && delete \"c\"'")
 
-    sub.add_parser("list", help="Queue anzeigen")
-    p_run = sub.add_parser("run-now", help="Queue jetzt abarbeiten")
+    sub.add_parser("list", help=t("cli_list_help"))
+    p_run = sub.add_parser("run-now", help=t("cli_run_help"))
     p_run.add_argument("--pause", action="store_true",
-                       help="Sync-Client fuer den Lauf pausieren (M2)")
+                       help=t("cli_pause_help"))
 
-    p_ctx = sub.add_parser("context", help="Explorer-Kontextmenue verwalten")
+    p_ctx = sub.add_parser("context", help=t("cli_context_help"))
     gc = p_ctx.add_mutually_exclusive_group(required=True)
     gc.add_argument("--install", action="store_true")
     gc.add_argument("--uninstall", action="store_true")
     gc.add_argument("--status", action="store_true")
 
-    p_gui = sub.add_parser("gui-add", help="Dialog zum Einreihen (vom Kontextmenue)")
+    p_gui = sub.add_parser("gui-add", help=t("cli_gui_add_help"))
     p_gui.add_argument("--op", required=True, choices=["rename", "move", "delete"])
     p_gui.add_argument("--src", required=True)
 
@@ -69,41 +74,44 @@ def main(argv: list[str] | None = None) -> int:
         else:
             task = parse_txt_line(args.chain)  # type: ignore[assignment]
             if task is None:
-                print("Leere/ungueltige Kette.", file=sys.stderr)
+                print(t("invalid_chain"), file=sys.stderr)
                 return 2
         queue.add(task)
-        print(f"Eingereiht: {task.id}  {task.describe()}")
+        print(t("queued_msg", id=task.id, desc=task.describe()))
         return 0
 
     if args.cmd == "list":
         if not queue.tasks:
-            print("Queue leer.")
+            print(t("queue_empty"))
             return 0
-        for t in queue.tasks:
-            print(f"[{t.status:7}] {t.id}  (Versuche {t.retry_count})  {t.describe()}"
-                  + (f"  ! {t.last_error}" if t.last_error else ""))
+        for tk in queue.tasks:
+            print(f"[{tk.status:7}] {tk.id}  (Versuche {tk.retry_count})  {tk.describe()}"
+                  + (f"  ! {tk.last_error}" if tk.last_error else ""))
         return 0
 
     if args.cmd == "run-now":
         summary = run_once(queue, force_pause=args.pause)
-        print(f"Lauf fertig: {summary['done']} erledigt, "
-              f"{summary['failed_again']} weiterhin offen "
-              f"(Start: {summary['pending_start']} offen)."
-              + (f" Pausiert: {', '.join(summary['paused_providers'])}"
-                 if summary['paused_providers'] else ""))
+        paused = ""
+        if summary["paused_providers"]:
+            paused = t("paused_providers",
+                       names=", ".join(summary["paused_providers"]))
+        print(t("run_summary", done=summary["done"],
+                failed=summary["failed_again"],
+                start=summary["pending_start"], paused=paused))
         return 0
 
     if args.cmd == "context":
         from . import contextmenu
         if args.install:
             ok = contextmenu.install()
-            print("Kontextmenue installiert." if ok else "Installation fehlgeschlagen.")
+            print(t("context_installed") if ok else t("context_install_failed"))
             return 0 if ok else 1
         if args.uninstall:
             ok = contextmenu.uninstall()
-            print("Kontextmenue entfernt." if ok else "Entfernen fehlgeschlagen.")
+            print(t("context_removed") if ok else t("context_remove_failed"))
             return 0 if ok else 1
-        print("installiert" if contextmenu.is_installed() else "nicht installiert")
+        print(t("context_status_installed") if contextmenu.is_installed()
+              else t("context_status_not_installed"))
         return 0
 
     if args.cmd == "gui-add":
@@ -113,7 +121,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _gui_add(op: str, src: str, queue: Queue) -> int:
-    """Mini-GUI-Dialog (vom Explorer-Kontextmenue aufgerufen)."""
     import os
 
     from PySide6.QtWidgets import (
@@ -125,25 +132,27 @@ def _gui_add(op: str, src: str, queue: Queue) -> int:
     name = os.path.basename(src.rstrip("/\\"))
     if op == "rename":
         new, ok = QInputDialog.getText(
-            None, "Verzoegert umbenennen", f"Neuer Name fuer:\n{src}", text=name)
+            None, t("gui_rename_title"),
+            t("gui_rename_prompt", src=src), text=name)
         if not ok or not new.strip():
             return 0
         task = Task(chain=[Step(op="rename", src=src, arg=new.strip())])
     elif op == "move":
-        dst_parent = QFileDialog.getExistingDirectory(None, "Zielordner waehlen")
+        dst_parent = QFileDialog.getExistingDirectory(None, t("gui_move_title"))
         if not dst_parent:
             return 0
         task = Task(chain=[Step(op="move", src=src,
                                 arg=os.path.join(dst_parent, name))])
     else:
-        if QMessageBox.question(None, "Verzoegert loeschen",
-                                f"'{src}'\nverzoegert loeschen?") != QMessageBox.StandardButton.Yes:
+        if QMessageBox.question(
+                None, t("gui_delete_title"),
+                t("gui_delete_confirm", src=src)
+        ) != QMessageBox.StandardButton.Yes:
             return 0
         task = Task(chain=[Step(op="delete", src=src)])
     queue.add(task)
-    QMessageBox.information(None, "CloudLockFixer",
-                           f"Eingereiht:\n{task.describe()}\n\n"
-                           "Wird beim naechsten Lauf erledigt.")
+    QMessageBox.information(None, t("gui_queued_title"),
+                           t("gui_queued_msg", desc=task.describe()))
     return 0
 
 
