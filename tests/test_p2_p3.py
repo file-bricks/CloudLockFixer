@@ -11,9 +11,13 @@ class FakeProvider(SyncProvider):
     name = "fake"
 
     def __init__(self):
+        super().__init__()
         self.running = True
         self.paused = 0
         self.resumed = 0
+
+    def _detect_roots(self):
+        return []
 
     def owns_path(self, p) -> bool:
         return True

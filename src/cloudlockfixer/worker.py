@@ -36,6 +36,9 @@ def _providers_to_pause(tasks: list[Task], force_pause: bool) -> set[SyncProvide
         for p in _task_paths(t):
             prov = provider_for(p)
             if prov is not None and prov.is_running():
+                if prov.mount_type == "virtual":
+                    log.warning("Skipping pause for %s (virtual mount)", prov.name)
+                    continue
                 provs.add(prov)
     return provs
 

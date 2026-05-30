@@ -21,7 +21,7 @@ from . import autostart, contextmenu, settings, watcher
 from .i18n import t
 from .models import Queue, Step, Task
 from .paths import data_dir, log_file
-from .providers import OneDriveProvider
+from .providers import WATCHER_TICK_MS, available_providers, provider_for
 from .worker import run_once
 
 INTERVAL_CHOICES_MIN = [30, 60, 90, 120, 180, 240, 360, 720]
@@ -87,13 +87,21 @@ class TrayApp:
         self.timer.timeout.connect(lambda: self.run_async(False))
         self._apply_interval()
 
-        self.watcher = watcher.PreventiveWatcher(
-            OneDriveProvider(), watch_dirs=self.settings.get("watch_dirs", []))
+        self.providers = available_providers()
+        self.watchers: dict[str, watcher.PreventiveWatcher] = {}
+        watch_dirs = self.settings.get("watch_dirs", [])
+        for prov in self.providers:
+            dirs = [d for d in watch_dirs
+                    if provider_for(d) is not None
+                    and provider_for(d).name == prov.name]
+            if dirs:
+                self.watchers[prov.name] = watcher.PreventiveWatcher(
+                    prov, watch_dirs=dirs)
         self._watch_running = False
         self.watch_timer = QTimer()
         self.watch_timer.timeout.connect(self._watcher_tick)
-        if self.settings.get("watcher_enabled"):
-            self.watch_timer.start(int(self.watcher.window_s * 1000))
+        if self.settings.get("watcher_enabled") and self.watchers:
+            self.watch_timer.start(WATCHER_TICK_MS)
 
         self._refresh_status()
         QTimer.singleShot(3000, lambda: self.run_async(False))
@@ -277,9 +285,8 @@ class TrayApp:
     def _toggle_watcher(self, checked: bool) -> None:
         self.settings["watcher_enabled"] = checked
         settings.save(self.settings)
-        if checked:
-            self.watcher.watch_dirs = self.settings.get("watch_dirs", [])
-            self.watch_timer.start(int(self.watcher.window_s * 1000))
+        if checked and self.watchers:
+            self.watch_timer.start(WATCHER_TICK_MS)
         else:
             self.watch_timer.stop()
 
@@ -292,7 +299,12 @@ class TrayApp:
             dirs.append(d)
             self.settings["watch_dirs"] = dirs
             settings.save(self.settings)
-            self.watcher.watch_dirs = dirs
+            prov = provider_for(d)
+            if prov and prov.name in self.watchers:
+                self.watchers[prov.name].watch_dirs.append(d)
+            elif prov:
+                self.watchers[prov.name] = watcher.PreventiveWatcher(
+                    prov, watch_dirs=[d])
         self.tray.showMessage("CloudLockFixer", t("watch_dir_added", d=d),
                               _make_icon(), 3000)
 
@@ -303,7 +315,8 @@ class TrayApp:
 
         def job():
             try:
-                self.watcher.tick()
+                for w in self.watchers.values():
+                    w.tick()
             except Exception:  # pragma: no cover
                 pass
             self._watch_running = False
