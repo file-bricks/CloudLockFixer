@@ -1,0 +1,75 @@
+# =============================================================================
+# .gitignore - CloudLockFixer
+# =============================================================================
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.pytest_cache/
+
+# ---- Virtuelle Umgebungen ----
+venv/
+.venv/
+env/
+.env/
+
+# ---- Persoenliche / Sensible Daten ----
+_USER/
+.env
+.env.*
+credentials.json
+client_secret*.json
+token.json
+*.pem
+*.key
+keyring/
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# ---- Interne Steuerungsdateien (nicht ins Repo) ----
+AUFGABEN.txt
+TEST.txt
+TESTS.txt
+TESTERGEBNISSE.txt
+BUGREPORT.md
+DIAGNOSE_REPORT.md
+
+# ---- Build-Artefakte & Releases ----
+releases/
+*.exe
+*.msi
+*.msix
+*.appx
+*.spec
+logs/
+*.log
+
+# ---- IDE & Editoren ----
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- Betriebssystem ----
+desktop.ini
+Thumbs.db
+.DS_Store
+ehthumbs.db
+
+# ---- Projektspezifisch (CloudLockFixer Laufzeitdaten) ----
+# Queue, Logs und Konfiguration liegen zur Laufzeit in
+# %LOCALAPPDATA%\CloudLockFixer\ und gehoeren nicht ins Repo.
+queue.json
+queue.txt
+clf.log
