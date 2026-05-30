@@ -182,7 +182,7 @@ class TrayApp:
                                     arg=os.path.join(dst_parent, name))])
         else:
             if QMessageBox.question(None, "Löschen",
-                                    f"'{src}' verzögert löschen?") != QMessageBox.Yes:
+                                    f"'{src}' verzögert löschen?") != QMessageBox.StandardButton.Yes:
                 return
             task = Task(chain=[Step(op="delete", src=src)])
         self.queue.add(task)

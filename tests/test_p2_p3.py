@@ -75,6 +75,24 @@ def test_watcher_tick_pauses_and_resumes(monkeypatch):
     assert prov.resumed == 1 and prov.running
 
 
+def test_watcher_no_resume_if_provider_already_stopped(monkeypatch):
+    """Regression: wenn decide 'pause' sagt, der Provider aber schon gestoppt
+    ist (User hat ihn manuell beendet), darf spaeter KEIN resume erfolgen."""
+    clock = [0.0]
+    prov = FakeProvider()
+    prov.running = False  # User hat OneDrive manuell beendet
+    w = PreventiveWatcher(prov, threshold=3, cooldown_s=5,
+                          time_fn=lambda: clock[0])
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 10)
+    assert w.tick() == "pause"
+    assert prov.paused == 0, "Provider war schon gestoppt — pause() darf nicht aufgerufen werden"
+    assert not w._paused_by_us, "_paused_by_us muss zurueckgesetzt sein"
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 0)
+    clock[0] += 6
+    assert w.tick() == "none", "Kein resume, da wir nicht pausiert haben"
+    assert prov.resumed == 0
+
+
 # ── Provider-Robustheit (Regression: deutsches Windows tasklist-Encoding) ──
 
 class _FakeCompleted:

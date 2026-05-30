@@ -93,6 +93,22 @@ def test_step_idempotent_after_copy_without_delete(tmp_path, monkeypatch):
     assert dst.exists() and not src.exists()
 
 
+def test_verify_fail_cleans_dst_allows_retry(tmp_path, monkeypatch):
+    """Regression: wenn _verify_copy nach erfolgreicher Kopie fehlschlaegt,
+    muss dst aufgeraeumt werden — sonst blockiert 'Ziel existiert' den Retry."""
+    src = _mkdir_with_file(tmp_path / "old", "payload")
+    dst = tmp_path / "new"
+    monkeypatch.setattr(ops.os, "replace",
+                        lambda *a, **k: (_ for _ in ()).throw(OSError("x")))
+    monkeypatch.setattr(ops, "_verify_copy", lambda s, d: False)
+    ok1, msg1 = ops.move_path(src, dst)
+    assert not ok1 and "Verify" in msg1
+    assert not dst.exists(), "dst muss bei Verify-Fehler aufgeraeumt sein"
+    monkeypatch.undo()
+    ok2, msg2 = ops.move_path(src, dst)
+    assert ok2, f"Retry muss klappen: {msg2}"
+
+
 def test_move_conflict_when_dst_differs(tmp_path):
     src = _mkdir_with_file(tmp_path / "old", "A")
     dst = _mkdir_with_file(tmp_path / "new", "B")  # anderer Inhalt

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import shlex
+import threading
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -109,17 +110,19 @@ class Queue:
         self.json_path = self.data_dir / "queue.json"
         self.txt_path = self.data_dir / "queue.txt"
         self.tasks: list[Task] = []
+        self._lock = threading.Lock()
         self.load()
 
     def load(self) -> None:
-        self.tasks = []
-        if self.json_path.exists():
-            try:
-                raw = json.loads(self.json_path.read_text(encoding="utf-8"))
-                self.tasks = [Task.from_dict(t) for t in raw.get("tasks", [])]
-            except (json.JSONDecodeError, OSError, TypeError):
-                self.tasks = []
-        self._ingest_txt()
+        with self._lock:
+            self.tasks = []
+            if self.json_path.exists():
+                try:
+                    raw = json.loads(self.json_path.read_text(encoding="utf-8"))
+                    self.tasks = [Task.from_dict(t) for t in raw.get("tasks", [])]
+                except (json.JSONDecodeError, OSError, TypeError):
+                    self.tasks = []
+            self._ingest_txt()
 
     def _ingest_txt(self) -> None:
         """Liest neue Zeilen aus queue.txt, hängt sie als Tasks an und
@@ -151,13 +154,14 @@ class Queue:
                 out.append(line)
         if changed:
             self.txt_path.write_text("\n".join(out) + "\n", encoding="utf-8")
-            self.save()
+            self._save_unlocked()
 
     def add(self, task: Task) -> Task:
-        if not task.created_at:
-            task.created_at = _now()
-        self.tasks.append(task)
-        self.save()
+        with self._lock:
+            if not task.created_at:
+                task.created_at = _now()
+            self.tasks.append(task)
+            self._save_unlocked()
         return task
 
     @property
@@ -165,6 +169,10 @@ class Queue:
         return [t for t in self.tasks if t.status in ("pending", "running")]
 
     def save(self) -> None:
+        with self._lock:
+            self._save_unlocked()
+
+    def _save_unlocked(self) -> None:
         payload = {"version": 1, "saved_at": _now(),
                    "tasks": [t.to_dict() for t in self.tasks]}
         tmp = self.json_path.with_suffix(".json.tmp")

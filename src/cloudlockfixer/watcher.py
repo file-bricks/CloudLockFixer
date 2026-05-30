@@ -85,8 +85,11 @@ class PreventiveWatcher:
 
     def tick(self) -> str:
         action = self.decide(self.count_recent_changes())
-        if action == "pause" and self.provider.is_running():
-            self.provider.pause()
+        if action == "pause":
+            if self.provider.is_running():
+                self.provider.pause()
+            else:
+                self._paused_by_us = False
             log.info("Praeventiv-Waechter: %s pausiert (hohe Aenderungsrate).",
                      self.provider.name)
         elif action == "resume":

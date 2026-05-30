@@ -117,6 +117,7 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
         return False, f"Copy fehlgeschlagen: {e}", False
 
     if not _verify_copy(src, dst):
+        _delete_path(dst)
         return False, "Copy unvollstaendig (Verify fehlgeschlagen)", False
 
     ok, msg = _delete_path(src)
