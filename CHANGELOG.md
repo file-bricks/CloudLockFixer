@@ -6,7 +6,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
--
+- GitHub Actions workflow for Windows smoke tests on Python 3.10, 3.11 and 3.12.
+- `llms.txt` with canonical machine-readable project context.
+
+### Geändert / Changed
+- Roadmap and README test counts now reflect the current i18n and multicloud implementation.
+
+### Behoben / Fixed
+- Locale detection no longer uses Python's deprecated `locale.getdefaultlocale()`.
 
 ## [1.0.0] - 2026-05-30
 

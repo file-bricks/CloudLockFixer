@@ -30,8 +30,17 @@
 - [x] ROADMAP.md (langfristige Planung)
 - [x] PORTIERUNGSPLAN.md (Linux/macOS)
 
+## Erkenntnisse aus MCP-Integration (2026-05-31)
+
+Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScript) wurden folgende Punkte entdeckt:
+
+- [ ] **EBUSY als Fehlercode aufnehmen:** Windows gibt bei File-Locks durch andere Prozesse (inkl. Cloud-Sync) `EBUSY` zurück, nicht nur EPERM/EACCES. CLFs `ops.py` sollte EBUSY in die Retry-Trigger-Codes aufnehmen (aktuell nur EXDEV + Access Denied).
+- [ ] **Delete-nach-Copy bei aktivem Lock:** Wenn die Kopie erfolgreich ist aber das Löschen des Originals mit EBUSY scheitert (Datei noch vom Sync-Client gehalten), ist das ein Teilerfolg. CLF handhabt das bereits via Queue-Retry — aber der Status sollte explizit als "kopiert, Löschung ausstehend" im queue.txt sichtbar sein.
+- [ ] **Verzeichnis-Rename mit gelockter Innendatei:** Bei `fs.rename()` auf ein Verzeichnis, dessen Inhalt einen gelockten File enthält, gibt Windows EPERM (nicht EBUSY). Die copy+delete-Strategie funktioniert hier korrekt (rekursives Kopieren + rekursives Löschen), aber das Löschen des Quellverzeichnisses scheitert wenn eine Innendatei noch gelockt ist. CLFs `ops.py` sollte diesen Fall explizit behandeln.
+
 ## Nächste Schritte (aus ROADMAP.md)
 
+- [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
 - [ ] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md)
 - [ ] Cross-Platform: macOS-Support (siehe PORTIERUNGSPLAN.md)
 - [ ] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive

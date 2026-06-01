@@ -1,0 +1,29 @@
+# CloudLockFixer
+
+CloudLockFixer is a Windows tray and CLI tool for delayed rename, move and delete
+operations in cloud-sync folders. It is designed for OneDrive, Dropbox, Google
+Drive and iCloud folders where Windows Cloud Files locks can make normal file
+operations fail.
+
+Canonical repository: https://github.com/file-bricks/CloudLockFixer
+
+Primary interfaces:
+- Tray app: `START.bat` or `PYTHONPATH=src python -m cloudlockfixer`
+- CLI: `PYTHONPATH=src python -m cloudlockfixer.cli`
+- Queue file: `%LOCALAPPDATA%\CloudLockFixer\queue.txt`
+- Tests: `PYTHONPATH=src python -m pytest -q`
+
+Safety boundaries:
+- The tool performs destructive filesystem operations only after queued user or
+  script instructions.
+- Move and rename operations use copy, verify and delete fallback logic so that
+  deletion happens only after a verified copy.
+- Runtime queues, logs and local credentials are not part of the repository.
+
+Key files:
+- `README.md`: English user overview and quickstart
+- `README.de.md`: German user overview and quickstart
+- `docs/DESIGN.md`: design and safety model
+- `src/cloudlockfixer/ops.py`: copy/delete and retry-safe filesystem operations
+- `src/cloudlockfixer/providers.py`: cloud provider detection and pause policy
+- `tests/`: regression tests for core, i18n, provider and tray-adjacent behavior

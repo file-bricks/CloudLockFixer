@@ -59,17 +59,17 @@ def test_format_missing_param_returns_template():
 
 
 def test_detect_language_german(monkeypatch):
-    monkeypatch.setattr("locale.getdefaultlocale", lambda: ("de_DE", "UTF-8"))
+    monkeypatch.setattr("locale.getlocale", lambda: ("de_DE", "UTF-8"))
     assert detect_language() == "de"
 
 
 def test_detect_language_english(monkeypatch):
-    monkeypatch.setattr("locale.getdefaultlocale", lambda: ("en_US", "UTF-8"))
+    monkeypatch.setattr("locale.getlocale", lambda: ("en_US", "UTF-8"))
     assert detect_language() == "en"
 
 
 def test_detect_language_fallback(monkeypatch):
-    monkeypatch.setattr("locale.getdefaultlocale", lambda: (None, None))
+    monkeypatch.setattr("locale.getlocale", lambda: (None, None))
     assert detect_language() == "de"
 
 
@@ -80,7 +80,7 @@ def test_available_keys_sorted():
 
 
 def test_resolve_language_auto(monkeypatch):
-    monkeypatch.setattr("locale.getdefaultlocale", lambda: ("en_US", "UTF-8"))
+    monkeypatch.setattr("locale.getlocale", lambda: ("en_US", "UTF-8"))
     assert resolve_language({"language": "auto"}) == "en"
 
 

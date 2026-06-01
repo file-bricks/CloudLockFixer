@@ -290,7 +290,7 @@ _current: Language = "de"
 def detect_language() -> Language:
     """Sprache aus System-Locale ableiten (Fallback: Deutsch)."""
     try:
-        lang, _ = locale.getdefaultlocale()
+        lang, _ = locale.getlocale()
         if lang and lang.lower().startswith("en"):
             return "en"
     except (ValueError, TypeError):

@@ -12,22 +12,22 @@
 - Autostart via Registry
 - PyInstaller-Build
 
-## v1.1.0 — i18n + Bugfixes (aktuell)
+## v1.1.0 — i18n + Bugfixes (erledigt)
 
 - [x] Bugfixes: Verify-Cleanup, Watcher-Resume, Queue-Race-Condition
-- [ ] Internationalisierung: Deutsch + Englisch
-- [ ] Sprachauswahl im Tray-Menü (de/en/auto)
-- [ ] Systemsprache-Erkennung via locale
+- [x] Internationalisierung: Deutsch + Englisch
+- [x] Sprachauswahl im Tray-Menü (de/en/auto)
+- [x] Systemsprache-Erkennung via locale
 
-## v1.2.0 — Windows Multicloud
+## v1.2.0 — Windows Multicloud (erledigt)
 
-- [ ] Google Drive Provider (GoogleDriveFS, virtueller Mount)
-- [ ] Dropbox Provider
-- [ ] iCloud Provider
-- [ ] Auto-Discovery installierter Cloud-Sync-Clients
-- [ ] Dynamische Provider-Anzeige im Tray
-- [ ] Virtual-mount Guard (kein Pause für gemountete Laufwerke)
-- [ ] Multi-Provider Präventiv-Wächter
+- [x] Google Drive Provider (GoogleDriveFS, virtueller Mount)
+- [x] Dropbox Provider
+- [x] iCloud Provider
+- [x] Auto-Discovery installierter Cloud-Sync-Clients
+- [x] Dynamische Provider-Anzeige im Tray
+- [x] Virtual-mount Guard (kein Pause für gemountete Laufwerke)
+- [x] Multi-Provider Präventiv-Wächter
 
 ## v2.0.0 — Cross-Platform
 
