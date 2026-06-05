@@ -87,11 +87,13 @@ class PreventiveWatcher:
         action = self.decide(self.count_recent_changes())
         if action == "pause":
             if self.provider.is_running():
-                self.provider.pause()
+                if self.provider.pause():
+                    log.info("Preventive watcher: %s paused (high change rate).",
+                             self.provider.name)
+                else:
+                    self._paused_by_us = False  # pause() gescheitert — kein Resume noetig
             else:
                 self._paused_by_us = False
-            log.info("Preventive watcher: %s paused (high change rate).",
-                     self.provider.name)
         elif action == "resume":
             self.provider.resume()
             log.info("Preventive watcher: %s resumed (idle).",

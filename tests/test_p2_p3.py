@@ -168,6 +168,39 @@ def test_dropbox_detect_roots_handles_non_dict_json(tmp_path, monkeypatch):
         assert isinstance(roots, list), f"Erwartet Liste fuer bad JSON={bad!r}"
 
 
+def test_watcher_no_spurious_resume_if_pause_fails(monkeypatch):
+    """Bug-Fix: wenn provider.pause() False zurückgibt (z.B. taskkill gescheitert),
+    muss _paused_by_us auf False zurückgesetzt werden.
+
+    Ohne den Fix: decide() setzt _paused_by_us=True, tick() ignoriert den
+    pause()-Fehlschlag, nach Cooldown wird resume() auf einem nie-gestoppten
+    Provider aufgerufen (spurious resume).
+    """
+    clock = [0.0]
+
+    class FailPauseProvider(FakeProvider):
+        def pause(self) -> bool:
+            self.paused += 1
+            return False  # Pause schlägt fehl (z.B. taskkill-Fehler)
+
+    fail_prov = FailPauseProvider()
+    w = PreventiveWatcher(fail_prov, threshold=3, cooldown_s=5,
+                          time_fn=lambda: clock[0])
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 10)
+    result = w.tick()
+    assert result == "pause"  # decide() liefert "pause" (korrekt)
+    assert not w._paused_by_us, (
+        "_paused_by_us muss False sein wenn pause() scheiterte — "
+        "sonst resume() nach Cooldown auf nie-gestoppten Provider"
+    )
+    # Kein spurious resume() nach Cooldown
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 0)
+    clock[0] += 10
+    result2 = w.tick()
+    assert result2 != "resume", f"Spurious resume() nach fehlgeschlagenem pause(): {result2}"
+    assert fail_prov.resumed == 0, "resume() darf nicht aufgerufen werden"
+
+
 def test_watcher_counts_recent_files(tmp_path):
     (tmp_path / "a.txt").write_text("x", encoding="utf-8")
     (tmp_path / "sub").mkdir()
