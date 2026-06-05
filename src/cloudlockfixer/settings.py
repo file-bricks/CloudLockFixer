@@ -19,7 +19,9 @@ def load() -> dict:
             data = json.loads(p.read_text(encoding="utf-8"))
             if isinstance(data, dict):
                 return data
-        except (json.JSONDecodeError, OSError):
+        except (ValueError, OSError):
+            # ValueError faengt JSONDecodeError UND UnicodeDecodeError (z.B.
+            # abgebrochener Multibyte-Schreibvorgang, Disk-Korruption) ab.
             pass
     return {"interval_min": DEFAULT_INTERVAL_MIN}
 

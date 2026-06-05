@@ -122,7 +122,9 @@ class Queue:
                     if not isinstance(raw, dict):
                         raise TypeError(f"unexpected JSON root type: {type(raw)}")
                     self.tasks = [Task.from_dict(t) for t in raw.get("tasks", [])]
-                except (json.JSONDecodeError, OSError, TypeError, AttributeError):
+                except (ValueError, OSError, TypeError, AttributeError):
+                    # ValueError faengt JSONDecodeError UND UnicodeDecodeError
+                    # (abgebrochener Multibyte-Schreibvorgang, Disk-Korruption) ab.
                     self.tasks = []
             self._ingest_txt()
 

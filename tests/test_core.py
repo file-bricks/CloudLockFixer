@@ -185,6 +185,27 @@ def test_settings_load_returns_defaults_on_non_dict_json(tmp_path, monkeypatch):
         assert "interval_min" in result
 
 
+def test_settings_load_returns_defaults_on_invalid_utf8(tmp_path, monkeypatch):
+    """Bug-Fix: settings.json mit ungueltigem UTF-8 (z.B. Disk-Korruption) ->
+    Defaults, kein UnicodeDecodeError-Crash. json.JSONDecodeError faengt
+    UnicodeDecodeError NICHT ab -- ValueError als gemeinsame Basisklasse noetig."""
+    import cloudlockfixer.settings as smod
+    monkeypatch.setattr(smod, "data_dir", lambda: tmp_path)
+    (tmp_path / "settings.json").write_bytes(b"\xff\xfe{bad")
+    result = smod.load()
+    assert isinstance(result, dict), "settings.load() muss bei ungueltigem UTF-8 Defaults liefern"
+    assert "interval_min" in result
+
+
+def test_queue_load_returns_empty_on_invalid_utf8(tmp_path):
+    """Bug-Fix: queue.json mit ungueltigem UTF-8 -> leere Tasks, kein UnicodeDecodeError.
+    json.JSONDecodeError faengt UnicodeDecodeError NICHT ab -- ValueError noetig."""
+    q = Queue(tmp_path)
+    q.json_path.write_bytes(b"\xff\xfe{bad")
+    q.load()
+    assert q.tasks == [], "Queue.load() muss bei ungueltigem UTF-8 leere Tasks liefern"
+
+
 def test_settings_save_atomic_no_tmp_leftover(tmp_path, monkeypatch):
     """settings.save() muss atomar schreiben (tmp ersetzen) — kein .json.tmp Überrest."""
     import cloudlockfixer.settings as smod
