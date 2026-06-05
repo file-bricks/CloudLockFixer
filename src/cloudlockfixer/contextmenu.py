@@ -44,7 +44,7 @@ def install() -> bool:
                 # leerer SubCommands-Wert aktiviert die shell-Unterverben
                 winreg.SetValueEx(k, "subcommands", 0, winreg.REG_SZ, "")
             for key, label_key, op in _OPS:
-                vk = base + r"\shell\\" + key
+                vk = base + "\\shell\\" + key
                 with winreg.CreateKey(winreg.HKEY_CURRENT_USER, vk) as k:
                     winreg.SetValueEx(k, "MUIVerb", 0, winreg.REG_SZ, t(label_key))
                 with winreg.CreateKey(winreg.HKEY_CURRENT_USER, vk + r"\command") as k:

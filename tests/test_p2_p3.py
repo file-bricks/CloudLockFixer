@@ -46,6 +46,15 @@ def test_contextmenu_command_format():
     assert "clf_launcher.pyw" in cmd
 
 
+def test_contextmenu_verb_key_no_double_backslash():
+    """Regression: r'\\shell\\\\' erzeugte doppelten Backslash im Registry-Pfad."""
+    from cloudlockfixer.contextmenu import _BASES, _OPS
+    for base in _BASES:
+        for key, _, _ in _OPS:
+            vk = base + "\\shell\\" + key
+            assert "\\\\" not in vk, f"Doppelter Backslash in Registry-Pfad: {vk!r}"
+
+
 # ── P3: reine Entscheidungslogik ────────────────────────────────────
 
 def test_watcher_decide_pause_then_resume_after_cooldown():
