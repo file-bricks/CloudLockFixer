@@ -58,7 +58,11 @@ class Task:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Task":
-        chain = [Step(**s) for s in d.get("chain", [])]
+        step_fields = set(Step.__dataclass_fields__)
+        chain = [
+            Step(**{k: v for k, v in s.items() if k in step_fields})
+            for s in d.get("chain", [])
+        ]
         known = {f for f in cls.__dataclass_fields__ if f != "chain"}
         return cls(chain=chain, **{k: v for k, v in d.items() if k in known})
 

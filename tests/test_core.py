@@ -237,6 +237,41 @@ def test_queue_load_returns_empty_on_corrupt_json(tmp_path):
         assert q.tasks == [], f"Erwartet leere Liste für bad JSON={bad!r}"
 
 
+def test_task_from_dict_tolerates_unknown_step_fields(tmp_path):
+    """Bug-Fix (Bug 10): Step(**s) ohne Feldfilterung -> TypeError bei unbekannten
+    Feldern -> alle Tasks still verloren. from_dict muss unbekannte Step-Felder
+    ignorieren (Forward-Compat, manuelle Queue-Edits)."""
+    import json
+    q = Queue(tmp_path)
+    payload = {
+        "version": 1,
+        "saved_at": "2026-01-01T00:00:00+00:00",
+        "tasks": [{
+            "id": "aabbcc00",
+            "status": "pending",
+            "retry_count": 0,
+            "created_at": "2026-01-01T00:00:00+00:00",
+            "last_try": "",
+            "last_error": "",
+            "step_index": 0,
+            "chain": [{
+                "op": "delete",
+                "src": "/tmp/x",
+                "arg": "",
+                "copied": False,
+                "zukunftsfeld": "x",   # unbekanntes Feld
+            }],
+        }],
+    }
+    q.json_path.write_text(json.dumps(payload), encoding="utf-8")
+    q.load()
+    assert len(q.tasks) == 1, (
+        "Task muss geladen werden — unbekannte Step-Felder duerfen nicht zu "
+        "TypeError -> silent task-loss fuehren"
+    )
+    assert q.tasks[0].chain[0].op == "delete"
+
+
 # ── worker ohne Cloud (provider_for -> None) ────────────────────────
 
 def test_worker_runs_local_task(tmp_path):
