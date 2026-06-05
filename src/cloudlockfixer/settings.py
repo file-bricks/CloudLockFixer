@@ -16,7 +16,9 @@ def load() -> dict:
     p = _path()
     if p.exists():
         try:
-            return json.loads(p.read_text(encoding="utf-8"))
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
         except (json.JSONDecodeError, OSError):
             pass
     return {"interval_min": DEFAULT_INTERVAL_MIN}

@@ -174,6 +174,17 @@ def test_queue_txt_ingest_and_roundtrip(tmp_path):
     assert q2.tasks[0].id == q.tasks[0].id
 
 
+def test_settings_load_returns_defaults_on_non_dict_json(tmp_path, monkeypatch):
+    """settings.load() muss Default zurückgeben wenn JSON kein dict ist."""
+    import cloudlockfixer.settings as smod
+    monkeypatch.setattr(smod, "data_dir", lambda: tmp_path)
+    for bad in ("null", "[]", "42", "{bad json"):
+        (tmp_path / "settings.json").write_text(bad, encoding="utf-8")
+        result = smod.load()
+        assert isinstance(result, dict), f"Erwartet dict für bad JSON={bad!r}"
+        assert "interval_min" in result
+
+
 def test_settings_save_atomic_no_tmp_leftover(tmp_path, monkeypatch):
     """settings.save() muss atomar schreiben (tmp ersetzen) — kein .json.tmp Überrest."""
     import cloudlockfixer.settings as smod
