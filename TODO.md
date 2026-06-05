@@ -34,9 +34,15 @@
 
 Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScript) wurden folgende Punkte entdeckt:
 
-- [ ] **EBUSY als Fehlercode aufnehmen:** Windows gibt bei File-Locks durch andere Prozesse (inkl. Cloud-Sync) `EBUSY` zurück, nicht nur EPERM/EACCES. CLFs `ops.py` sollte EBUSY in die Retry-Trigger-Codes aufnehmen (aktuell nur EXDEV + Access Denied).
-- [ ] **Delete-nach-Copy bei aktivem Lock:** Wenn die Kopie erfolgreich ist aber das Löschen des Originals mit EBUSY scheitert (Datei noch vom Sync-Client gehalten), ist das ein Teilerfolg. CLF handhabt das bereits via Queue-Retry — aber der Status sollte explizit als "kopiert, Löschung ausstehend" im queue.txt sichtbar sein.
-- [ ] **Verzeichnis-Rename mit gelockter Innendatei:** Bei `fs.rename()` auf ein Verzeichnis, dessen Inhalt einen gelockten File enthält, gibt Windows EPERM (nicht EBUSY). Die copy+delete-Strategie funktioniert hier korrekt (rekursives Kopieren + rekursives Löschen), aber das Löschen des Quellverzeichnisses scheitert wenn eine Innendatei noch gelockt ist. CLFs `ops.py` sollte diesen Fall explizit behandeln.
+- [x] **EBUSY als Fehlercode aufnehmen** — DONE 2026-06-01
+      `_is_lock_error()` + `_LOCK_ERRNOS` in ops.py: EBUSY, EPERM, EACCES, EXDEV + WinError 32/33.
+      Tests: `tests/test_ebusy_and_lock_errors.py` (TestIsLockError, 11 Tests).
+- [x] **Delete-nach-Copy bei aktivem Lock** — bereits korrekt via step.copied-Flag (Retry-Mechanismus).
+      Tests verifizieren: step.copied=True nach partial-move, Retry löscht nur Quelle.
+- [x] **Verzeichnis-Rename mit gelockter Innendatei** — DONE 2026-06-01
+      `_delete_dir_skip_locked()` in ops.py: Best-effort-Bereinigung, überspringt EBUSY-Dateien.
+      `_delete_path()` nutzt es automatisch wenn `_rmtree()` mit Lock-Fehler scheitert.
+      Tests: TestDeleteDirSkipLocked (5 Tests).
 
 ## Nächste Schritte (aus ROADMAP.md)
 

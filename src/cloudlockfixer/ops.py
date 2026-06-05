@@ -11,6 +11,7 @@ NICHT erneut (kein Datenverlust, kein Doppel-Copy).
 """
 from __future__ import annotations
 
+import errno as _errno
 import os
 import shutil
 import stat
@@ -18,6 +19,26 @@ import sys
 from pathlib import Path
 
 from .models import Step, Task
+
+# Fehlercodes, die auf einen temporären Lock hinweisen und einen Retry erlauben.
+# EBUSY (16): Datei von anderem Prozess gehalten (Cloud-Sync, Antivirus, …)
+# EPERM (1) / EACCES (13): Zugriff verweigert (read-only, Cloud-Filter cldflt)
+# EXDEV (18): Cross-Device-Rename — immer über copy+delete lösen
+_LOCK_ERRNOS: frozenset[int] = frozenset([
+    _errno.EBUSY,
+    _errno.EPERM,
+    _errno.EACCES,
+    _errno.EXDEV,
+])
+
+
+def _is_lock_error(e: OSError) -> bool:
+    """True wenn der Fehler auf einen temporären Lock hindeutet (Retry sinnvoll)."""
+    if e.errno in _LOCK_ERRNOS:
+        return True
+    # Windows-spezifisch: WinError 32 (Sharing-Verletzung), 33 (Lock-Verletzung)
+    win_err = getattr(e, "winerror", None)
+    return win_err in (32, 33)
 
 
 def _force_writable(path: str | os.PathLike) -> None:
@@ -71,7 +92,17 @@ def _delete_path(p: Path) -> tuple[bool, str]:
         if not p.exists():
             return True, "bereits geloescht"
         if p.is_dir():
-            _rmtree(p)
+            try:
+                _rmtree(p)
+            except OSError as e:
+                if _is_lock_error(e):
+                    # Bug 3: Verzeichnis mit gesperrter Innendatei
+                    ok, locked = _delete_dir_skip_locked(p)
+                    if ok:
+                        return True, "geloescht (gesperrte Innendateien uebersprungen)"
+                    names = ", ".join(str(lp.name) for lp in locked[:3])
+                    return False, f"Innendatei(en) noch gesperrt (EBUSY): {names}"
+                raise
         else:
             try:
                 p.unlink()
@@ -81,6 +112,45 @@ def _delete_path(p: Path) -> tuple[bool, str]:
         return True, "geloescht"
     except OSError as e:
         return False, f"Loeschen fehlgeschlagen: {e}"
+
+
+def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
+    """Löscht ein Verzeichnis rekursiv, überspringt EBUSY-gesperrte Dateien.
+
+    Gibt zurück: (vollständig_gelöscht, [gesperrte_Pfade]).
+    Wird genutzt wenn _rmtree() wegen gesperrter Innendatei scheitert, damit
+    zumindest alle nicht-gesperrten Dateien bereinigt werden (Bug 3 aus TODO.md).
+    """
+    locked: list[Path] = []
+    if not p.exists():
+        return True, []
+
+    # Dateien zuerst (tiefes Niveau zuerst damit Verzeichnisse leer werden)
+    for child in sorted(p.rglob("*"), key=lambda x: len(x.parts), reverse=True):
+        if child.is_file() or child.is_symlink():
+            try:
+                _force_writable(child)
+                child.unlink()
+            except OSError as e:
+                if _is_lock_error(e):
+                    locked.append(child)
+                # Andere Fehler ignorieren (best-effort)
+
+    # Leere Unterverzeichnisse entfernen
+    for child in sorted(p.rglob("*"), key=lambda x: len(x.parts), reverse=True):
+        if child.is_dir():
+            try:
+                child.rmdir()  # nur wenn leer
+            except OSError:
+                pass
+
+    if not locked:
+        try:
+            p.rmdir()
+        except OSError:
+            pass
+
+    return len(locked) == 0, locked
 
 
 def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
@@ -103,7 +173,7 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
         os.replace(src, dst)
         return True, "in-place verschoben", False  # Quelle ist schon weg
     except OSError:
-        pass
+        pass  # Fallback auf copy+delete (deckt EBUSY, EPERM, EACCES, EXDEV ab)
 
     # 2) copy+delete (filter-sicher)
     try:
