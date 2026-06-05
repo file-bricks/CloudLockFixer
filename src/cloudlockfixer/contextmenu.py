@@ -26,11 +26,13 @@ def is_installed() -> bool:
     if sys.platform != "win32":
         return False
     import winreg
-    try:
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _BASES[0]):
-            return True
-    except OSError:
-        return False
+    for base in _BASES:
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, base):
+                return True
+        except OSError:
+            continue
+    return False
 
 
 def install() -> bool:

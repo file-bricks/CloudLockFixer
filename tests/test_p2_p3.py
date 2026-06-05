@@ -46,6 +46,32 @@ def test_contextmenu_command_format():
     assert "clf_launcher.pyw" in cmd
 
 
+def test_contextmenu_is_installed_checks_all_bases(monkeypatch):
+    """Regression (Bug 9): is_installed() muss alle _BASES pruefen — nicht nur
+    den ersten. Wenn BASES[0] fehlt aber BASES[1] vorhanden ist, muss True kommen."""
+    import sys
+    if sys.platform != "win32":
+        return  # nur auf Windows ausfuehrbar (winreg existiert nicht auf Linux/Mac)
+    import winreg
+    from cloudlockfixer.contextmenu import _BASES, is_installed
+
+    call_count = {"n": 0}
+
+    class FakeKey:
+        def __enter__(self): return self
+        def __exit__(self, *a): pass
+
+    def fake_open_key(root, path, *a, **k):
+        call_count["n"] += 1
+        # Erst-Aufruf (_BASES[0]) scheitert, zweiter (_BASES[1]) klappt
+        if call_count["n"] == 1:
+            raise OSError("nicht vorhanden")
+        return FakeKey()
+
+    monkeypatch.setattr(winreg, "OpenKey", fake_open_key)
+    assert is_installed() is True, "Wenn BASES[1] vorhanden, muss is_installed() True sein"
+
+
 def test_contextmenu_verb_key_no_double_backslash():
     """Regression: r'\\shell\\\\' erzeugte doppelten Backslash im Registry-Pfad."""
     from cloudlockfixer.contextmenu import _BASES, _OPS
