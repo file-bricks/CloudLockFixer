@@ -119,8 +119,10 @@ class Queue:
             if self.json_path.exists():
                 try:
                     raw = json.loads(self.json_path.read_text(encoding="utf-8"))
+                    if not isinstance(raw, dict):
+                        raise TypeError(f"unexpected JSON root type: {type(raw)}")
                     self.tasks = [Task.from_dict(t) for t in raw.get("tasks", [])]
-                except (json.JSONDecodeError, OSError, TypeError):
+                except (json.JSONDecodeError, OSError, TypeError, AttributeError):
                     self.tasks = []
             self._ingest_txt()
 

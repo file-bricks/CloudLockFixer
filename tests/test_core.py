@@ -174,6 +174,15 @@ def test_queue_txt_ingest_and_roundtrip(tmp_path):
     assert q2.tasks[0].id == q.tasks[0].id
 
 
+def test_queue_load_returns_empty_on_corrupt_json(tmp_path):
+    """Queue.load darf nicht abstürzen wenn queue.json kein dict-Root enthält."""
+    q = Queue(tmp_path)
+    for bad in ("", "{bad json", "null", "[]", "42"):
+        q.json_path.write_text(bad, encoding="utf-8")
+        q.load()
+        assert q.tasks == [], f"Erwartet leere Liste für bad JSON={bad!r}"
+
+
 # ── worker ohne Cloud (provider_for -> None) ────────────────────────
 
 def test_worker_runs_local_task(tmp_path):
