@@ -168,6 +168,31 @@ def test_dropbox_detect_roots_handles_non_dict_json(tmp_path, monkeypatch):
         assert isinstance(roots, list), f"Erwartet Liste fuer bad JSON={bad!r}"
 
 
+def test_dropbox_detect_roots_handles_non_dict_section(tmp_path, monkeypatch):
+    """Bug-Fix (Bug 11): info.json mit dict-Root, aber Section-Wert kein dict
+    (z.B. {'personal': 'pfad-als-string'}) -> AttributeError beim .get('path')-Aufruf
+    auf dem String. Muss leere Liste liefern, darf nicht werfen."""
+    import json
+    from cloudlockfixer.providers import DropboxProvider
+    info_dir = tmp_path / "Dropbox"
+    info_dir.mkdir()
+    info_json = info_dir / "info.json"
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    # Section-Wert ist kein dict -> frueher AttributeError
+    for bad_section in (
+        {"personal": "nicht-ein-dict"},
+        {"personal": 42},
+        {"personal": ["list"]},
+        {"personal": None},
+    ):
+        info_json.write_text(json.dumps(bad_section), encoding="utf-8")
+        prov = DropboxProvider()
+        roots = prov._detect_roots()
+        assert isinstance(roots, list), (
+            f"_detect_roots muss Liste liefern, nicht werfen: {bad_section!r}"
+        )
+
+
 def test_watcher_no_spurious_resume_if_pause_fails(monkeypatch):
     """Bug-Fix: wenn provider.pause() False zurückgibt (z.B. taskkill gescheitert),
     muss _paused_by_us auf False zurückgesetzt werden.
