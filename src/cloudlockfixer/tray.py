@@ -305,6 +305,9 @@ class TrayApp:
             elif prov:
                 self.watchers[prov.name] = watcher.PreventiveWatcher(
                     prov, watch_dirs=[d])
+        if (self.settings.get("watcher_enabled")
+                and not self.watch_timer.isActive()):
+            self.watch_timer.start(WATCHER_TICK_MS)
         self.tray.showMessage("CloudLockFixer", t("watch_dir_added", d=d),
                               _make_icon(), 3000)
 
