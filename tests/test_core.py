@@ -197,6 +197,16 @@ def test_settings_save_atomic_no_tmp_leftover(tmp_path, monkeypatch):
     assert loaded["interval_min"] == 60 and loaded["language"] == "de"
 
 
+def test_ingest_txt_atomic_write(tmp_path):
+    """Regression (Bug 6): _ingest_txt muss queue.txt atomar schreiben
+    (tmp-Datei + replace). Kein .txt.tmp-Überrest nach Ingest."""
+    q = Queue(tmp_path)
+    q.txt_path.write_text('delete "C:\\\\foo\\\\bar"\n', encoding="utf-8")
+    q.load()
+    assert len(q.tasks) == 1
+    assert not (tmp_path / "queue.txt.tmp").exists(), ".txt.tmp-Datei darf nach Ingest nicht übrig bleiben"
+
+
 def test_queue_load_returns_empty_on_corrupt_json(tmp_path):
     """Queue.load darf nicht abstürzen wenn queue.json kein dict-Root enthält."""
     q = Queue(tmp_path)

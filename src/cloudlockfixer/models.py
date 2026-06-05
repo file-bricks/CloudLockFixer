@@ -156,7 +156,9 @@ class Queue:
             else:
                 out.append(line)
         if changed:
-            self.txt_path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            tmp = self.txt_path.with_suffix(".txt.tmp")
+            tmp.write_text("\n".join(out) + "\n", encoding="utf-8")
+            tmp.replace(self.txt_path)
             self._save_unlocked()
 
     def add(self, task: Task) -> Task:
