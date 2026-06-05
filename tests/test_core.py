@@ -274,6 +274,19 @@ def test_task_from_dict_tolerates_unknown_step_fields(tmp_path):
 
 # ── worker ohne Cloud (provider_for -> None) ────────────────────────
 
+def test_queue_txt_ingest_handles_invalid_utf8(tmp_path):
+    """Bug-Fix (Bug 12): queue.txt mit ungueltigem UTF-8 muss Queue.load() ueberleben.
+    UnicodeDecodeError war ungefangen -> Queue-Init scheiterte komplett.
+    Erwartet: tasks bleibt leer, kein Exception."""
+    q = Queue(tmp_path)
+    q.txt_path.write_bytes(b"\xff\xfe rename corrupted\n")
+    q.load()
+    assert q.tasks == [], (
+        "_ingest_txt darf bei ungueltigem UTF-8 in queue.txt nicht werfen -- "
+        "tasks muss leer bleiben"
+    )
+
+
 def test_worker_runs_local_task(tmp_path):
     q = Queue(tmp_path)
     src = _mkdir_with_file(tmp_path / "old")

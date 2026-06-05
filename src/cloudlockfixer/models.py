@@ -139,7 +139,12 @@ class Queue:
         if not self.txt_path.exists():
             self.txt_path.write_text(_txt_header(), encoding="utf-8")
             return
-        lines = self.txt_path.read_text(encoding="utf-8").splitlines()
+        try:
+            text = self.txt_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            # Analog zu queue.json: korrupte Datei -> Ingest uebersprungen.
+            return
+        lines = text.splitlines()
         changed = False
         out: list[str] = []
         for line in lines:
