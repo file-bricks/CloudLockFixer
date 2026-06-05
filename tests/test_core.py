@@ -225,3 +225,15 @@ def test_worker_runs_local_task(tmp_path):
     summary = run_once(q, force_pause=False)
     assert summary["done"] == 1
     assert (tmp_path / "new").exists()
+
+
+# ── CLI ─────────────────────────────────────────────────────────────
+
+def test_cli_chain_invalid_op_returns_2(tmp_path, monkeypatch):
+    """Regression (Bug 8): 'clf add --chain' mit ungueltigem Op darf KEINEN
+    Traceback (ValueError) erzeugen — muss Return-Code 2 + Fehlermeldung liefern."""
+    import cloudlockfixer.cli as cli_mod
+    import cloudlockfixer.paths as paths_mod
+    monkeypatch.setattr(paths_mod, "data_dir", lambda: tmp_path)
+    rc = cli_mod.main(["add", "--chain", "frobnicate x"])
+    assert rc == 2

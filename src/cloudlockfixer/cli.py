@@ -72,7 +72,11 @@ def main(argv: list[str] | None = None) -> int:
         elif args.delete:
             task = Task(chain=[Step(op="delete", src=args.delete[0])])
         else:
-            task = parse_txt_line(args.chain)  # type: ignore[assignment]
+            try:
+                task = parse_txt_line(args.chain)  # type: ignore[assignment]
+            except ValueError as e:
+                print(t("invalid_chain") + f": {e}", file=sys.stderr)
+                return 2
             if task is None:
                 print(t("invalid_chain"), file=sys.stderr)
                 return 2
