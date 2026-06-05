@@ -23,8 +23,11 @@ def load() -> dict:
 
 
 def save(settings: dict) -> None:
-    _path().write_text(json.dumps(settings, ensure_ascii=False, indent=2),
-                       encoding="utf-8")
+    p = _path()
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(settings, ensure_ascii=False, indent=2),
+                   encoding="utf-8")
+    tmp.replace(p)
 
 
 def resolve_language(cfg: dict) -> str:

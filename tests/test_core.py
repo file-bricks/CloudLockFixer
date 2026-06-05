@@ -174,6 +174,18 @@ def test_queue_txt_ingest_and_roundtrip(tmp_path):
     assert q2.tasks[0].id == q.tasks[0].id
 
 
+def test_settings_save_atomic_no_tmp_leftover(tmp_path, monkeypatch):
+    """settings.save() muss atomar schreiben (tmp ersetzen) — kein .json.tmp Überrest."""
+    import cloudlockfixer.settings as smod
+    monkeypatch.setattr(smod, "data_dir", lambda: tmp_path)
+    smod.save({"interval_min": 60, "language": "de"})
+    p = tmp_path / "settings.json"
+    assert p.exists(), "settings.json muss nach save() existieren"
+    assert not (tmp_path / "settings.json.tmp").exists(), "Kein .tmp-Überrest erlaubt"
+    loaded = smod.load()
+    assert loaded["interval_min"] == 60 and loaded["language"] == "de"
+
+
 def test_queue_load_returns_empty_on_corrupt_json(tmp_path):
     """Queue.load darf nicht abstürzen wenn queue.json kein dict-Root enthält."""
     q = Queue(tmp_path)
