@@ -209,10 +209,11 @@ class DropboxProvider(SyncProvider):
         if info_json.exists():
             try:
                 data = json.loads(info_json.read_text(encoding="utf-8"))
-                for section in ("personal", "business"):
-                    path = data.get(section, {}).get("path")
-                    if path:
-                        roots.append(Path(path))
+                if isinstance(data, dict):
+                    for section in ("personal", "business"):
+                        path = data.get(section, {}).get("path")
+                        if path:
+                            roots.append(Path(path))
             except (json.JSONDecodeError, OSError):
                 pass
         return _dedup_paths(roots)

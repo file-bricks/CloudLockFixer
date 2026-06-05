@@ -127,6 +127,21 @@ def test_is_running_detects_process(monkeypatch):
     assert OneDriveProvider().is_running() is True
 
 
+def test_dropbox_detect_roots_handles_non_dict_json(tmp_path, monkeypatch):
+    """Regression (Bug 7): DropboxProvider._detect_roots darf nicht mit
+    AttributeError crashen wenn info.json kein dict als Root hat."""
+    from cloudlockfixer.providers import DropboxProvider
+    info_dir = tmp_path / "Dropbox"
+    info_dir.mkdir()
+    info_json = info_dir / "info.json"
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    for bad in ("null", "[]", "42", '"string"'):
+        info_json.write_text(bad, encoding="utf-8")
+        prov = DropboxProvider()
+        roots = prov._detect_roots()  # darf NICHT werfen
+        assert isinstance(roots, list), f"Erwartet Liste fuer bad JSON={bad!r}"
+
+
 def test_watcher_counts_recent_files(tmp_path):
     (tmp_path / "a.txt").write_text("x", encoding="utf-8")
     (tmp_path / "sub").mkdir()
