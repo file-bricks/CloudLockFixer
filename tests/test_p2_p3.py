@@ -233,3 +233,36 @@ def test_watcher_counts_recent_files(tmp_path):
     w = PreventiveWatcher(FakeProvider(), watch_dirs=[str(tmp_path)],
                           window_s=3600)
     assert w.count_recent_changes() >= 2
+
+
+def test_watcher_tick_dict_snapshot_safe_against_concurrent_modification():
+    """Regression: _watcher_tick muss list(self.watchers.values()) statt
+    self.watchers.values() iterieren -- sonst RuntimeError wenn Main-Thread
+    self.watchers während des Daemon-Thread-Ticks modifiziert.
+
+    Dieser Test verifiziert das Snapshot-Verhalten: Modifikation eines Dicts
+    waehrend einer list()-Iteration ist sicher, waehrend direkte values()-
+    Iteration einen RuntimeError wirft."""
+    watchers: dict = {}
+    prov = FakeProvider()
+    w1 = PreventiveWatcher(prov, watch_dirs=[])
+    watchers["fake"] = w1
+
+    ticked = []
+
+    class CountingWatcher(PreventiveWatcher):
+        def tick(self):
+            ticked.append(1)
+            # Simuliert Haupt-Thread-Modifikation waehrend Iteration
+            watchers["fake2"] = PreventiveWatcher(FakeProvider(), watch_dirs=[])
+
+    watchers["fake"] = CountingWatcher(prov, watch_dirs=[])
+
+    # list()-Snapshot: sicher, kein RuntimeError
+    try:
+        for w in list(watchers.values()):
+            w.tick()
+    except RuntimeError:
+        assert False, "list()-Snapshot darf keinen RuntimeError erzeugen"
+
+    assert ticked, "Watcher wurde aufgerufen"
