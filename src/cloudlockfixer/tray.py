@@ -318,8 +318,7 @@ class TrayApp:
 
         def job():
             try:
-                for w in list(self.watchers.values()):
-                    w.tick()
+                watcher.tick_all(self.watchers)
             except Exception:  # pragma: no cover
                 pass
             self._watch_running = False

@@ -99,3 +99,10 @@ class PreventiveWatcher:
             log.info("Preventive watcher: %s resumed (idle).",
                      self.provider.name)
         return action
+
+
+def tick_all(watchers: dict) -> None:
+    """Führt tick() für alle Watcher aus. Snapshot via list() schützt vor
+    RuntimeError wenn der Hauptthread watchers während der Iteration ändert."""
+    for w in list(watchers.values()):
+        w.tick()

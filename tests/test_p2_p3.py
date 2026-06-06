@@ -235,34 +235,30 @@ def test_watcher_counts_recent_files(tmp_path):
     assert w.count_recent_changes() >= 2
 
 
-def test_watcher_tick_dict_snapshot_safe_against_concurrent_modification():
-    """Regression: _watcher_tick muss list(self.watchers.values()) statt
-    self.watchers.values() iterieren -- sonst RuntimeError wenn Main-Thread
-    self.watchers während des Daemon-Thread-Ticks modifiziert.
+def test_tick_all_safe_against_concurrent_modification():
+    """Regression: tick_all() muss list()-Snapshot nutzen -- sonst RuntimeError
+    wenn ein Watcher waehrend der Iteration das dict modifiziert (simuliert
+    Haupt-Thread, der self.watchers aendert).
 
-    Dieser Test verifiziert das Snapshot-Verhalten: Modifikation eines Dicts
-    waehrend einer list()-Iteration ist sicher, waehrend direkte values()-
-    Iteration einen RuntimeError wirft."""
+    Dieser Test schlaegt fehl, wenn list() aus tick_all() entfernt wird."""
+    from cloudlockfixer.watcher import tick_all
+
     watchers: dict = {}
     prov = FakeProvider()
-    w1 = PreventiveWatcher(prov, watch_dirs=[])
-    watchers["fake"] = w1
-
     ticked = []
 
-    class CountingWatcher(PreventiveWatcher):
+    class ModifyingWatcher(PreventiveWatcher):
         def tick(self):
             ticked.append(1)
             # Simuliert Haupt-Thread-Modifikation waehrend Iteration
-            watchers["fake2"] = PreventiveWatcher(FakeProvider(), watch_dirs=[])
+            watchers["injected"] = PreventiveWatcher(FakeProvider(), watch_dirs=[])
 
-    watchers["fake"] = CountingWatcher(prov, watch_dirs=[])
+    watchers["fake"] = ModifyingWatcher(prov, watch_dirs=[])
 
-    # list()-Snapshot: sicher, kein RuntimeError
+    # tick_all muss RuntimeError verhindern (list()-Snapshot)
     try:
-        for w in list(watchers.values()):
-            w.tick()
-    except RuntimeError:
-        assert False, "list()-Snapshot darf keinen RuntimeError erzeugen"
+        tick_all(watchers)
+    except RuntimeError as e:
+        assert False, f"tick_all() darf keinen RuntimeError erzeugen: {e}"
 
-    assert ticked, "Watcher wurde aufgerufen"
+    assert ticked, "Watcher muss aufgerufen worden sein"
