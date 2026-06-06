@@ -19,6 +19,10 @@ _OPS = [
 
 
 def _command(op: str) -> str:
+    # PyInstaller-Exe: sys.frozen ist True, clf_launcher.pyw existiert nicht im Build-Dir.
+    # Exe direkt aufrufen — sie versteht gui-add als subcommand.
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}" gui-add --op {op} --src "%1"'
     return f'"{pythonw()}" "{launcher()}" gui-add --op {op} --src "%1"'
 
 
