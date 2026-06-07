@@ -306,3 +306,70 @@ def test_cli_chain_invalid_op_returns_2(tmp_path, monkeypatch):
     monkeypatch.setattr(paths_mod, "data_dir", lambda: tmp_path)
     rc = cli_mod.main(["add", "--chain", "frobnicate x"])
     assert rc == 2
+
+
+# ── Tray: _refresh_status race guard ─────────────────────────────────
+
+def test_refresh_status_skips_load_when_running(tmp_path):
+    """Bug-Fix (Bug O): _refresh_status() darf queue.load() NICHT aufrufen wenn
+    _running=True — sonst ersetzt Queue.__new__-Objekte die Worker-Referenzen
+    und erledigte Tasks erscheinen nach dem Lauf wieder als pending."""
+    import os
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from unittest.mock import MagicMock, patch
+
+    from cloudlockfixer.models import Queue
+    from cloudlockfixer.tray import TrayApp
+
+    tray = TrayApp.__new__(TrayApp)
+    tray.queue = Queue(tmp_path)
+    tray._running = True
+    tray.status_action = MagicMock()
+    tray.tray = MagicMock()
+
+    load_calls = []
+    original_load = tray.queue.load
+
+    def tracking_load():
+        load_calls.append(1)
+        original_load()
+
+    tray.queue.load = tracking_load
+
+    tray._refresh_status()
+
+    assert load_calls == [], (
+        "_refresh_status() darf queue.load() nicht aufrufen wenn _running=True — "
+        "sonst werden Worker-Modifikationen im Speicher überschrieben"
+    )
+
+
+def test_refresh_status_calls_load_when_not_running(tmp_path):
+    """Gegenstück: wenn _running=False, muss queue.load() aufgerufen werden."""
+    import os
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from unittest.mock import MagicMock
+
+    from cloudlockfixer.models import Queue
+    from cloudlockfixer.tray import TrayApp
+
+    tray = TrayApp.__new__(TrayApp)
+    tray.queue = Queue(tmp_path)
+    tray._running = False
+    tray.status_action = MagicMock()
+    tray.tray = MagicMock()
+
+    load_calls = []
+    original_load = tray.queue.load
+
+    def tracking_load():
+        load_calls.append(1)
+        original_load()
+
+    tray.queue.load = tracking_load
+
+    tray._refresh_status()
+
+    assert len(load_calls) == 1, (
+        "_refresh_status() muss queue.load() aufrufen wenn _running=False"
+    )

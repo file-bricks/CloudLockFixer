@@ -267,7 +267,8 @@ class TrayApp:
         self.tray.setToolTip(f"CloudLockFixer — {text}")
 
     def _refresh_status(self) -> None:
-        self.queue.load()
+        if not self._running:
+            self.queue.load()
         n = len(self.queue.pending)
         failed = sum(1 for t_ in self.queue.tasks
                      if t_.status == "pending" and t_.retry_count > 0)
