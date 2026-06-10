@@ -88,7 +88,7 @@ automatically commented out with `#>`.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 49 passing (core + P2/P3 + i18n + multicloud regressions).
+- **Tests:** `pytest`, 88 passing (core + P2/P3 + i18n + multicloud regressions).
 - **Open/future:** more provider adapters (Dropbox / Google Drive / iCloud);
   optional suppression of sync-client relaunch during long operations.
 

@@ -5,6 +5,7 @@ operations in cloud-sync folders. It is designed for OneDrive, Dropbox, Google
 Drive and iCloud folders where Windows Cloud Files locks can make normal file
 operations fail.
 
+Version: 0.2.2
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
 Primary interfaces:

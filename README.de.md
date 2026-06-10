@@ -87,7 +87,7 @@ automatisch zu `#>` auskommentiert.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **49 grün** (Core + P2/P3 + i18n + Multicloud-Regressionen).
+- **Tests:** `pytest`, **88 grün** (Core + P2/P3 + i18n + Multicloud-Regressionen).
 - **Im Lifetest gehärtet (2026-05-29):** `is_running()/pause()` robust gegen
   nicht-UTF-8-`tasklist`-Ausgabe; `delete` entfernt read-only-Attribute statt an
   WinError 5 zu scheitern. Erster echter Einsatz: ein Ordner-Rename, den manuelle
