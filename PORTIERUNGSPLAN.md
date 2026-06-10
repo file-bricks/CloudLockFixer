@@ -146,6 +146,12 @@ CI/CD: GitHub Actions Matrix-Build (windows-latest, ubuntu-latest, macos-latest)
 
 ## Testbarkeit
 
-- Kernlogik (ops, models, worker, watcher): Bereits plattformneutral, Tests laufen überall
+- Kernlogik (ops, models, worker, watcher): Bereits plattformneutral, Tests laufen überall ✓
 - Provider-Tests: Komplett gemockt (kein echtes tasklist/pgrep nötig)
 - Autostart/Kontextmenü: Integration-Tests nur auf Zielplattform, Unit-Tests gemockt
+
+### Source-Platform Smoke-Tests (CI aktiv)
+
+`tests/source_platform_smoke.py` + `.github/workflows/source-platform-smoke.yml` prüfen auf
+`ubuntu-latest` und `macos-latest` headless: Import, Version, ops, Queue, paths, worker.
+Kein Cloud-Client, kein GUI, kein pip-Extra (nur pytest). Stand: 2026-06-10.
