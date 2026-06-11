@@ -28,3 +28,24 @@ Key files:
 - `src/cloudlockfixer/ops.py`: copy/delete and retry-safe filesystem operations
 - `src/cloudlockfixer/providers.py`: cloud provider detection and pause policy
 - `tests/`: regression tests for core, i18n, provider and tray-adjacent behavior
+
+## Audience
+
+- Windows developers dealing with OneDrive, Dropbox, Google Drive, or iCloud file-locking issues inside cloud-sync folders
+- LLM agents and automation scripts that need to queue rename, move, or delete operations without encountering cldflt errors
+- IT automation engineers running cloud-sync folders on managed Windows desktops who need a fire-and-forget queue
+- Python/PySide6 developers looking for a reference tray tool with CLI, queue.txt, and Explorer context-menu integration
+
+## Search Phrases
+
+```
+CloudLockFixer OneDrive rename access denied cldflt Windows
+delayed file rename move delete cloud sync Windows Python
+cldflt bypass copy delete fallback cloud files filter
+OneDrive locked file fix tray tool automation
+file-bricks CloudLockFixer queue.txt LLM script file operation
+Windows cloud files filter bypass Python PySide6
+OneDrive file lock retry tool CLF-WDAS
+```
+
+## Last-checked: 2026-06-11
