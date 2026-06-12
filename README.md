@@ -17,6 +17,16 @@ workaround** is to replace `rename()` with **copy()+delete()** — which is
 exactly what this tool does, plus delayed retries and optional pausing of the
 sync client.
 
+## Start here
+
+| Need | Entry point |
+|---|---|
+| Fix a OneDrive or Cloud Files "Access denied" rename/move/delete | Start the tray app with `START.bat`, then add a delayed task |
+| Automate stuck file operations from scripts or LLM agents | Use `PYTHONPATH=src python -m cloudlockfixer.cli` |
+| Inspect the safety model before deleting anything | Read [`docs/DESIGN.md`](docs/DESIGN.md) |
+| Queue work without opening the UI | Edit `%LOCALAPPDATA%\CloudLockFixer\queue.txt` |
+| Verify the source tree | Run `PYTHONPATH=src python -m pytest -q` |
+
 ## Features
 
 - Queue file/folder operations and let them run fire & forget
@@ -78,6 +88,18 @@ automatically commented out with `#>`.
 - **Worker:** runs on start + every 2 h (configurable) + on demand. If a task
   is stuck repeatedly, the responsible sync client is paused for that run and
   restarted afterwards.
+
+## Discovery context
+
+Useful search phrases: `OneDrive access denied rename`, `cldflt.sys locked
+file`, `Windows Cloud Files filter copy delete fallback`, `OneDrive 0x8007016A
+file operation`, `Dropbox Google Drive iCloud locked folder retry`, and
+`CloudLockFixer queue.txt`.
+
+CloudLockFixer is not a generic file unlocker, anti-malware tool, backup client
+or cloud-storage replacement. It is a local-first queue and retry helper for
+files that are already under the user's control but temporarily blocked by a
+cloud-sync provider.
 
 ## Status / Roadmap
 

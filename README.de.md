@@ -16,6 +16,16 @@ Ordnern zuverlässig erledigt, auch wenn sie der Windows-Cloud-Files-Filter
 genau das macht dieses Tool, plus verzögerte Retries und optionales Pausieren
 des Sync-Clients.
 
+## Einstieg
+
+| Bedarf | Einstieg |
+|---|---|
+| OneDrive- oder Cloud-Files-Fehler „Zugriff verweigert" beim Umbenennen/Verschieben/Löschen beheben | Tray-App mit `START.bat` starten und verzögerte Aufgabe hinzufügen |
+| Blockierte Dateioperationen aus Skripten oder LLM-Agenten automatisieren | `PYTHONPATH=src python -m cloudlockfixer.cli` nutzen |
+| Sicherheitsmodell vor destruktiven Aktionen prüfen | [`docs/DESIGN.md`](docs/DESIGN.md) lesen |
+| Aufgaben ohne UI eintragen | `%LOCALAPPDATA%\CloudLockFixer\queue.txt` bearbeiten |
+| Quellbaum verifizieren | `PYTHONPATH=src python -m pytest -q` ausführen |
+
 ## Funktionen
 
 - Datei-/Ordner-Operationen eintragen und fire & forget ausführen lassen
@@ -77,6 +87,18 @@ automatisch zu `#>` auskommentiert.
 - **Worker:** bei Start + alle 2 h (einstellbar) + manuell. Hängt ein Task
   mehrfach, wird der zuständige Sync-Client für den Lauf pausiert und danach
   neu gestartet.
+
+## Auffindbarkeit
+
+Nützliche Suchphrasen: `OneDrive Zugriff verweigert umbenennen`,
+`cldflt.sys Datei gesperrt`, `Windows Cloud Files Filter copy delete fallback`,
+`OneDrive 0x8007016A Dateioperation`, `Dropbox Google Drive iCloud gesperrter
+Ordner Retry` und `CloudLockFixer queue.txt`.
+
+CloudLockFixer ist kein generischer File-Unlocker, kein Anti-Malware-Werkzeug,
+kein Backup-Client und kein Ersatz für Cloud-Speicher. Es ist eine lokale
+Queue- und Retry-Hilfe für Dateien, die bereits unter Kontrolle des Nutzers
+stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 
 ## Status / Roadmap
 

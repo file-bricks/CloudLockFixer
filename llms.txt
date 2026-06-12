@@ -46,6 +46,17 @@ OneDrive locked file fix tray tool automation
 file-bricks CloudLockFixer queue.txt LLM script file operation
 Windows cloud files filter bypass Python PySide6
 OneDrive file lock retry tool CLF-WDAS
+OneDrive 0x8007016A rename move delete workaround
+cldflt.sys Access denied copy delete fallback
+Dropbox Google Drive iCloud locked folder retry queue
+Windows tray tool for cloud sync file operation failures
 ```
 
-## Last-checked: 2026-06-11
+## Disambiguation
+
+CloudLockFixer is not a generic file unlocker, antivirus utility, backup client,
+ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
+a local-first delayed action queue for rename, move and delete operations that
+fail because Windows Cloud Files providers temporarily lock paths.
+
+## Last-checked: 2026-06-12
