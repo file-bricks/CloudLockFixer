@@ -43,6 +43,12 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
       `_delete_dir_skip_locked()` in ops.py: Best-effort-Bereinigung, überspringt EBUSY-Dateien.
       `_delete_path()` nutzt es automatisch wenn `_rmtree()` mit Lock-Fehler scheitert.
       Tests: TestDeleteDirSkipLocked (5 Tests).
+- [x] **Bug 4: leerer Ordner mit gesperrtem Eigen-Handle → falsches „completed"** — DONE 2026-06-13
+      `_delete_dir_skip_locked()` wertete `len(locked) == 0` als Erfolg; bei einem leeren,
+      am eigenen Handle gesperrten Ordner (z. B. Windows Search Indexer) gibt es keine
+      gesperrte Innendatei → das verschluckte `p.rmdir()`-OSError wurde als Erfolg gewertet,
+      der Worker verwarf den Task statt zu retryen. Fix: Erfolg = `not p.exists()`; eigene
+      Retry-Meldung in `_delete_path()`. Tests: TestEmptyDirOwnHandleLocked (4 Tests).
 
 ## Nächste Schritte (aus ROADMAP.md)
 

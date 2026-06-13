@@ -100,8 +100,14 @@ def _delete_path(p: Path) -> tuple[bool, str]:
                     ok, locked = _delete_dir_skip_locked(p)
                     if ok:
                         return True, "geloescht (gesperrte Innendateien uebersprungen)"
-                    names = ", ".join(str(lp.name) for lp in locked[:3])
-                    return False, f"Innendatei(en) noch gesperrt (EBUSY): {names}"
+                    if locked:
+                        names = ", ".join(str(lp.name) for lp in locked[:3])
+                        return False, f"Innendatei(en) noch gesperrt (EBUSY): {names}"
+                    # Bug 4: leeres Verzeichnis, aber sein eigenes Handle ist gesperrt
+                    return False, (
+                        "Verzeichnis-Handle selbst gesperrt (offenes Handle, "
+                        "z.B. Windows Search-Indexer) -- Retry"
+                    )
                 raise
         else:
             try:
@@ -150,7 +156,12 @@ def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
         except OSError:
             pass
 
-    return len(locked) == 0, locked
+    # Bug 4: Erfolg am echten FS-Zustand messen, nicht an `locked`. Ein leeres
+    # Verzeichnis, dessen EIGENES Handle gesperrt ist (z.B. Windows Search-Indexer),
+    # hat KEINE gesperrte Innendatei -> locked bliebe [] und das oben verschluckte
+    # p.rmdir()-OSError wuerde faelschlich als Erfolg gewertet. Re-Check verhindert
+    # das stille "completed", sodass der Worker den Task korrekt erneut versucht.
+    return (not p.exists()), locked
 
 
 def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:

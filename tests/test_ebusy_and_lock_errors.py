@@ -240,3 +240,86 @@ class TestDeleteDirSkipLocked:
 
         assert ok, f"_delete_path soll OK zurückgeben wenn skip_locked erfolgreich: {msg}"
         assert skip_called, "_delete_dir_skip_locked muss aufgerufen worden sein"
+
+
+# ── Bug 4: leeres Verzeichnis mit gesperrtem EIGEN-Handle (z.B. Search-Indexer) ──
+
+class TestEmptyDirOwnHandleLocked:
+    """Regression: ein LEERES Verzeichnis, dessen eigenes Handle gesperrt ist
+    (kein gesperrtes Kind, sondern der Ordner selbst — z.B. von SearchIndexer.exe
+    gehalten), darf NICHT fälschlich als gelöscht ('completed') gemeldet werden.
+    Sonst verwirft der Worker den Task statt ihn erneut zu versuchen (false-completed).
+    """
+
+    def _lock_rmdir(self, monkeypatch, target: Path) -> None:
+        """Path.rmdir für genau `target` mit EBUSY scheitern lassen (Handle gehalten)."""
+        original_rmdir = Path.rmdir
+
+        def fake_rmdir(self):
+            if self == target:
+                e = OSError(errno.EBUSY, "EBUSY: directory handle held by another process")
+                e.errno = errno.EBUSY
+                raise e
+            return original_rmdir(self)
+
+        monkeypatch.setattr(Path, "rmdir", fake_rmdir)
+
+    def test_skip_locked_reports_failure_when_own_handle_locked(self, tmp_path, monkeypatch):
+        d = tmp_path / "emptylocked"
+        d.mkdir()
+        self._lock_rmdir(monkeypatch, d)
+
+        ok, locked = _delete_dir_skip_locked(d)
+
+        assert not ok, "Leeres, am Eigen-Handle gesperrtes Verzeichnis darf nicht als Erfolg gelten"
+        assert locked == [], "Keine gesperrte Innendatei -> locked muss leer bleiben"
+        assert d.exists(), "Verzeichnis existiert noch (rmdir scheiterte) -> kein Erfolg"
+
+    def test_delete_path_reports_failure_and_retry_hint(self, tmp_path, monkeypatch):
+        d = tmp_path / "busyempty"
+        d.mkdir()
+
+        # rmtree muss mit Lock-Fehler scheitern, damit der skip_locked-Pfad genommen wird
+        def fake_rmtree(p, **kwargs):
+            e = OSError(errno.EBUSY, "EBUSY")
+            e.errno = errno.EBUSY
+            raise e
+
+        monkeypatch.setattr(ops, "_rmtree", fake_rmtree)
+        self._lock_rmdir(monkeypatch, d)
+
+        ok, msg = ops._delete_path(d)
+
+        assert not ok, "_delete_path muss Fehlschlag melden (kein stilles completed)"
+        assert d.exists()
+        assert "handle" in msg.lower() or "retry" in msg.lower(), \
+            f"Meldung soll Eigen-Handle-Lock/Retry benennen, war: '{msg}'"
+
+    def test_chain_stays_pending_not_completed(self, tmp_path, monkeypatch):
+        """execute_chain darf den Delete-Task NICHT als done markieren (-> Worker retryt)."""
+        d = tmp_path / "queuedempty"
+        d.mkdir()
+
+        def fake_rmtree(p, **kwargs):
+            e = OSError(errno.EBUSY, "EBUSY")
+            e.errno = errno.EBUSY
+            raise e
+
+        monkeypatch.setattr(ops, "_rmtree", fake_rmtree)
+        self._lock_rmdir(monkeypatch, d)
+
+        task = Task(chain=[Step(op="delete", src=str(d))])
+        result = ops.execute_chain(task)
+
+        assert result is False, "Kette muss fehlschlagen solange das Handle gesperrt ist"
+        assert task.status != "done", "Task darf nicht fälschlich 'done' sein"
+        assert task.last_error, "last_error muss gesetzt sein (Grundlage für nächsten Retry)"
+        assert d.exists()
+
+    def test_succeeds_once_handle_released(self, tmp_path):
+        """Gegenprobe: ohne Lock wird derselbe leere Ordner sauber gelöscht."""
+        d = tmp_path / "freed"
+        d.mkdir()
+        ok, msg = ops._delete_path(d)
+        assert ok, f"Ohne Lock muss der leere Ordner gelöscht werden: {msg}"
+        assert not d.exists()

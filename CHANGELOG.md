@@ -13,6 +13,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `.github/workflows/source-platform-smoke.yml`: CI-Matrix für `ubuntu-latest` und `macos-latest`, die die Smoke-Tests bei jedem Push/PR auf `main` ausführt.
 
 ### Behoben / Fixed
+- **Bug 4 — falsches „completed" bei leerem Verzeichnis mit gesperrtem Eigen-Handle:**
+  `_delete_dir_skip_locked()` meldete Erfolg anhand von `len(locked) == 0`. Ein
+  LEERER Ordner, dessen eigenes Handle gesperrt ist (kein gesperrtes Kind, sondern
+  der Ordner selbst — z. B. von `SearchIndexer.exe` gehalten), hat keine gesperrte
+  Innendatei; das verschluckte `p.rmdir()`-`OSError` wurde so fälschlich als gelöscht
+  gewertet. Folge: Der Worker markierte den Task „completed" und verwarf ihn, statt
+  ihn erneut zu versuchen — der Ordner blieb für immer liegen. Fix: Erfolg wird jetzt
+  am echten FS-Zustand gemessen (`not p.exists()`); `_delete_path()` liefert für den
+  Eigen-Handle-Lock eine eigene Retry-Meldung. Tests: `TestEmptyDirOwnHandleLocked`
+  (4 Tests). Ursache empirisch bestätigt (Windows Search Indexer, 2026-06-13).
 - Guard in `_refresh_status()` against race between queue reload and worker thread.
 - Thread-safe dict snapshot in `_watcher_tick` (tray).
 - `tick_all()` helper extracted; real snapshot test added.
