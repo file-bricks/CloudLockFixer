@@ -293,7 +293,9 @@ def detect_language() -> Language:
         lang, _ = locale.getlocale()
         if lang and lang.lower().startswith("en"):
             return "en"
-    except (ValueError, TypeError):
+    except Exception:
+        # locale.Error (Subclass von Exception) und ValueError/TypeError
+        # bei ungültiger oder nicht gesetzter System-Locale abfangen.
         pass
     return "de"
 

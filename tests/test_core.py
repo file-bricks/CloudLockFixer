@@ -296,6 +296,43 @@ def test_worker_runs_local_task(tmp_path):
     assert (tmp_path / "new").exists()
 
 
+def test_queue_status_counts_thread_safe(tmp_path):
+    """Bug-Fix (Bug-Sweep): status_counts() muss Thread-sicher unter Lock laufen.
+    pending-Property und tasks-Direktzugriff in _refresh_status ersetzt durch
+    status_counts() um Race Condition zwischen UI- und Worker-Thread zu vermeiden."""
+    q = Queue(tmp_path)
+    # Leere Queue
+    n_pending, n_failed = q.status_counts()
+    assert n_pending == 0 and n_failed == 0
+
+    # Einen Task hinzufügen
+    src = _mkdir_with_file(tmp_path / "src1")
+    t1 = Task(chain=[Step(op="rename", src=str(src), arg="dst1")])
+    q.add(t1)
+    n_pending, n_failed = q.status_counts()
+    assert n_pending == 1 and n_failed == 0
+
+    # retry_count > 0 -> zählt als "failed_with_retries"
+    q.tasks[0].retry_count = 1
+    n_pending, n_failed = q.status_counts()
+    assert n_pending == 1 and n_failed == 1
+
+    # Status "done" -> nicht mehr pending
+    q.tasks[0].status = "done"
+    n_pending, n_failed = q.status_counts()
+    assert n_pending == 0 and n_failed == 0
+
+
+def test_queue_pending_property_thread_safe(tmp_path):
+    """Bug-Fix (Bug-Sweep): pending-Property muss Lock halten beim Lesen von tasks."""
+    q = Queue(tmp_path)
+    src = _mkdir_with_file(tmp_path / "src2")
+    q.add(Task(chain=[Step(op="rename", src=str(src), arg="dst2")]))
+    pending = q.pending
+    assert len(pending) == 1
+    assert pending[0].status == "pending"
+
+
 # ── CLI ─────────────────────────────────────────────────────────────
 
 def test_cli_chain_invalid_op_returns_2(tmp_path, monkeypatch):

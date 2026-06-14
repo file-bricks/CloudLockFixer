@@ -269,9 +269,7 @@ class TrayApp:
     def _refresh_status(self) -> None:
         if not self._running:
             self.queue.load()
-        n = len(self.queue.pending)
-        failed = sum(1 for t_ in self.queue.tasks
-                     if t_.status == "pending" and t_.retry_count > 0)
+        n, failed = self.queue.status_counts()
         txt = (t("status_no_tasks") if n == 0
                else t("status_open", n=n, failed=failed))
         self._set_status(txt)

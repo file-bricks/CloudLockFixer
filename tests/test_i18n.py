@@ -73,6 +73,19 @@ def test_detect_language_fallback(monkeypatch):
     assert detect_language() == "de"
 
 
+def test_detect_language_locale_error_falls_back_to_german(monkeypatch):
+    """Bug-Fix: locale.getlocale() kann locale.Error werfen (Subclass von Exception,
+    nicht von ValueError/TypeError). Muss sicher auf 'de' zurückfallen."""
+    import locale as locale_mod
+
+    def raise_locale_error():
+        raise locale_mod.Error("Ungültige Locale-Konfiguration")
+
+    monkeypatch.setattr("locale.getlocale", raise_locale_error)
+    result = detect_language()
+    assert result == "de", f"Erwartet 'de' als Fallback bei locale.Error, war: {result}"
+
+
 def test_available_keys_sorted():
     keys = available_keys()
     assert keys == sorted(keys)
