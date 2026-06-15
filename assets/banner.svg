@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080C14"/>
+      <stop offset="50%" stop-color="#0E1220"/>
+      <stop offset="100%" stop-color="#18132A"/>
+    </linearGradient>
+
+    <!-- Cloud Front Gradient -->
+    <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+
+    <!-- Cloud Back Gradient -->
+    <linearGradient id="cloudBackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+
+    <!-- Cloud Back Glow (Radial) -->
+    <radialGradient id="cloudBackGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Text Glow (Radial) -->
+    <radialGradient id="textBackGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Lightning Bolt Gradient -->
+    <linearGradient id="lightningGrad" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FDBA74"/>
+      <stop offset="50%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+
+    <!-- Metallic Chain Gradient -->
+    <linearGradient id="metallicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="35%" stop-color="#CBD5E1"/>
+      <stop offset="65%" stop-color="#64748B"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+
+    <!-- Text Gradients -->
+    <linearGradient id="lockGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <linearGradient id="fixerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </linearGradient>
+
+    <!-- Dot Pattern -->
+    <pattern id="gridDots" width="30" height="30" patternUnits="userSpaceOnUse">
+      <circle cx="15" cy="15" r="1" fill="#FFFFFF" fill-opacity="0.06"/>
+    </pattern>
+
+    <!-- Blur Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="subtleGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="1200" height="280" rx="16" fill="url(#bgGrad)"/>
+  
+  <!-- Dot Pattern Overlay -->
+  <rect width="1200" height="280" rx="16" fill="url(#gridDots)"/>
+
+  <!-- Radial Glow Behind Cloud -->
+  <circle cx="220" cy="140" r="180" fill="url(#cloudBackGlow)"/>
+
+  <!-- Radial Glow Behind Text -->
+  <circle cx="800" cy="140" r="250" fill="url(#textBackGlow)"/>
+
+  <!-- Background Decorative Wave/Line (subtle tech detail) -->
+  <path d="M-100,240 Q 300,180 700,250 T 1300,210" fill="none" stroke="#FFFFFF" stroke-opacity="0.03" stroke-width="2"/>
+  <path d="M-100,250 Q 250,220 650,270 T 1300,230" fill="none" stroke="#38BDF8" stroke-opacity="0.02" stroke-width="1.5"/>
+
+  <!-- ================= LEFT THIRD: CLOUD + LOCK + EXPLODING CHAINS ================= -->
+  <g id="illustration-group">
+    <!-- Back Cloud Layer (gives depth and shadow) -->
+    <path d="M 145,178 C 123,178 107,161 107,139 C 107,117 123,101 145,101 C 147,101 149,101 151,102 C 161,74 188,52 220,52 C 258,52 290,79 294,115 C 298,114 301,114 305,114 C 324,114 340,130 340,150 C 340,170 324,186 305,186 L 145,186 Z" fill="url(#cloudBackGrad)" opacity="0.6" transform="translate(-5, 3)"/>
+
+    <!-- Main Front Cloud -->
+    <path d="M 150,175 C 130,175 115,160 115,140 C 115,120 130,105 150,105 C 152,105 154,105 156,106 C 165,80 190,60 220,60 C 255,60 284,85 288,118 C 291,117 294,117 297,117 C 315,117 330,132 330,150 C 330,168 315,183 297,183 L 150,183 Z" fill="url(#cloudGrad)" filter="url(#subtleGlow)"/>
+    <path d="M 150,175 C 130,175 115,160 115,140 C 115,120 130,105 150,105 C 152,105 154,105 156,106 C 165,80 190,60 220,60 C 255,60 284,85 288,118 C 291,117 294,117 297,117 C 315,117 330,132 330,150 C 330,168 315,183 297,183 L 150,183 Z" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.25"/>
+
+    <!-- Lightning Bolt (striking down from top, behind padlock, shatters chains) -->
+    <!-- Glow Layer -->
+    <path d="M 240,-10 L 210,100 L 230,100 L 190,175 L 245,95 L 225,95 Z" fill="url(#lightningGrad)" opacity="0.4" filter="url(#glow)"/>
+    <!-- Main Bolt -->
+    <path d="M 240,-10 L 210,100 L 230,100 L 190,175 L 245,95 L 225,95 Z" fill="url(#lightningGrad)"/>
+    <!-- Inner Core Highlight -->
+    <path d="M 238,-10 L 212,98 L 232,98 L 194,171 L 241,97 L 225,97 Z" fill="#FFFBEB" opacity="0.95"/>
+
+    <!-- Padlock Body -->
+    <rect x="200" y="130" width="40" height="30" rx="6" fill="#FFFFFF" filter="url(#subtleGlow)"/>
+    <!-- Keyhole -->
+    <circle cx="220" cy="142" r="3.5" fill="#1E293B"/>
+    <path d="M 218.5,144 L 221.5,144 L 222.5,151 L 217.5,151 Z" fill="#1E293B"/>
+
+    <!-- Padlock Shackle - Broken and popped open -->
+    <!-- Left shackle piece flying off -->
+    <path d="M 208,130 V 118 C 208,109 214,109 214,114" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" transform="translate(-10, -14) rotate(-35 208 130)"/>
+    <!-- Right shackle piece flying off -->
+    <path d="M 222,114 C 222,109 228,109 228,118 V 130" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" transform="translate(10, -10) rotate(30 228 130)"/>
+
+    <!-- EXPLODING CHAINS (escaping in opposite directions) -->
+    <!-- Left Chain Segment (escaping top-left) -->
+    <!-- Link L1 (flat capsule) -->
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(85, 65) rotate(-35)"/>
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(85, 65) rotate(-35)"/>
+    <!-- Link L2 (side capsule) -->
+    <rect x="-5" y="-22" width="10" height="44" rx="5" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(115, 86) rotate(-35)"/>
+    <rect x="-5" y="-22" width="10" height="44" rx="5" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(115, 86) rotate(-35)"/>
+    <!-- Link L3 (flat capsule) -->
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(145, 107) rotate(-35)"/>
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(145, 107) rotate(-35)"/>
+    <!-- Link L4 (side capsule, snapped top half) -->
+    <rect x="-5" y="-22" width="10" height="15" rx="3" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(170, 115) rotate(-55)"/>
+    <!-- Link L4 (side capsule, snapped bottom half) -->
+    <rect x="-5" y="7" width="10" height="15" rx="3" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(182, 138) rotate(-15)"/>
+
+    <!-- Right Chain Segment (escaping bottom-right) -->
+    <!-- Link R1 (flat capsule) -->
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(355, 215) rotate(-30)"/>
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(355, 215) rotate(-30)"/>
+    <!-- Link R2 (side capsule) -->
+    <rect x="-5" y="-22" width="10" height="44" rx="5" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(325, 198) rotate(-30)"/>
+    <rect x="-5" y="-22" width="10" height="44" rx="5" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(325, 198) rotate(-30)"/>
+    <!-- Link R3 (flat capsule) -->
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(295, 181) rotate(-30)"/>
+    <rect x="-11" y="-20" width="22" height="40" rx="11" fill="none" stroke="#FFFFFF" stroke-width="1.2" stroke-opacity="0.3" transform="translate(295, 181) rotate(-30)"/>
+    <!-- Link R4 (side capsule, snapped top half) -->
+    <rect x="-5" y="-22" width="10" height="15" rx="3" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(262, 150) rotate(-10)"/>
+    <!-- Link R4 (side capsule, snapped bottom half) -->
+    <rect x="-5" y="7" width="10" height="15" rx="3" fill="none" stroke="url(#metallicGrad)" stroke-width="6" transform="translate(274, 168) rotate(-50)"/>
+
+    <!-- Broken Main Flat Link in the center (bursting apart) -->
+    <!-- Left Half -->
+    <path d="M 0,-20 C -11,-20 -11,-10 -11,0 C -11,10 -11,20 0,20" fill="none" stroke="url(#metallicGrad)" stroke-width="6" stroke-linecap="round" transform="translate(178, 153) rotate(-75)"/>
+    <!-- Right Half -->
+    <path d="M 0,-20 C 11,-20 11,-10 11,0 C 11,10 11,20 0,20" fill="none" stroke="url(#metallicGrad)" stroke-width="6" stroke-linecap="round" transform="translate(248, 127) rotate(45)"/>
+
+    <!-- Shockwave Rings -->
+    <circle cx="215" cy="140" r="65" fill="none" stroke="#FB923C" stroke-width="2" stroke-dasharray="8, 16" stroke-opacity="0.4" filter="url(#subtleGlow)"/>
+    <circle cx="215" cy="140" r="45" fill="none" stroke="#38BDF8" stroke-width="1.5" stroke-opacity="0.5" filter="url(#subtleGlow)"/>
+
+    <!-- Spark Shards -->
+    <polygon points="180,95 172,91 183,86" fill="#FB923C" opacity="0.9"/>
+    <polygon points="265,175 278,183 273,169" fill="#F97316" opacity="0.9"/>
+    <polygon points="152,162 138,167 147,153" fill="#0EA5E9" opacity="0.9"/>
+    <polygon points="282,98 296,89 287,108" fill="#38BDF8" opacity="0.8"/>
+    <polygon points="210,75 204,61 216,70" fill="#FBBF24" opacity="0.9"/>
+    <polygon points="230,205 238,218 226,211" fill="#FBBF24" opacity="0.9"/>
+    <circle cx="210" cy="140" r="12" fill="#FB923C" opacity="0.7" filter="url(#subtleGlow)"/>
+    <circle cx="220" cy="145" r="6" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================= RIGHT TWO-THIRDS: BRANDING & TAGLINE ================= -->
+  <!-- Text Glow Shadow for depth -->
+  <text x="420" y="148" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="900" letter-spacing="-1.5px" opacity="0.35" filter="url(#glow)">
+    <tspan fill="#000000">Cloud</tspan>
+    <tspan fill="#000000">Lock</tspan>
+    <tspan fill="#000000">Fixer</tspan>
+  </text>
+  
+  <!-- Front Text -->
+  <text x="420" y="145" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="900" letter-spacing="-1.5px">
+    <tspan fill="#FFFFFF">Cloud</tspan>
+    <tspan fill="url(#lockGrad)">Lock</tspan>
+    <tspan fill="url(#fixerGrad)">Fixer</tspan>
+  </text>
+
+  <!-- Tagline Shadow -->
+  <text x="425" y="196" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="600" fill="#000000" letter-spacing="0.5px" opacity="0.3"/>
+  <!-- Tagline Front -->
+  <text x="425" y="195" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="600" fill="#E2E8F0" letter-spacing="0.5px">
+    Cloud file locks? <tspan fill="#34D399" font-weight="800">Fixed.</tspan>
+  </text>
+
+  <!-- Decorative Tech Accent Lines Under Text -->
+  <rect x="425" y="215" width="220" height="4" rx="2" fill="url(#lockGrad)" opacity="0.8"/>
+  <rect x="655" y="215" width="80" height="4" rx="2" fill="url(#fixerGrad)" opacity="0.8"/>
+
+  <!-- High-Tech Crosshair Accents & Floating Dots -->
+  <g id="decorations" opacity="0.85">
+    <!-- Top-Right Crosshair -->
+    <path d="M 1090,60 L 1110,60 M 1100,50 L 1100,70" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="1.5"/>
+    <circle cx="1100" cy="60" r="5" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="1.5"/>
+    <!-- Bottom-Right Crosshair -->
+    <path d="M 1125,200 L 1135,200 M 1130,195 L 1130,205" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="1"/>
+    <!-- Floating Cyber Dots -->
+    <circle cx="1000" cy="80" r="3" fill="#38BDF8" opacity="0.3"/>
+    <circle cx="1050" cy="180" r="2.5" fill="#FB923C" opacity="0.3"/>
+    <circle cx="850" cy="60" r="2" fill="#FFFFFF" opacity="0.2"/>
+    <circle cx="780" cy="220" r="3" fill="#34D399" opacity="0.25"/>
+  </g>
+
+  <!-- Sleek Card Border (for high-contrast separation on dark/light backgrounds) -->
+  <rect x="0.5" y="0.5" width="1199" height="279" rx="15.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1"/>
+</svg>

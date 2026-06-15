@@ -1,3 +1,5 @@
+<img src="assets/banner.svg" width="100%" alt="CloudLockFixer Banner">
+
 # CloudLockFixer (CLF-WDAS)
 
 > 🇩🇪 **Deutsche Version:** [README.de.md](README.de.md)
