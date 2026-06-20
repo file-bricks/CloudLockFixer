@@ -1,5 +1,5 @@
-"""Explorer-Rechtsklick-Kontextmenue (Windows, HKCU) als Kaskaden-Untermenue
-'CloudLockFixer' fuer Ordner und Dateien. Eintraege rufen `clf gui-add`."""
+"""Explorer-Rechtsklick-Kontextmenü (Windows, HKCU) als Kaskaden-Untermenü
+'CloudLockFixer' für Ordner und Dateien. Einträge rufen `clf gui-add`."""
 from __future__ import annotations
 
 import sys

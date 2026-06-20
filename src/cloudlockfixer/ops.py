@@ -4,9 +4,9 @@ Kernidee: rename/move zuerst als schnelles os.replace versuchen; scheitert das
 am Cloud-Files-Filter (cldflt) mit Zugriff-verweigert/EXDEV, automatisch auf
 copy+delete ausweichen (der MS-empfohlene, filter-sichere Workaround).
 
-Idempotenz fuer verzoegerte Retries: Wenn der Copy-Teil gelang, aber das
-Loeschen der Quelle (noch) gesperrt ist, merkt sich der Schritt das via
-`Step.copied` — der naechste Lauf loescht dann nur noch die Quelle und kopiert
+Idempotenz für verzögerte Retries: Wenn der Copy-Teil gelang, aber das
+Löschen der Quelle (noch) gesperrt ist, merkt sich der Schritt das via
+`Step.copied` — der nächste Lauf löscht dann nur noch die Quelle und kopiert
 NICHT erneut (kein Datenverlust, kein Doppel-Copy).
 """
 from __future__ import annotations
@@ -50,9 +50,9 @@ def _force_writable(path: str | os.PathLike) -> None:
 
 def _on_rm_error(func, path, _exc):
     """rmtree-Fehlerbehandler: read-only-Attribut entfernen, dann erneut versuchen.
-    Windows verweigert das Loeschen read-only markierter Dateien/Verzeichnisse mit
+    Windows verweigert das Löschen read-only markierter Dateien/Verzeichnisse mit
     WinError 5 (z.B. .pytest_cache, .git/objects oder von OneDrive 'pinned'). Ohne
-    diesen Handler bricht shutil.rmtree an solchen Eintraegen ab."""
+    diesen Handler bricht shutil.rmtree an solchen Einträgen ab."""
     _force_writable(path)
     func(path)
 
@@ -90,7 +90,7 @@ def _verify_copy(src: Path, dst: Path) -> bool:
 def _delete_path(p: Path) -> tuple[bool, str]:
     try:
         if not p.exists():
-            return True, "bereits geloescht"
+            return True, "bereits gelöscht"
         if p.is_dir():
             try:
                 _rmtree(p)
@@ -99,7 +99,7 @@ def _delete_path(p: Path) -> tuple[bool, str]:
                     # Bug 3: Verzeichnis mit gesperrter Innendatei
                     ok, locked = _delete_dir_skip_locked(p)
                     if ok:
-                        return True, "geloescht (gesperrte Innendateien uebersprungen)"
+                        return True, "gelöscht (gesperrte Innendateien übersprungen)"
                     if locked:
                         names = ", ".join(str(lp.name) for lp in locked[:3])
                         return False, f"Innendatei(en) noch gesperrt (EBUSY): {names}"
@@ -115,9 +115,9 @@ def _delete_path(p: Path) -> tuple[bool, str]:
             except OSError:
                 _force_writable(p)  # read-only Datei -> beschreibbar machen
                 p.unlink()
-        return True, "geloescht"
+        return True, "gelöscht"
     except OSError as e:
-        return False, f"Loeschen fehlgeschlagen: {e}"
+        return False, f"Löschen fehlgeschlagen: {e}"
 
 
 def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
@@ -165,8 +165,8 @@ def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
 
 
 def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
-    """Verschiebt src -> dst. Rueckgabe: (ok, msg, copied).
-    `copied`=True heisst: dst ist vollstaendig erstellt (egal ob Quelle schon weg).
+    """Verschiebt src -> dst. Rückgabe: (ok, msg, copied).
+    `copied`=True heißt: dst ist vollständig erstellt (egal ob Quelle schon weg).
     Ziel-existiert (mit anderem Inhalt als 'schon erledigt') = Konflikt -> Fehler."""
     if not src.exists() and dst.exists():
         return True, "bereits verschoben", True
@@ -199,12 +199,12 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
 
     if not _verify_copy(src, dst):
         _delete_path(dst)
-        return False, "Copy unvollstaendig (Verify fehlgeschlagen)", False
+        return False, "Copy unvollständig (Verify fehlgeschlagen)", False
 
     ok, msg = _delete_path(src)
     if ok:
         return True, "verschoben (copy+delete)", True
-    return False, f"Kopiert, aber Quelle noch gesperrt — Retry spaeter ({msg})", True
+    return False, f"Kopiert, aber Quelle noch gesperrt — Retry später ({msg})", True
 
 
 # ── Standalone-API (fuer direkte Nutzung/Tests) ─────────────────────
@@ -251,7 +251,7 @@ def execute_step(step: Step) -> tuple[bool, str]:
 
 
 def execute_chain(task: Task) -> bool:
-    """Fuehrt die Kette ab task.step_index aus. Schritt N nur nach Erfolg N-1."""
+    """Führt die Kette ab task.step_index aus. Schritt N nur nach Erfolg N-1."""
     for i in range(task.step_index, len(task.chain)):
         ok, msg = execute_step(task.chain[i])
         if ok:

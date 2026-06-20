@@ -1,4 +1,4 @@
-"""Zentrale Pfade (Datenverzeichnis, Log, Launcher fuer Registry-Befehle)."""
+"""Zentrale Pfade (Datenverzeichnis, Log, Launcher für Registry-Befehle)."""
 from __future__ import annotations
 
 import os

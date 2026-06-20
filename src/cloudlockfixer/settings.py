@@ -28,10 +28,13 @@ def load() -> dict:
 
 def save(settings: dict) -> None:
     p = _path()
-    tmp = p.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(settings, ensure_ascii=False, indent=2),
-                   encoding="utf-8")
-    tmp.replace(p)
+    try:
+        tmp = p.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(settings, ensure_ascii=False, indent=2),
+                       encoding="utf-8")
+        tmp.replace(p)
+    except OSError:
+        pass
 
 
 def resolve_language(cfg: dict) -> str:

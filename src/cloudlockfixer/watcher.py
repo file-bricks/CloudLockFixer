@@ -1,12 +1,12 @@
-"""Praeventiv-Waechter (P3, opt-in).
+"""Präventiv-Wächter (P3, opt-in).
 
-Beobachtet die Aenderungsrate in *konfigurierten* Ordnern (NICHT dem ganzen
-OneDrive-Baum — das wuerde Online-only-Placeholder hydratisieren = ungewollte
-Downloads). Bei hoher Aktivitaet wird der Sync-Client pausiert; nach einer
+Beobachtet die Änderungsrate in *konfigurierten* Ordnern (NICHT dem ganzen
+OneDrive-Baum — das würde Online-only-Placeholder hydratisieren = ungewollte
+Downloads). Bei hoher Aktivität wird der Sync-Client pausiert; nach einer
 Ruhephase (Cooldown) wieder gestartet — so entstehen Locks gar nicht erst.
 
 Die Entscheidungslogik (`decide`) ist rein/zustandsbehaftet und testbar; das
-Zaehlen ist bounded + stat-only (liest nur Metadaten, hydratisiert nicht).
+Zählen ist bounded + stat-only (liest nur Metadaten, hydratisiert nicht).
 """
 from __future__ import annotations
 
@@ -91,7 +91,7 @@ class PreventiveWatcher:
                     log.info("Preventive watcher: %s paused (high change rate).",
                              self.provider.name)
                 else:
-                    self._paused_by_us = False  # pause() gescheitert — kein Resume noetig
+                    self._paused_by_us = False  # pause() gescheitert — kein Resume nötig
             else:
                 self._paused_by_us = False
         elif action == "resume":

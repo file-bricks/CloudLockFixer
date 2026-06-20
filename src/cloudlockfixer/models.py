@@ -27,7 +27,7 @@ class Step:
     op: StepType
     src: str
     arg: str = ""
-    copied: bool = False  # bei move/rename: Copy erfolgt, nur noch Quelle-Loeschen offen
+    copied: bool = False  # bei move/rename: Copy erfolgt, nur noch Quelle-Löschen offen
 
     def describe(self) -> str:
         if self.op == "rename":
@@ -142,7 +142,7 @@ class Queue:
         try:
             text = self.txt_path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
-            # Analog zu queue.json: korrupte Datei -> Ingest uebersprungen.
+            # Analog zu queue.json: korrupte Datei -> Ingest übersprungen.
             return
         lines = text.splitlines()
         changed = False
@@ -167,10 +167,13 @@ class Queue:
             else:
                 out.append(line)
         if changed:
-            tmp = self.txt_path.with_suffix(".txt.tmp")
-            tmp.write_text("\n".join(out) + "\n", encoding="utf-8")
-            tmp.replace(self.txt_path)
-            self._save_unlocked()
+            try:
+                tmp = self.txt_path.with_suffix(".txt.tmp")
+                tmp.write_text("\n".join(out) + "\n", encoding="utf-8")
+                tmp.replace(self.txt_path)
+                self._save_unlocked()
+            except OSError:
+                pass  # best-effort; nächster load()-Aufruf wiederholt den Versuch
 
     def add(self, task: Task) -> Task:
         with self._lock:

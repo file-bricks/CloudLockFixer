@@ -1,8 +1,8 @@
 """Worker: arbeitet die Queue ab.
 
 Standard ist non-disruptiv: copy+delete funktioniert auch ohne den Sync-Client
-zu beenden. Erst wenn ein Task mehrfach haengt (oder force_pause), wird der
-zustaendige Sync-Provider fuer den Lauf pausiert (M2) und danach wieder gestartet.
+zu beenden. Erst wenn ein Task mehrfach hängt (oder force_pause), wird der
+zuständige Sync-Provider für den Lauf pausiert (M2) und danach wieder gestartet.
 """
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ def run_once(queue: Queue, force_pause: bool = False) -> dict:
                 summary["done"] += 1
                 log.info("Task %s completed.", t.id)
             else:
-                t.status = "pending"  # bleibt fuer naechsten Lauf
+                t.status = "pending"  # bleibt für nächsten Lauf
                 summary["failed_again"] += 1
                 log.warning("Task %s still open: %s", t.id, t.last_error)
         queue.save()

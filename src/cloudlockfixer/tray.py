@@ -173,7 +173,7 @@ class TrayApp:
                                     triggered=self.app.quit))
 
     def _on_activated(self, reason):
-        if reason == QSystemTrayIcon.Trigger:
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.menu.popup(self.tray.geometry().center())
 
     # ── Aktionen ────────────────────────────────────────────────────
