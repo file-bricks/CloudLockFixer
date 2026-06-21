@@ -37,6 +37,8 @@ keyring/
 
 # ---- Interne Steuerungsdateien (nicht ins Repo) ----
 AUFGABEN.txt
+LOCK.txt
+LOCK*.txt
 TEST.txt
 TESTS.txt
 TESTERGEBNISSE.txt
