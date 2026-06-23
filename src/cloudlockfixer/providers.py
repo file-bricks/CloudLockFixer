@@ -111,6 +111,30 @@ def _get_volume_label(drive_letter: str) -> str:
         return ""
 
 
+def _read_box_custom_location() -> Path | None:
+    """Read Box Drive's optional custom root parent from the Windows registry."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+    except ImportError:
+        return None
+
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Box\Box") as key:
+            value, _ = winreg.QueryValueEx(key, "CustomBoxLocation")
+    except (OSError, ValueError):
+        return None
+
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip().strip('"')
+    if not normalized:
+        return None
+    base = Path(normalized)
+    return base if base.name.lower() == "box" else base / "Box"
+
+
 # ── OneDrive ───────────────────────────────────────────────────────
 
 
@@ -245,6 +269,99 @@ class DropboxProvider(SyncProvider):
         return False
 
 
+# ── Box ────────────────────────────────────────────────────────────
+
+
+class BoxProvider(SyncProvider):
+    name = "Box"
+    mount_type = "folder"
+
+    def _detect_roots(self) -> list[Path]:
+        roots: list[Path] = []
+        default_root = Path.home() / "Box"
+        if default_root.exists():
+            roots.append(default_root)
+
+        custom_root = _read_box_custom_location()
+        if custom_root and custom_root.exists():
+            roots.append(custom_root)
+        return _dedup_paths(roots)
+
+    def is_running(self) -> bool:
+        return _check_process("Box.exe")
+
+    def pause(self) -> bool:
+        return _kill_process("Box.exe")
+
+    def resume(self) -> bool:
+        if sys.platform != "win32":
+            return False
+        candidates = [
+            Path(r"C:\Program Files\Box\Box\Box.exe"),
+            Path(r"C:\Program Files (x86)\Box\Box\Box.exe"),
+        ]
+        for exe in candidates:
+            if exe.exists():
+                try:
+                    subprocess.Popen([str(exe)])
+                    return True
+                except OSError:
+                    continue
+        return False
+
+
+# ── Nextcloud ───────────────────────────────────────────────────────
+
+
+class NextcloudProvider(SyncProvider):
+    name = "Nextcloud"
+    mount_type = "folder"
+
+    def _detect_roots(self) -> list[Path]:
+        roots: list[Path] = []
+        default_root = Path.home() / "Nextcloud"
+        if default_root.exists():
+            roots.append(default_root)
+
+        cfg_path = Path(os.environ.get("APPDATA", "")) / "Nextcloud" / "nextcloud.cfg"
+        if cfg_path.exists():
+            try:
+                for raw_line in cfg_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+                    line = raw_line.strip()
+                    if not line or line.startswith(("#", ";")) or "localPath=" not in line:
+                        continue
+                    _, raw_path = line.split("localPath=", 1)
+                    normalized = raw_path.strip().strip('"').replace("/", os.sep)
+                    if normalized:
+                        roots.append(Path(normalized))
+            except OSError:
+                pass
+        return _dedup_paths(roots)
+
+    def is_running(self) -> bool:
+        return _check_process("nextcloud.exe")
+
+    def pause(self) -> bool:
+        return _kill_process("nextcloud.exe")
+
+    def resume(self) -> bool:
+        if sys.platform != "win32":
+            return False
+        candidates = [
+            Path(r"C:\Program Files\Nextcloud\nextcloud.exe"),
+            Path(r"C:\Program Files (x86)\Nextcloud\nextcloud.exe"),
+            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Nextcloud" / "nextcloud.exe",
+        ]
+        for exe in candidates:
+            if exe.exists():
+                try:
+                    subprocess.Popen([str(exe)])
+                    return True
+                except OSError:
+                    continue
+        return False
+
+
 # ── iCloud ─────────────────────────────────────────────────────────
 
 
@@ -292,7 +409,7 @@ class ICloudProvider(SyncProvider):
 
 def _discover_providers() -> list[SyncProvider]:
     candidates = [OneDriveProvider(), GoogleDriveProvider(),
-                  DropboxProvider(), ICloudProvider()]
+                  DropboxProvider(), BoxProvider(), NextcloudProvider(), ICloudProvider()]
     active: list[SyncProvider] = []
     for prov in candidates:
         try:

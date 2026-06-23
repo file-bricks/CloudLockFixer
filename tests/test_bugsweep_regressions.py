@@ -97,3 +97,21 @@ def test_ops_no_digraphs_in_return_strings():
         "ASCII-Digraphe in ops.py Strings (Bug #10-4) — echte Umlaute verwenden:\n"
         + "\n".join(violations)
     )
+
+
+# ---------------------------------------------------------------------------
+# Bug #10-5: Autostart-Befehl zeigte im PyInstaller-Build auf clf_launcher.pyw
+# ---------------------------------------------------------------------------
+
+def test_autostart_uses_frozen_executable(monkeypatch):
+    """Frozen Builds müssen sich selbst registrieren, nicht den Source-Launcher."""
+    import sys
+    import cloudlockfixer.autostart as autostart
+
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", r"C:\_Local_DEV\CloudLockFixer\CloudLockFixer.exe")
+
+    cmd = autostart._launch_command()
+
+    assert cmd == r'"C:\_Local_DEV\CloudLockFixer\CloudLockFixer.exe"'
+    assert "clf_launcher.pyw" not in cmd

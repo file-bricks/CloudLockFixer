@@ -38,9 +38,11 @@ des Sync-Clients.
   **Tray-Dialog** und **Explorer-Rechtsklick**-Kontextmenü
 - Auto-Retry in einstellbarem Intervall (Default 2 h) und auf Abruf
 - Optionales Pausieren/Neustarten des Sync-Clients während einer Operation
-  (OneDrive-Provider)
+  für unterstützte ordnerbasierte Provider
 - Optionaler Präventiv-Wächter, der den Sync-Client je nach Ordner-Aktivität
   pausiert/fortsetzt
+- Unterstützte Windows-Provider aktuell: OneDrive, Google Drive, Dropbox, Box,
+  iCloud und Nextcloud
 - Autostart mit Windows; Single-Instance-Tray-App
 
 ## Installation
@@ -111,12 +113,12 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **92 grün** (Core + P2/P3 + i18n + Multicloud + Leerordner-Eigen-Handle-Lock-Regressionen).
+- **Tests:** `pytest`, **110 grün** (Core + P2/P3 + i18n + Multicloud + Box + Nextcloud + Leerordner-Eigen-Handle-Lock-Regressionen).
 - **Im Lifetest gehärtet (2026-05-29):** `is_running()/pause()` robust gegen
   nicht-UTF-8-`tasklist`-Ausgabe; `delete` entfernt read-only-Attribute statt an
   WinError 5 zu scheitern. Erster echter Einsatz: ein Ordner-Rename, den manuelle
   Versuche/`cldflt` zuvor blockierten, gelang per copy+delete.
-- **Offen/künftig:** weitere Provider-Adapter (Dropbox/Google Drive/iCloud);
+- **Offen/künftig:** weitere Provider-Adapter (pCloud/Synology Drive);
   optional Relaunch-Unterdrückung des Sync-Clients während langer Operationen.
 
 Windows-only (`cldflt` ist Windows-spezifisch); der Kern ist plattformneutral

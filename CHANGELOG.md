@@ -6,9 +6,15 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **Box provider (Windows):** root auto-discovery via `~/Box` plus optional `CustomBoxLocation` registry path, process detection via `Box.exe`, and pause/resume support.
+- **Nextcloud provider (Windows):** root auto-discovery via `%APPDATA%\\Nextcloud\\nextcloud.cfg` plus default `~/Nextcloud`, process detection via `nextcloud.exe`, and pause/resume support.
 - README.md, README.de.md and `llms.txt`: added discovery/search context for
   OneDrive access-denied, `cldflt.sys`, Windows Cloud Files filter, error
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
+
+### Behoben / Fixed
+- **Autostart in packaged builds:** PyInstaller/Frozen builds now register the
+  packaged executable instead of the source-tree `clf_launcher.pyw`.
 - `tests/source_platform_smoke.py`: headless Smoke-Tests für Linux und macOS — prüft Modul-Import, Version, `ops`-Operationen (rename/move/delete), `models.Queue`-Persistenz, `paths.data_dir()` und `worker.run_once()` ohne Cloud-Client oder GUI.
 - `.github/workflows/source-platform-smoke.yml`: CI-Matrix für `ubuntu-latest` und `macos-latest`, die die Smoke-Tests bei jedem Push/PR auf `main` ausführt.
 

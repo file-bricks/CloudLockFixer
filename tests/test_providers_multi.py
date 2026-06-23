@@ -4,7 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cloudlockfixer.providers import (
-    DropboxProvider, GoogleDriveProvider, ICloudProvider, OneDriveProvider,
+    BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider, OneDriveProvider,
     SyncProvider, _discover_providers, _get_providers, _is_subpath,
     available_providers, provider_for,
 )
@@ -59,6 +59,14 @@ def test_dropbox_is_folder_type():
     assert DropboxProvider().mount_type == "folder"
 
 
+def test_box_is_folder_type():
+    assert BoxProvider().mount_type == "folder"
+
+
+def test_nextcloud_is_folder_type():
+    assert NextcloudProvider().mount_type == "folder"
+
+
 def test_icloud_is_folder_type():
     assert ICloudProvider().mount_type == "folder"
 
@@ -101,6 +109,33 @@ def test_dropbox_owns_path_via_info_json(monkeypatch, tmp_path):
     assert prov.owns_path(root / "file.txt")
 
 
+def test_box_detects_custom_root_from_registry(monkeypatch, tmp_path):
+    custom_root = tmp_path / "CustomCloud" / "Box"
+    custom_root.mkdir(parents=True)
+    monkeypatch.setattr("cloudlockfixer.providers._read_box_custom_location", lambda: custom_root)
+    prov = BoxProvider()
+    roots = prov._detect_roots()
+    assert custom_root in roots
+
+
+def test_nextcloud_detects_roots_from_cfg(monkeypatch, tmp_path):
+    appdata = tmp_path / "AppData" / "Roaming"
+    cfg_dir = appdata / "Nextcloud"
+    cfg_dir.mkdir(parents=True)
+    synced_root = tmp_path / "Nextcloud"
+    synced_root.mkdir()
+    cfg_dir.joinpath("nextcloud.cfg").write_text(
+        "[Accounts]\n"
+        "0\\FoldersWithPlaceholders\\1\\localPath="
+        f"{synced_root.as_posix()}/\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("APPDATA", str(appdata))
+    prov = NextcloudProvider()
+    roots = prov._detect_roots()
+    assert synced_root in roots
+
+
 # ── is_running (mocked) ───────────────────────────────────────────
 
 class _FakeCompleted:
@@ -124,6 +159,18 @@ def test_dropbox_is_running(monkeypatch):
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("Dropbox.exe  1234\n"))
     assert DropboxProvider().is_running() is True
+
+
+def test_box_is_running(monkeypatch):
+    monkeypatch.setattr(subprocess, "run",
+                        lambda *a, **k: _FakeCompleted("Box.exe  2345\n"))
+    assert BoxProvider().is_running() is True
+
+
+def test_nextcloud_is_running(monkeypatch):
+    monkeypatch.setattr(subprocess, "run",
+                        lambda *a, **k: _FakeCompleted("nextcloud.exe  6789\n"))
+    assert NextcloudProvider().is_running() is True
 
 
 def test_icloud_is_running_either_process(monkeypatch):
@@ -167,8 +214,14 @@ def test_provider_for_returns_correct_provider(monkeypatch, tmp_path):
     od_root.mkdir()
     db_root = tmp_path / "Dropbox"
     db_root.mkdir()
+    bx_root = tmp_path / "Box"
+    bx_root.mkdir()
+    nc_root = tmp_path / "Nextcloud"
+    nc_root.mkdir()
     monkeypatch.setattr(OneDriveProvider, "_roots", lambda self: [od_root])
     monkeypatch.setattr(DropboxProvider, "_roots", lambda self: [db_root])
+    monkeypatch.setattr(BoxProvider, "_roots", lambda self: [bx_root])
+    monkeypatch.setattr(NextcloudProvider, "_roots", lambda self: [nc_root])
     monkeypatch.setattr(GoogleDriveProvider, "_roots", lambda self: [])
     monkeypatch.setattr(ICloudProvider, "_roots", lambda self: [])
 
@@ -180,8 +233,12 @@ def test_provider_for_returns_correct_provider(monkeypatch, tmp_path):
         assert p1 is not None and p1.name == "OneDrive"
         p2 = provider_for(db_root / "doc.pdf")
         assert p2 is not None and p2.name == "Dropbox"
-        p3 = provider_for(tmp_path / "unrelated")
-        assert p3 is None
+        p3 = provider_for(bx_root / "slides.pptx")
+        assert p3 is not None and p3.name == "Box"
+        p4 = provider_for(nc_root / "photo.jpg")
+        assert p4 is not None and p4.name == "Nextcloud"
+        p5 = provider_for(tmp_path / "unrelated")
+        assert p5 is None
     finally:
         pmod._PROVIDERS = old  # restore cache
 

@@ -9,6 +9,8 @@ _VALUE = "CloudLockFixer"
 
 def _launch_command() -> str:
     """Befehl, der die Tray-App startet (pythonw, kein Konsolenfenster)."""
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}"'
     from .paths import launcher, pythonw
     return f'"{pythonw()}" "{launcher()}"'
 

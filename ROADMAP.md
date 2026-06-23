@@ -39,7 +39,10 @@
 
 ## Langfristig
 
-- [ ] Weitere Cloud-Provider (Box, Nextcloud, pCloud, Synology Drive)
+- [~] Weitere Cloud-Provider (Box, Nextcloud, pCloud, Synology Drive)
+  - Box erledigt 2026-06-17
+  - Nextcloud erledigt 2026-06-16
+  - Offen: pCloud, Synology Drive
 - [ ] Konfigurierbares Retry-Verhalten (Exponential Backoff, max Retries)
 - [ ] Benachrichtigungen (System-Toast bei Dauerfehler)
 - [ ] Web-Dashboard / Remote-Status

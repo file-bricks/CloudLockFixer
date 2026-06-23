@@ -44,11 +44,11 @@ def _make_icon(color: str = "#2e9e44") -> QIcon:
             if not ic.isNull():
                 return ic
     pm = QPixmap(64, 64)
-    pm.fill(Qt.transparent)
+    pm.fill(Qt.GlobalColor.transparent)
     p = QPainter(pm)
-    p.setRenderHint(QPainter.Antialiasing)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
     p.setBrush(QColor(color))
-    p.setPen(Qt.NoPen)
+    p.setPen(Qt.PenStyle.NoPen)
     p.drawEllipse(8, 26, 28, 26)
     p.drawEllipse(26, 18, 30, 28)
     p.drawRoundedRect(10, 38, 46, 16, 8, 8)
@@ -57,7 +57,7 @@ def _make_icon(color: str = "#2e9e44") -> QIcon:
     f.setBold(True)
     f.setPointSize(13)
     p.setFont(f)
-    p.drawText(pm.rect(), Qt.AlignCenter, "↻")
+    p.drawText(pm.rect(), Qt.AlignmentFlag.AlignCenter, "↻")
     p.end()
     return QIcon(pm)
 

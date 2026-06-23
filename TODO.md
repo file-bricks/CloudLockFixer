@@ -55,4 +55,7 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
 - [ ] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md)
 - [ ] Cross-Platform: macOS-Support (siehe PORTIERUNGSPLAN.md)
-- [ ] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive
+- [~] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive
+      Box erledigt 2026-06-17 (`~/Box` plus `CustomBoxLocation`-Registry-Pfad, `Box.exe`-Prozesssteuerung).
+      Nextcloud erledigt 2026-06-16 (`nextcloud.cfg`-Root-Erkennung + Prozesssteuerung).
+      Offen bleiben pCloud und Synology Drive.

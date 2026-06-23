@@ -38,9 +38,12 @@ sync client.
 - Multiple input paths: **CLI** (for LLMs/scripts), human-readable
   **`queue.txt`**, **tray dialog**, and an **Explorer right-click** context menu
 - Auto-retry on a configurable interval (default 2 h) and on demand
-- Optional sync-client pause/restart during an operation (OneDrive provider)
+- Optional sync-client pause/restart during an operation for supported
+  folder-based providers
 - Optional preventive watcher that pauses/resumes the sync client based on
   folder activity
+- Supported Windows providers today: OneDrive, Google Drive, Dropbox, Box,
+  iCloud, and Nextcloud
 - Autostart with Windows; single-instance tray app
 
 ## Installation
@@ -112,8 +115,8 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 92 passing (core + P2/P3 + i18n + multicloud + empty-dir own-handle-lock regressions).
-- **Open/future:** more provider adapters (Dropbox / Google Drive / iCloud);
+- **Tests:** `pytest`, 110 passing (core + P2/P3 + i18n + multicloud + Box + Nextcloud + empty-dir own-handle-lock regressions).
+- **Open/future:** more provider adapters (pCloud / Synology Drive);
   optional suppression of sync-client relaunch during long operations.
 
 Windows-only; the core is platform-neutral for later ports.
