@@ -13,10 +13,36 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
 
 ### Behoben / Fixed
+- **Tray task dialog now supports files as well as folders:** the GUI no longer
+  forces source selection through a folder-only picker, so delayed rename/move/delete
+  actions cover the same file/folder scope that the product documentation promises.
 - **Autostart in packaged builds:** PyInstaller/Frozen builds now register the
   packaged executable instead of the source-tree `clf_launcher.pyw`.
 - `tests/source_platform_smoke.py`: headless Smoke-Tests für Linux und macOS — prüft Modul-Import, Version, `ops`-Operationen (rename/move/delete), `models.Queue`-Persistenz, `paths.data_dir()` und `worker.run_once()` ohne Cloud-Client oder GUI.
 - `.github/workflows/source-platform-smoke.yml`: CI-Matrix für `ubuntu-latest` und `macos-latest`, die die Smoke-Tests bei jedem Push/PR auf `main` ausführt.
+
+### Behoben / Fixed
+- **Bug #BW-1 — GoogleDriveProvider.resume() semantische Versionssortierung:**
+  `sorted(glob("*/GoogleDriveFS.exe"), reverse=True)` nutzte lexikografische Sortierung;
+  Versionsordner wie `"9.0.0"` rangierten dabei über `"62.0.1"` (`'9' > '6'`
+  zeichenweise). Fix: neue Hilfsfunktion `_gdrive_version_key(p)` parst den
+  Verzeichnisnamen als Integer-Tupel; `_RESUME_BASE` als Klassenattribut ermöglicht
+  zudem sauberes Monkeypatching in Tests. Betrifft nur Installationen mit mehreren
+  parallelen Google-Drive-Versionen (z. B. nach unvollständigem Update). Test:
+  `test_googledrive_version_sort_key_is_semantic`, `test_googledrive_resume_picks_highest_semantic_version`.
+- **Bug #BW-2 — PreventiveWatcher.tick() ignorierte resume()-Rückgabewert:**
+  `self.provider.resume()` wurde ohne Prüfung des Rückgabewerts aufgerufen. Bei
+  Fehlschlag (z. B. Prozess-Start verweigert) blieb `_paused_by_us=False` und
+  `_last_activity=None` — der Watcher lief keinen neuen Cooldown, der Provider
+  pausierte dauerhaft bis zum App-Neustart. Symmetrisch zum bereits in v0.2.2
+  behobenen `pause()`-Bug. Fix: bei `resume() == False` werden `_paused_by_us=True`
+  und `_last_activity=self._time()` wiederhergestellt, um nach dem nächsten
+  Cooldown einen Retry zu ermöglichen. Test: `test_watcher_tick_retries_resume_after_failure`.
+- **Robustheit #BW-R — _check_process() Groß-/Kleinschreibungsvergleich:**
+  `exe_name in out` war case-sensitiv; Windows' `tasklist` gibt Prozessnamen in der
+  tatsächlichen Binär-Schreibweise zurück (z. B. `Nextcloud.exe`, nicht
+  `nextcloud.exe`). Fix: `exe_name.lower() in out.lower()`. Test:
+  `test_check_process_case_insensitive_exe_name`.
 
 ### Behoben / Fixed
 - **Bug 4 — falsches „completed" bei leerem Verzeichnis mit gesperrtem Eigen-Handle:**

@@ -262,3 +262,54 @@ def test_tick_all_safe_against_concurrent_modification():
         assert False, f"tick_all() darf keinen RuntimeError erzeugen: {e}"
 
     assert ticked, "Watcher muss aufgerufen worden sein"
+
+
+# ── Bug #BW-2: tick() ignoriert resume()-Rückgabewert ─────────────────────────
+
+def test_watcher_tick_retries_resume_after_failure(monkeypatch):
+    """Bug #BW-2: resume() Rückgabewert wurde in tick() ignoriert.
+    Wenn resume() False zurückgibt, blieb _paused_by_us=False und der Provider
+    pausierte dauerhaft bis zum App-Neustart — symmetrisch zum bereits behobenen
+    pause()-Bug (v0.2.1 CHANGELOG).
+    Fix: nach gescheitertem resume() _paused_by_us und _last_activity
+    wiederherstellen, damit nach dem nächsten Cooldown ein Retry-Versuch erfolgt."""
+    clock = [0.0]
+
+    class FailResumeProvider(FakeProvider):
+        resume_calls = 0
+
+        def resume(self) -> bool:
+            self.resume_calls += 1
+            return False  # simuliert Prozess-Start-Fehler
+
+    prov = FailResumeProvider()
+    w = PreventiveWatcher(prov, threshold=3, cooldown_s=10,
+                          time_fn=lambda: clock[0])
+
+    # Phase 1: hohe Aktivität → pause() erfolgreich (FakeProvider.pause() gibt True)
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 10)
+    assert w.tick() == "pause"
+    assert w._paused_by_us
+
+    # Phase 2: Cooldown abgewartet → resume() schlägt fehl
+    monkeypatch.setattr(w, "count_recent_changes", lambda: 0)
+    clock[0] += 11
+    assert w.tick() == "resume"
+    assert prov.resume_calls == 1
+
+    # Kern-Assert: Zustand muss nach gescheitertem resume() wiederhergestellt sein
+    assert w._paused_by_us, (
+        "_paused_by_us muss nach gescheitertem resume() True sein — "
+        "sonst bleibt der Provider dauerhaft pausiert"
+    )
+    assert w._last_activity is not None, (
+        "_last_activity muss nach gescheitertem resume() gesetzt sein — "
+        "sonst läuft kein neuer Cooldown und kein Retry erfolgt"
+    )
+
+    # Phase 3: zweiter Cooldown → resume() wird erneut versucht (Retry)
+    clock[0] += 11
+    assert w.tick() == "resume", (
+        "Nach erneutem Cooldown muss resume() erneut versucht werden"
+    )
+    assert prov.resume_calls == 2, "resume() muss ein zweites Mal aufgerufen worden sein"

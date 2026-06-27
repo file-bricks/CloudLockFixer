@@ -95,9 +95,16 @@ class PreventiveWatcher:
             else:
                 self._paused_by_us = False
         elif action == "resume":
-            self.provider.resume()
-            log.info("Preventive watcher: %s resumed (idle).",
-                     self.provider.name)
+            if self.provider.resume():
+                log.info("Preventive watcher: %s resumed (idle).",
+                         self.provider.name)
+            else:
+                # resume() fehlgeschlagen — Zustand wiederherstellen damit
+                # nach dem nächsten Cooldown ein neuer Versuch gestartet wird.
+                self._paused_by_us = True
+                self._last_activity = self._time()
+                log.warning("Preventive watcher: resume %s fehlgeschlagen, "
+                            "Retry nach Cooldown.", self.provider.name)
         return action
 
 

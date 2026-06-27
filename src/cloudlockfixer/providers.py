@@ -69,6 +69,19 @@ def _dedup_paths(paths: list[Path]) -> list[Path]:
     return out
 
 
+def _gdrive_version_key(p: Path) -> tuple[int, ...]:
+    """Semantischer Sortier-Schlüssel für versionierte GoogleDriveFS.exe-Pfade.
+
+    Parst den Verzeichnisnamen des exe-Pfads als Integer-Tupel, damit z. B.
+    '62.0.1' numerisch über '9.0.0' sortiert ('9' > '6' lexikografisch wäre falsch).
+    Ungültige Komponenten werden auf (0,) normiert.
+    """
+    try:
+        return tuple(int(x) for x in p.parent.name.split("."))
+    except ValueError:
+        return (0,)
+
+
 def _check_process(exe_name: str) -> bool:
     if sys.platform != "win32":
         return False
@@ -78,7 +91,7 @@ def _check_process(exe_name: str) -> bool:
             capture_output=True, text=True, timeout=10,
             encoding="utf-8", errors="ignore",
         ).stdout or ""
-        return exe_name in out
+        return exe_name.lower() in out.lower()
     except (OSError, subprocess.SubprocessError):
         return False
 
@@ -182,6 +195,7 @@ class OneDriveProvider(SyncProvider):
 class GoogleDriveProvider(SyncProvider):
     name = "Google Drive"
     mount_type = "virtual"
+    _RESUME_BASE: Path = Path(r"C:\Program Files\Google\Drive File Stream")
 
     def _detect_roots(self) -> list[Path]:
         if sys.platform != "win32":
@@ -204,10 +218,11 @@ class GoogleDriveProvider(SyncProvider):
     def resume(self) -> bool:
         if sys.platform != "win32":
             return False
-        base = Path(r"C:\Program Files\Google\Drive File Stream")
+        base = self._RESUME_BASE
         if not base.exists():
             return False
-        versions = sorted(base.glob("*/GoogleDriveFS.exe"), reverse=True)
+        versions = sorted(base.glob("*/GoogleDriveFS.exe"),
+                          key=_gdrive_version_key, reverse=True)
         for exe in versions:
             try:
                 subprocess.Popen([str(exe)])

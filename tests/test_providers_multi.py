@@ -249,3 +249,71 @@ def test_available_providers_returns_list():
     result = available_providers()
     assert isinstance(result, list)
     assert all(isinstance(p, SyncProvider) for p in result)
+
+
+# ── Bug #BW-1: GoogleDrive resume() — semantische Versionssortierung ──────────
+
+def test_googledrive_version_sort_key_is_semantic():
+    """Bug #BW-1: sorted(glob, reverse=True) nutzt lexikografische Sortierung;
+    '9.0.0' > '62.0.1' als String — '9' > '6' zeichenweise. Numerisch gilt
+    62 > 9. Die extrahierte _gdrive_version_key-Funktion muss integer-basiert
+    sortieren."""
+    from cloudlockfixer.providers import _gdrive_version_key
+
+    paths = [
+        Path("9.0.0") / "GoogleDriveFS.exe",
+        Path("62.0.1") / "GoogleDriveFS.exe",
+        Path("8.99.9") / "GoogleDriveFS.exe",
+    ]
+    ordered = sorted(paths, key=_gdrive_version_key, reverse=True)
+    names = [p.parent.name for p in ordered]
+    assert names == ["62.0.1", "9.0.0", "8.99.9"], (
+        f"Erwartet semantische Reihenfolge [62.0.1, 9.0.0, 8.99.9], war: {names}"
+    )
+
+
+def test_googledrive_resume_picks_highest_semantic_version(tmp_path, monkeypatch):
+    """Integration: resume() muss die semantisch höchste Version zuerst versuchen.
+    Bug #BW-1: ohne Fix startet lexikografisches '9.0.0' vor semantisch höherem '62.0.1'."""
+    import subprocess as sp
+
+    base = tmp_path / "Drive File Stream"
+    for ver in ("9.0.0", "62.0.1", "8.99.9"):
+        (base / ver).mkdir(parents=True)
+        (base / ver / "GoogleDriveFS.exe").write_text("x", encoding="utf-8")
+
+    started: list[str] = []
+
+    def fake_popen(cmd):
+        started.append(Path(cmd[0]).parent.name)
+        raise OSError("Testumgebung: kein echter Start")
+
+    monkeypatch.setattr(sp, "Popen", fake_popen)
+    monkeypatch.setattr(GoogleDriveProvider, "_RESUME_BASE", base, raising=False)
+
+    GoogleDriveProvider().resume()
+
+    assert started, "Popen wurde nicht aufgerufen — _RESUME_BASE-Patch prüfen"
+    assert started[0] == "62.0.1", (
+        f"Höchste semantische Version '62.0.1' muss zuerst versucht werden, "
+        f"war: {started[0]!r}"
+    )
+
+
+# ── Robustheit: _check_process() — Groß-/Kleinschreibung ──────────────────────
+
+def test_check_process_case_insensitive_exe_name(monkeypatch):
+    """Robustheit: tasklist gibt Prozessnamen in System-Schreibweise zurück
+    (z.B. 'Nextcloud.exe'). Wenn wir mit 'nextcloud.exe' suchen, muss der
+    Vergleich trotzdem True liefern (case-insensitive)."""
+    from cloudlockfixer.providers import _check_process
+
+    class _Fake:
+        stdout = "Nextcloud.exe  6789 Console   1   5.564 K\n"
+
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: _Fake())
+
+    # Suche mit Kleinbuchstaben — muss True ergeben trotz Groß-N in der Ausgabe
+    assert _check_process("nextcloud.exe") is True, (
+        "case-insensitive Suche muss Treffer finden wenn Ausgabe 'Nextcloud.exe' enthält"
+    )
