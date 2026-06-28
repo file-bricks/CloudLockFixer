@@ -377,6 +377,56 @@ class NextcloudProvider(SyncProvider):
         return False
 
 
+# ── pCloud ─────────────────────────────────────────────────────────
+
+
+class PCloudProvider(SyncProvider):
+    """pCloud Drive for Windows — virtueller Laufwerks-Mount.
+
+    pCloud Drive erscheint unter Windows als Laufwerksbuchstabe, dessen
+    Volume-Label "pCloud Drive" enthält. Erkennung analog zu Google Drive
+    per GetVolumeInformationW (kein Subprocess nötig).
+    """
+
+    name = "pCloud"
+    mount_type = "virtual"
+
+    def _detect_roots(self) -> list[Path]:
+        if sys.platform != "win32":
+            return []
+        roots: list[Path] = []
+        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+        for i, letter in enumerate(string.ascii_uppercase):
+            if bitmask & (1 << i):
+                label = _get_volume_label(letter)
+                if "pCloud" in label:
+                    roots.append(Path(f"{letter}:\\"))
+        return _dedup_paths(roots)
+
+    def is_running(self) -> bool:
+        return _check_process("pCloud.exe")
+
+    def pause(self) -> bool:
+        return _kill_process("pCloud.exe")
+
+    def resume(self) -> bool:
+        if sys.platform != "win32":
+            return False
+        candidates = [
+            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "pCloud" / "pCloud.exe",
+            Path(r"C:\Program Files\pCloud\pCloud.exe"),
+            Path(r"C:\Program Files (x86)\pCloud\pCloud.exe"),
+        ]
+        for exe in candidates:
+            if exe.exists():
+                try:
+                    subprocess.Popen([str(exe)])
+                    return True
+                except OSError:
+                    continue
+        return False
+
+
 # ── iCloud ─────────────────────────────────────────────────────────
 
 
@@ -424,7 +474,8 @@ class ICloudProvider(SyncProvider):
 
 def _discover_providers() -> list[SyncProvider]:
     candidates = [OneDriveProvider(), GoogleDriveProvider(),
-                  DropboxProvider(), BoxProvider(), NextcloudProvider(), ICloudProvider()]
+                  DropboxProvider(), BoxProvider(), NextcloudProvider(),
+                  PCloudProvider(), ICloudProvider()]
     active: list[SyncProvider] = []
     for prov in candidates:
         try:

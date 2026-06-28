@@ -4,7 +4,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from cloudlockfixer.providers import (
-    BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider, OneDriveProvider,
+    BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider,
+    OneDriveProvider, PCloudProvider,
     SyncProvider, _discover_providers, _get_providers, _is_subpath,
     available_providers, provider_for,
 )
@@ -69,6 +70,10 @@ def test_nextcloud_is_folder_type():
 
 def test_icloud_is_folder_type():
     assert ICloudProvider().mount_type == "folder"
+
+
+def test_pcloud_is_virtual_type():
+    assert PCloudProvider().mount_type == "virtual"
 
 
 # ── Discovery ──────────────────────────────────────────────────────
@@ -317,3 +322,154 @@ def test_check_process_case_insensitive_exe_name(monkeypatch):
     assert _check_process("nextcloud.exe") is True, (
         "case-insensitive Suche muss Treffer finden wenn Ausgabe 'Nextcloud.exe' enthält"
     )
+
+
+# ── pCloud Provider ────────────────────────────────────────────────
+
+def test_pcloud_detects_volume_with_pcloud_label(monkeypatch):
+    """_detect_roots() muss ein Laufwerk zurückgeben, dessen Label 'pCloud' enthält."""
+    import ctypes as _ctypes
+    import string
+
+    # Simuliere ein einzelnes Laufwerk P: mit Label "pCloud Drive"
+    def fake_get_logical_drives():
+        idx = string.ascii_uppercase.index("P")
+        return 1 << idx
+
+    def fake_get_volume_label(letter: str) -> str:
+        return "pCloud Drive" if letter == "P" else ""
+
+    monkeypatch.setattr(
+        _ctypes.windll.kernel32, "GetLogicalDrives", fake_get_logical_drives,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        "cloudlockfixer.providers._get_volume_label", fake_get_volume_label
+    )
+    import sys
+    monkeypatch.setattr(sys, "platform", "win32")
+
+    prov = PCloudProvider()
+    roots = prov._detect_roots()
+    assert any(str(r).startswith("P:") for r in roots), (
+        f"Laufwerk P: erwartet, erhalten: {roots}"
+    )
+
+
+def test_pcloud_no_roots_when_no_pcloud_volume(monkeypatch):
+    """_detect_roots() gibt leere Liste zurück wenn kein Volume das Label 'pCloud' trägt."""
+    monkeypatch.setattr(
+        "cloudlockfixer.providers._get_volume_label", lambda letter: "Local Disk"
+    )
+    import sys
+    monkeypatch.setattr(sys, "platform", "win32")
+
+    prov = PCloudProvider()
+    # Kein einziges Laufwerk hat das pCloud-Label
+    roots = prov._detect_roots()
+    # Da GetLogicalDrives nicht gemockt → kann Systemlaufwerke zurückgeben,
+    # aber keines davon hat das pCloud-Label → roots muss leer sein.
+    assert roots == []
+
+
+def test_pcloud_is_running_detects_process(monkeypatch):
+    monkeypatch.setattr(
+        subprocess, "run",
+        lambda *a, **k: _FakeCompleted("pCloud.exe  4321\n"),
+    )
+    assert PCloudProvider().is_running() is True
+
+
+def test_pcloud_is_running_negative(monkeypatch):
+    monkeypatch.setattr(
+        subprocess, "run",
+        lambda *a, **k: _FakeCompleted("INFO: Keine Aufgaben\n"),
+    )
+    assert PCloudProvider().is_running() is False
+
+
+def test_pcloud_resume_tries_known_paths(monkeypatch, tmp_path):
+    """resume() muss den ersten vorhandenen Kandidatenpfad starten."""
+    import subprocess as sp
+
+    fake_exe = tmp_path / "pCloud.exe"
+    fake_exe.write_text("x", encoding="utf-8")
+
+    started: list[str] = []
+
+    def fake_popen(cmd):
+        started.append(cmd[0])
+
+    monkeypatch.setattr(sp, "Popen", fake_popen)
+
+    import sys
+    monkeypatch.setattr(sys, "platform", "win32")
+
+    # Patch die candidates-Liste via _LOCALAPPDATA-Pfad im Provider
+    import os
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+
+    # Zieldatei muss exakt am erwarteten Pfad liegen
+    pcloud_dir = tmp_path / "Programs" / "pCloud"
+    pcloud_dir.mkdir(parents=True)
+    pcloud_exe = pcloud_dir / "pCloud.exe"
+    pcloud_exe.write_text("x", encoding="utf-8")
+
+    result = PCloudProvider().resume()
+    assert result is True
+    assert len(started) == 1
+    assert Path(started[0]).name == "pCloud.exe"
+
+
+def test_pcloud_virtual_mount_skipped_in_pause(tmp_path):
+    """pCloud ist ein Virtual-Mount-Provider → wird in _providers_to_pause() übersprungen."""
+    proot = tmp_path / "pcloud"
+    proot.mkdir()
+    vprov = FakeVirtualProvider(roots=[proot], running=True)
+    task = Task(chain=[Step(op="move", src=str(proot / "a"), arg=str(tmp_path / "b"))])
+    task.retry_count = 10
+
+    with patch("cloudlockfixer.worker.provider_for", return_value=vprov):
+        result = _providers_to_pause([task], force_pause=True)
+
+    assert vprov not in result
+
+
+def test_pcloud_included_in_discover_when_root_found(monkeypatch, tmp_path):
+    """_discover_providers() muss pCloud aufnehmen wenn _roots() nicht leer ist."""
+    monkeypatch.setattr(PCloudProvider, "_roots", lambda self: [tmp_path / "pcloud"])
+    providers = _discover_providers()
+    names = [p.name for p in providers]
+    assert "pCloud" in names
+
+
+def test_pcloud_excluded_from_discover_without_roots(monkeypatch):
+    """_discover_providers() darf pCloud nicht aufnehmen wenn kein Volume gefunden wird."""
+    monkeypatch.setattr(PCloudProvider, "_roots", lambda self: [])
+    providers = _discover_providers()
+    names = [p.name for p in providers]
+    assert "pCloud" not in names
+
+
+def test_provider_for_resolves_pcloud_root(monkeypatch, tmp_path):
+    """provider_for() muss eine Datei unter dem pCloud-Root dem pCloud-Provider zuordnen."""
+    import cloudlockfixer.providers as pmod
+
+    pc_root = tmp_path / "pCloud"
+    pc_root.mkdir()
+
+    monkeypatch.setattr(OneDriveProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(GoogleDriveProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(DropboxProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(BoxProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(NextcloudProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(PCloudProvider, "_roots", lambda self: [pc_root])
+    monkeypatch.setattr(ICloudProvider, "_roots", lambda self: [])
+
+    old = pmod._PROVIDERS
+    pmod._PROVIDERS = _discover_providers()
+    try:
+        p = provider_for(pc_root / "document.pdf")
+        assert p is not None and p.name == "pCloud"
+    finally:
+        pmod._PROVIDERS = old

@@ -6,6 +6,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **pCloud provider (Windows):** `PCloudProvider` erkennt pCloud Drive als virtuellen
+  Laufwerks-Mount (`mount_type="virtual"`) per `GetVolumeInformationW`-Volume-Label-Scan
+  (Label muss "pCloud" enthalten). Prozesssteuerung via `pCloud.exe`; Resume sucht in
+  `%LOCALAPPDATA%\Programs\pCloud\`, `C:\Program Files\pCloud\` und
+  `C:\Program Files (x86)\pCloud\`. Da `mount_type="virtual"`, wird der Provider
+  korrekt vom Pause-Guard ausgeschlossen. 9 neue Tests in `test_providers_multi.py`.
 - **Box provider (Windows):** root auto-discovery via `~/Box` plus optional `CustomBoxLocation` registry path, process detection via `Box.exe`, and pause/resume support.
 - **Nextcloud provider (Windows):** root auto-discovery via `%APPDATA%\\Nextcloud\\nextcloud.cfg` plus default `~/Nextcloud`, process detection via `nextcloud.exe`, and pause/resume support.
 - README.md, README.de.md and `llms.txt`: added discovery/search context for

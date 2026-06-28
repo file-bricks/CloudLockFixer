@@ -58,4 +58,5 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 - [~] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive
       Box erledigt 2026-06-17 (`~/Box` plus `CustomBoxLocation`-Registry-Pfad, `Box.exe`-Prozesssteuerung).
       Nextcloud erledigt 2026-06-16 (`nextcloud.cfg`-Root-Erkennung + Prozesssteuerung).
-      Offen bleiben pCloud und Synology Drive.
+      pCloud erledigt 2026-06-28 (Volume-Label-Scan via `GetVolumeInformationW`, `virtual` mount, `pCloud.exe`-Prozesssteuerung, 9 Tests).
+      Offen bleibt Synology Drive.
