@@ -298,6 +298,15 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "de": "FEHLER",
         "en": "ERROR",
     },
+    # -- worker.py: Retry-Cap --
+    "task_failed_max_retries": {
+        "de": "Nach {n} Fehlversuchen aufgegeben: {err}",
+        "en": "Gave up after {n} failed attempts: {err}",
+    },
+    "task_failed_unknown_error": {
+        "de": "unbekannter Fehler",
+        "en": "unknown error",
+    },
 }
 
 _current: Language = "de"

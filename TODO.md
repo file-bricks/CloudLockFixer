@@ -1,5 +1,20 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Software-Review-Loop 2026-07-12 (Fable) — zurückgestellt (brauchen echtes Gerät/Recherche)
+
+- [ ] P2: Synology pause/resume-Asymmetrie prüfen (providers.py:456-476):
+      pause() killt cloud-drive-ui.exe UND SynologyDrive.exe, resume() startet
+      nur cloud-drive-ui.exe. Am echten Synology-Prozessmodell verifizieren,
+      ob der Daemon vom UI-Start mitgezogen wird — sonst bleibt Sync tot.
+- [ ] P2: Synology Custom-Sync-Ordner wird nicht erkannt (nur ~/SynologyDrive
+      hardcodiert; providers.py:445-450). Einziger Folder-Provider ohne
+      Custom-Root-Erkennung. Recherche: wo speichert der Synology-Drive-Client
+      den Sync-Pfad (Config/Registry)? Dann analog Dropbox/Nextcloud lesen.
+- [ ] P3: Volume-Label-Matching per Substring ("Google Drive"/"pCloud" in
+      label; providers.py:208/402) — umbenannte Volumes werden fehlklassifiziert.
+      Exakteres Matching NUR mit realen Labels beider Clients verifizieren
+      (pCloud-Label könnte "pCloud Drive" sein — exakter Vergleich bräche das).
+
 ## i18n (Internationalisierung) — erledigt v1.1.0
 
 - [x] i18n-Modul erstellen (`src/cloudlockfixer/i18n.py`, Dict-basiert, de+en)

@@ -6,6 +6,7 @@ import json
 from .paths import data_dir
 
 DEFAULT_INTERVAL_MIN = 120  # 2 h
+DEFAULT_MAX_RETRIES = 5  # danach wird ein Task als "failed" markiert (kein Endlos-Retry)
 
 
 def _path():

@@ -91,6 +91,10 @@ class TrayApp:
         self.watchers: dict[str, watcher.PreventiveWatcher] = {}
         watch_dirs = self.settings.get("watch_dirs", [])
         for prov in self.providers:
+            # Virtual-Mount-Provider (Google Drive, pCloud) nie als Wächter
+            # registrieren: ihr Prozess-Kill würde den Laufwerks-Mount abreißen.
+            if prov.mount_type == "virtual":
+                continue
             dirs = [d for d in watch_dirs
                     if provider_for(d) is not None
                     and provider_for(d).name == prov.name]
@@ -332,7 +336,9 @@ class TrayApp:
             prov = provider_for(d)
             if prov and prov.name in self.watchers:
                 self.watchers[prov.name].watch_dirs.append(d)
-            elif prov:
+            elif prov and prov.mount_type != "virtual":
+                # Virtual-Mount-Provider (Google Drive, pCloud) bekommen keinen
+                # Präventiv-Wächter — ihr Prozess-Kill risse den Mount ab.
                 self.watchers[prov.name] = watcher.PreventiveWatcher(
                     prov, watch_dirs=[d])
         if (self.settings.get("watcher_enabled")

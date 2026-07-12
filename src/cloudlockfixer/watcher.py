@@ -84,7 +84,19 @@ class PreventiveWatcher:
         return n
 
     def tick(self) -> str:
-        action = self.decide(self.count_recent_changes())
+        # Virtual-Mount-Provider (Google Drive, pCloud) nie pausieren: ihr
+        # Prozess-Kill würde den Laufwerks-Mount abreißen. Defensiv-Guard
+        # zusätzlich zum Watcher-Bau in tray.py, der virtuelle Provider gar
+        # nicht erst als Wächter registriert.
+        if self.provider.mount_type == "virtual":
+            return "none"
+        # Der Scan ist langsam und läuft daher außerhalb des Provider-Locks;
+        # nur die Zustandsänderung + pause/resume werden serialisiert (FIX 4).
+        count = self.count_recent_changes()
+        with self.provider._lock:
+            return self._act(self.decide(count))
+
+    def _act(self, action: str) -> str:
         if action == "pause":
             if self.provider.is_running():
                 if self.provider.pause():

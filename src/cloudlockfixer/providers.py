@@ -13,6 +13,7 @@ import os
 import string
 import subprocess
 import sys
+import threading
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -28,6 +29,10 @@ class SyncProvider(ABC):
 
     def __init__(self) -> None:
         self._cached_roots: list[Path] | None = None
+        # Serialisiert pause()/resume() derselben Instanz zwischen Worker-Job-
+        # und Watcher-Tick-Thread (FIX 4). RLock (reentrant), damit der Watcher
+        # den Lock halten und darin pause()/resume() aufrufen kann.
+        self._lock = threading.RLock()
 
     @abstractmethod
     def _detect_roots(self) -> list[Path]: ...
@@ -109,17 +114,36 @@ def _kill_process(exe_name: str) -> bool:
         return False
 
 
+# Win32-Konstanten für die robuste Laufwerks-Abfrage.
+_SEM_FAILCRITICALERRORS = 0x0001  # unterdrückt die "Kein Datenträger"-Dialogbox
+_DRIVE_FIXED = 3
+_DRIVE_REMOTE = 4
+
+
 def _get_volume_label(drive_letter: str) -> str:
-    """Read volume label via Win32 API (no subprocess)."""
+    """Read volume label via Win32 API (no subprocess).
+
+    Robust gegen nicht bereite Wechsel-/CD-Laufwerke: der Fehlermodus wird
+    für die Dauer der Abfrage auf SEM_FAILCRITICALERRORS gesetzt (verhindert
+    die blockierende "Kein Datenträger"-Dialogbox) und danach wiederhergestellt.
+    Nur DRIVE_FIXED und DRIVE_REMOTE werden abgefragt — Cloud-Laufwerke
+    (Google Drive, pCloud) mounten als FIXED oder REMOTE, während echte
+    Wechseldatenträger/CD-ROMs übersprungen werden."""
     if sys.platform != "win32":
         return ""
-    buf = ctypes.create_unicode_buffer(261)
     try:
-        ok = ctypes.windll.kernel32.GetVolumeInformationW(
-            f"{drive_letter}:\\", buf, 261,
-            None, None, None, None, 0,
-        )
-        return buf.value if ok else ""
+        k = ctypes.windll.kernel32
+        root = f"{drive_letter}:\\"
+        old_mode = ctypes.c_uint(0)
+        k.SetThreadErrorMode(_SEM_FAILCRITICALERRORS, ctypes.byref(old_mode))
+        try:
+            if k.GetDriveTypeW(root) not in (_DRIVE_FIXED, _DRIVE_REMOTE):
+                return ""
+            buf = ctypes.create_unicode_buffer(261)
+            ok = k.GetVolumeInformationW(root, buf, 261, None, None, None, None, 0)
+            return buf.value if ok else ""
+        finally:
+            k.SetThreadErrorMode(old_mode.value, None)
     except (OSError, ValueError):
         return ""
 
@@ -174,19 +198,21 @@ class OneDriveProvider(SyncProvider):
         return _check_process("OneDrive.exe")
 
     def pause(self) -> bool:
-        return _kill_process("OneDrive.exe")
+        with self._lock:
+            return _kill_process("OneDrive.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
             return False
-        for exe in self._exe_candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe), "/background"])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in self._exe_candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe), "/background"])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── Google Drive ───────────────────────────────────────────────────
@@ -213,7 +239,8 @@ class GoogleDriveProvider(SyncProvider):
         return _check_process("GoogleDriveFS.exe")
 
     def pause(self) -> bool:
-        return _kill_process("GoogleDriveFS.exe")
+        with self._lock:
+            return _kill_process("GoogleDriveFS.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -221,15 +248,16 @@ class GoogleDriveProvider(SyncProvider):
         base = self._RESUME_BASE
         if not base.exists():
             return False
-        versions = sorted(base.glob("*/GoogleDriveFS.exe"),
-                          key=_gdrive_version_key, reverse=True)
-        for exe in versions:
-            try:
-                subprocess.Popen([str(exe)])
-                return True
-            except OSError:
-                continue
-        return False
+        with self._lock:
+            versions = sorted(base.glob("*/GoogleDriveFS.exe"),
+                              key=_gdrive_version_key, reverse=True)
+            for exe in versions:
+                try:
+                    subprocess.Popen([str(exe)])
+                    return True
+                except OSError:
+                    continue
+            return False
 
 
 # ── Dropbox ────────────────────────────────────────────────────────
@@ -263,7 +291,8 @@ class DropboxProvider(SyncProvider):
         return _check_process("Dropbox.exe")
 
     def pause(self) -> bool:
-        return _kill_process("Dropbox.exe")
+        with self._lock:
+            return _kill_process("Dropbox.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -274,14 +303,15 @@ class DropboxProvider(SyncProvider):
             Path(r"C:\Program Files\Dropbox\Client\Dropbox.exe"),
             Path(r"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe"),
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── Box ────────────────────────────────────────────────────────────
@@ -306,7 +336,8 @@ class BoxProvider(SyncProvider):
         return _check_process("Box.exe")
 
     def pause(self) -> bool:
-        return _kill_process("Box.exe")
+        with self._lock:
+            return _kill_process("Box.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -315,14 +346,15 @@ class BoxProvider(SyncProvider):
             Path(r"C:\Program Files\Box\Box\Box.exe"),
             Path(r"C:\Program Files (x86)\Box\Box\Box.exe"),
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── Nextcloud ───────────────────────────────────────────────────────
@@ -357,7 +389,8 @@ class NextcloudProvider(SyncProvider):
         return _check_process("nextcloud.exe")
 
     def pause(self) -> bool:
-        return _kill_process("nextcloud.exe")
+        with self._lock:
+            return _kill_process("nextcloud.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -367,14 +400,15 @@ class NextcloudProvider(SyncProvider):
             Path(r"C:\Program Files (x86)\Nextcloud\nextcloud.exe"),
             Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Nextcloud" / "nextcloud.exe",
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── pCloud ─────────────────────────────────────────────────────────
@@ -407,7 +441,8 @@ class PCloudProvider(SyncProvider):
         return _check_process("pCloud.exe")
 
     def pause(self) -> bool:
-        return _kill_process("pCloud.exe")
+        with self._lock:
+            return _kill_process("pCloud.exe")
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -417,14 +452,15 @@ class PCloudProvider(SyncProvider):
             Path(r"C:\Program Files\pCloud\pCloud.exe"),
             Path(r"C:\Program Files (x86)\pCloud\pCloud.exe"),
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── Synology Drive ─────────────────────────────────────────────────
@@ -454,9 +490,10 @@ class SynologyDriveProvider(SyncProvider):
                 or _check_process("SynologyDrive.exe"))
 
     def pause(self) -> bool:
-        ok1 = _kill_process("cloud-drive-ui.exe")
-        ok2 = _kill_process("SynologyDrive.exe")
-        return ok1 or ok2
+        with self._lock:
+            ok1 = _kill_process("cloud-drive-ui.exe")
+            ok2 = _kill_process("SynologyDrive.exe")
+            return ok1 or ok2
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -466,14 +503,15 @@ class SynologyDriveProvider(SyncProvider):
             Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
             Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── iCloud ─────────────────────────────────────────────────────────
@@ -496,9 +534,10 @@ class ICloudProvider(SyncProvider):
                 or _check_process("iCloud.exe"))
 
     def pause(self) -> bool:
-        ok1 = _kill_process("iCloudDrive.exe")
-        ok2 = _kill_process("iCloud.exe")
-        return ok1 or ok2
+        with self._lock:
+            ok1 = _kill_process("iCloudDrive.exe")
+            ok2 = _kill_process("iCloud.exe")
+            return ok1 or ok2
 
     def resume(self) -> bool:
         if sys.platform != "win32":
@@ -508,14 +547,15 @@ class ICloudProvider(SyncProvider):
             Path(r"C:\Program Files (x86)\iCloud\iCloudDrive.exe"),
             Path(r"C:\Program Files\Common Files\Apple\Internet Services\iCloudDrive.exe"),
         ]
-        for exe in candidates:
-            if exe.exists():
-                try:
-                    subprocess.Popen([str(exe)])
-                    return True
-                except OSError:
-                    continue
-        return False
+        with self._lock:
+            for exe in candidates:
+                if exe.exists():
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+            return False
 
 
 # ── Lazy Auto-Discovery ───────────────────────────────────────────

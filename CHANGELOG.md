@@ -30,6 +30,25 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
 
 ### Behoben / Fixed
+- **Review-Fixes (2026-07-12):**
+  - **Virtual-Mount-Guard im Präventiv-Wächter:** `PreventiveWatcher.tick()`
+    pausiert virtuelle Provider (Google Drive, pCloud) nie mehr; `tray.py`
+    registriert für sie gar keinen Wächter — sonst risse der Prozess-Kill den
+    Laufwerks-Mount ab.
+  - **Robuster Laufwerks-Scan:** `_get_volume_label()` umschließt die Abfrage mit
+    `SetThreadErrorMode(SEM_FAILCRITICALERRORS)` (verhindert die blockierende
+    „Kein Datenträger"-Dialogbox) und fragt via `GetDriveTypeW` nur `DRIVE_FIXED`
+    und `DRIVE_REMOTE` ab — Wechseldatenträger/CD-ROMs werden übersprungen.
+  - **Retry-Cap statt Endlos-Retry:** dauerhaft scheiternde Tasks werden nach
+    `DEFAULT_MAX_RETRIES` (5) auf `status="failed"` gesetzt (mit aussagekräftiger
+    Fehlermeldung, i18n de/en) und nicht mehr aufgegriffen.
+  - **Watcher/Worker-Race behoben:** jede Provider-Instanz hat einen eigenen
+    `threading.RLock`, der `pause()`/`resume()` zwischen Wächter- und
+    Worker-Thread serialisiert (kein globales Lock; Parallelität verschiedener
+    Provider bleibt erhalten).
+  - README/README.de: Provider-Liste um pCloud + Synology Drive ergänzt,
+    Testzahl auf 144 aktualisiert. 12 neue Regressionstests in
+    `tests/test_review_fixes_2026_07_12.py`.
 - **Tray task dialog now supports files as well as folders:** the GUI no longer
   forces source selection through a folder-only picker, so delayed rename/move/delete
   actions cover the same file/folder scope that the product documentation promises.

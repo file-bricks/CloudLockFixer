@@ -10,9 +10,11 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .i18n import t as tr  # 't' ist unten die Task-Schleifenvariable
 from .models import Queue, Task
 from .ops import execute_chain
 from .providers import SyncProvider, provider_for
+from .settings import DEFAULT_MAX_RETRIES
 
 log = logging.getLogger("clf")
 
@@ -43,12 +45,17 @@ def _providers_to_pause(tasks: list[Task], force_pause: bool) -> set[SyncProvide
     return provs
 
 
-def run_once(queue: Queue, force_pause: bool = False) -> dict:
-    """Versucht alle offenen Tasks einmal. Gibt eine Ergebnis-Zusammenfassung."""
+def run_once(queue: Queue, force_pause: bool = False,
+             max_retries: int = DEFAULT_MAX_RETRIES) -> dict:
+    """Versucht alle offenen Tasks einmal. Gibt eine Ergebnis-Zusammenfassung.
+
+    Tasks, die dauerhaft scheitern (z.B. weil die Quelle endgültig fehlt),
+    werden nach `max_retries` Versuchen auf status="failed" gesetzt und nicht
+    mehr aufgegriffen — verhindert Endlos-Retry."""
     queue.load()
     pending = queue.pending
     summary = {"pending_start": len(pending), "done": 0, "failed_again": 0,
-               "paused_providers": []}
+               "failed_permanent": 0, "paused_providers": []}
     if not pending:
         return summary
 
@@ -69,6 +76,14 @@ def run_once(queue: Queue, force_pause: bool = False) -> dict:
             if execute_chain(t):
                 summary["done"] += 1
                 log.info("Task %s completed.", t.id)
+            elif t.retry_count >= max_retries:
+                t.status = "failed"
+                t.last_error = tr("task_failed_max_retries",
+                                  n=t.retry_count,
+                                  err=t.last_error or tr("task_failed_unknown_error"))
+                summary["failed_permanent"] += 1
+                log.error("Task %s failed permanently after %d attempts: %s",
+                          t.id, t.retry_count, t.last_error)
             else:
                 t.status = "pending"  # bleibt für nächsten Lauf
                 summary["failed_again"] += 1
