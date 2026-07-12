@@ -427,6 +427,55 @@ class PCloudProvider(SyncProvider):
         return False
 
 
+# ── Synology Drive ─────────────────────────────────────────────────
+
+
+class SynologyDriveProvider(SyncProvider):
+    """Synology Drive Client for Windows.
+
+    Offizieller Default-Root laut Synology-Mass-Deployment-Doku ist
+    ``%USERPROFILE%\\SynologyDrive``. Resume startet die lokal installierte
+    GUI-Binärdatei, die Synology unter ``%LOCALAPPDATA%\\SynologyDrive\\
+    SynologyDrive.app\\bin\\cloud-drive-ui.exe`` ablegt.
+    """
+
+    name = "Synology Drive"
+    mount_type = "folder"
+
+    def _detect_roots(self) -> list[Path]:
+        roots: list[Path] = []
+        default_root = Path.home() / "SynologyDrive"
+        if default_root.exists():
+            roots.append(default_root)
+        return _dedup_paths(roots)
+
+    def is_running(self) -> bool:
+        return (_check_process("cloud-drive-ui.exe")
+                or _check_process("SynologyDrive.exe"))
+
+    def pause(self) -> bool:
+        ok1 = _kill_process("cloud-drive-ui.exe")
+        ok2 = _kill_process("SynologyDrive.exe")
+        return ok1 or ok2
+
+    def resume(self) -> bool:
+        if sys.platform != "win32":
+            return False
+        candidates = [
+            Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
+            Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
+            Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
+        ]
+        for exe in candidates:
+            if exe.exists():
+                try:
+                    subprocess.Popen([str(exe)])
+                    return True
+                except OSError:
+                    continue
+        return False
+
+
 # ── iCloud ─────────────────────────────────────────────────────────
 
 
@@ -475,7 +524,7 @@ class ICloudProvider(SyncProvider):
 def _discover_providers() -> list[SyncProvider]:
     candidates = [OneDriveProvider(), GoogleDriveProvider(),
                   DropboxProvider(), BoxProvider(), NextcloudProvider(),
-                  PCloudProvider(), ICloudProvider()]
+                  PCloudProvider(), SynologyDriveProvider(), ICloudProvider()]
     active: list[SyncProvider] = []
     for prov in candidates:
         try:

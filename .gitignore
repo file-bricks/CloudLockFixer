@@ -75,3 +75,7 @@ ehthumbs.db
 queue.json
 queue.txt
 clf.log
+
+# Bugsweep-/Session-Backups
+*.bak
+_backups/

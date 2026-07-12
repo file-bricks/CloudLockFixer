@@ -64,7 +64,9 @@ sync client.
 ### Tray app
 Starts with Windows when autostart is enabled. Tray menu: *Add task…*,
 *Run now* (also *with OneDrive pause*), *Interval* (30-min steps, default 2 h),
-*Start with Windows*, *Open queue/log*.
+*Start with Windows*, *Open queue/log*. The add-task dialog now lets you choose
+whether the source is a file or a folder, so the GUI matches the documented
+file/folder workflow.
 
 ### CLI (for LLMs/scripts)
 ```

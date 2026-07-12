@@ -155,3 +155,9 @@ CI/CD: GitHub Actions Matrix-Build (windows-latest, ubuntu-latest, macos-latest)
 `tests/source_platform_smoke.py` + `.github/workflows/source-platform-smoke.yml` prüfen auf
 `ubuntu-latest` und `macos-latest` headless: Import, Version, ops, Queue, paths, worker.
 Kein Cloud-Client, kein GUI, kein pip-Extra (nur pytest). Stand: 2026-06-10.
+
+Revalidiert 2026-07-06: lokaler Source-Smoke plus angrenzende Kern-/Provider-Tests
+liefen mit `PYTHONPATH=src` grün (`76 passed`). Damit sind Linux-/macOS-Source-
+Support-TODOs abgeschlossen. Nicht abgeschlossen sind native Linux-/macOS-Pakete,
+echte Zielplattform-Integrationstests und plattformspezifische Autostart-/
+Kontextmenü-Installer.

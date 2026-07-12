@@ -410,3 +410,33 @@ def test_refresh_status_calls_load_when_not_running(tmp_path):
     assert len(load_calls) == 1, (
         "_refresh_status() muss queue.load() aufrufen wenn _running=False"
     )
+
+
+def test_add_task_dialog_accepts_file_source_for_delete(tmp_path, monkeypatch):
+    """UX-Regression: Der Tray-Dialog darf Datei-Operationen nicht auf Ordner
+    beschränken, weil das Produkt explizit Datei-/Ordner-Aktionen bewirbt."""
+    from unittest.mock import MagicMock
+
+    from cloudlockfixer.models import Queue
+    from cloudlockfixer.tray import TrayApp
+    import cloudlockfixer.tray as tray_mod
+
+    src = tmp_path / "example.txt"
+    src.write_text("payload", encoding="utf-8")
+
+    tray = TrayApp.__new__(TrayApp)
+    tray.queue = Queue(tmp_path / "queue-data")
+    tray.tray = MagicMock()
+    tray._refresh_status = lambda: None
+    tray._choose_action = lambda: "Löschen"
+    tray._choose_source_path = lambda: str(src)
+    tray._confirm_delete = lambda chosen_src: chosen_src == str(src)
+    monkeypatch.setattr(tray_mod, "_make_icon", lambda *args, **kwargs: None)
+
+    tray.add_task_dialog()
+
+    assert len(tray.queue.tasks) == 1
+    step = tray.queue.tasks[0].chain[0]
+    assert step.op == "delete"
+    assert step.src == str(src)
+    tray.tray.showMessage.assert_called_once()

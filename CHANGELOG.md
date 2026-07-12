@@ -6,6 +6,17 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **Cross-platform source support revalidated:** Linux/macOS source support is
+  now treated as done at source-smoke level, backed by
+  `tests/source_platform_smoke.py`, the existing GitHub Actions matrix for
+  `ubuntu-latest` and `macos-latest`, and a fresh local 76-test verification.
+  Native packages and real target-platform integration remain release scope.
+- **Synology Drive provider (Windows):** root auto-discovery via the official
+  default sync folder `~/SynologyDrive`, process detection via
+  `cloud-drive-ui.exe`, and resume support via the local
+  `%LOCALAPPDATA%\\SynologyDrive\\SynologyDrive.app\\bin\\cloud-drive-ui.exe`
+  installation path. Covered by focused provider discovery, routing and resume
+  tests.
 - **pCloud provider (Windows):** `PCloudProvider` erkennt pCloud Drive als virtuellen
   Laufwerks-Mount (`mount_type="virtual"`) per `GetVolumeInformationW`-Volume-Label-Scan
   (Label muss "pCloud" enthalten). Prozesssteuerung via `pCloud.exe`; Resume sucht in

@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from cloudlockfixer.providers import (
     BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider,
-    OneDriveProvider, PCloudProvider,
+    OneDriveProvider, PCloudProvider, SynologyDriveProvider,
     SyncProvider, _discover_providers, _get_providers, _is_subpath,
     available_providers, provider_for,
 )
@@ -76,6 +76,10 @@ def test_pcloud_is_virtual_type():
     assert PCloudProvider().mount_type == "virtual"
 
 
+def test_synology_drive_is_folder_type():
+    assert SynologyDriveProvider().mount_type == "folder"
+
+
 # ── Discovery ──────────────────────────────────────────────────────
 
 def test_discover_includes_provider_with_roots(monkeypatch, tmp_path):
@@ -141,6 +145,15 @@ def test_nextcloud_detects_roots_from_cfg(monkeypatch, tmp_path):
     assert synced_root in roots
 
 
+def test_synology_drive_detects_default_root(monkeypatch, tmp_path):
+    synced_root = tmp_path / "SynologyDrive"
+    synced_root.mkdir()
+    monkeypatch.setattr("cloudlockfixer.providers.Path.home", lambda: tmp_path)
+    prov = SynologyDriveProvider()
+    roots = prov._detect_roots()
+    assert synced_root in roots
+
+
 # ── is_running (mocked) ───────────────────────────────────────────
 
 class _FakeCompleted:
@@ -176,6 +189,12 @@ def test_nextcloud_is_running(monkeypatch):
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("nextcloud.exe  6789\n"))
     assert NextcloudProvider().is_running() is True
+
+
+def test_synology_drive_is_running(monkeypatch):
+    monkeypatch.setattr(subprocess, "run",
+                        lambda *a, **k: _FakeCompleted("cloud-drive-ui.exe  4321\n"))
+    assert SynologyDriveProvider().is_running() is True
 
 
 def test_icloud_is_running_either_process(monkeypatch):
@@ -223,10 +242,13 @@ def test_provider_for_returns_correct_provider(monkeypatch, tmp_path):
     bx_root.mkdir()
     nc_root = tmp_path / "Nextcloud"
     nc_root.mkdir()
+    sd_root = tmp_path / "SynologyDrive"
+    sd_root.mkdir()
     monkeypatch.setattr(OneDriveProvider, "_roots", lambda self: [od_root])
     monkeypatch.setattr(DropboxProvider, "_roots", lambda self: [db_root])
     monkeypatch.setattr(BoxProvider, "_roots", lambda self: [bx_root])
     monkeypatch.setattr(NextcloudProvider, "_roots", lambda self: [nc_root])
+    monkeypatch.setattr(SynologyDriveProvider, "_roots", lambda self: [sd_root])
     monkeypatch.setattr(GoogleDriveProvider, "_roots", lambda self: [])
     monkeypatch.setattr(ICloudProvider, "_roots", lambda self: [])
 
@@ -242,8 +264,10 @@ def test_provider_for_returns_correct_provider(monkeypatch, tmp_path):
         assert p3 is not None and p3.name == "Box"
         p4 = provider_for(nc_root / "photo.jpg")
         assert p4 is not None and p4.name == "Nextcloud"
-        p5 = provider_for(tmp_path / "unrelated")
-        assert p5 is None
+        p5 = provider_for(sd_root / "notes.txt")
+        assert p5 is not None and p5.name == "Synology Drive"
+        p6 = provider_for(tmp_path / "unrelated")
+        assert p6 is None
     finally:
         pmod._PROVIDERS = old  # restore cache
 
@@ -471,5 +495,70 @@ def test_provider_for_resolves_pcloud_root(monkeypatch, tmp_path):
     try:
         p = provider_for(pc_root / "document.pdf")
         assert p is not None and p.name == "pCloud"
+    finally:
+        pmod._PROVIDERS = old
+
+
+# ── Synology Drive Provider ────────────────────────────────────────
+
+def test_synology_drive_resume_tries_known_paths(monkeypatch, tmp_path):
+    """resume() muss die lokal installierte Synology-GUI starten."""
+    import subprocess as sp
+    import sys
+
+    started: list[str] = []
+
+    def fake_popen(cmd):
+        started.append(cmd[0])
+
+    monkeypatch.setattr(sp, "Popen", fake_popen)
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+
+    synology_dir = tmp_path / "SynologyDrive" / "SynologyDrive.app" / "bin"
+    synology_dir.mkdir(parents=True)
+    synology_exe = synology_dir / "cloud-drive-ui.exe"
+    synology_exe.write_text("x", encoding="utf-8")
+
+    result = SynologyDriveProvider().resume()
+    assert result is True
+    assert len(started) == 1
+    assert Path(started[0]).name == "cloud-drive-ui.exe"
+
+
+def test_synology_drive_included_in_discover_when_root_found(monkeypatch, tmp_path):
+    monkeypatch.setattr(SynologyDriveProvider, "_roots", lambda self: [tmp_path / "SynologyDrive"])
+    providers = _discover_providers()
+    names = [p.name for p in providers]
+    assert "Synology Drive" in names
+
+
+def test_synology_drive_excluded_from_discover_without_roots(monkeypatch):
+    monkeypatch.setattr(SynologyDriveProvider, "_roots", lambda self: [])
+    providers = _discover_providers()
+    names = [p.name for p in providers]
+    assert "Synology Drive" not in names
+
+
+def test_provider_for_resolves_synology_drive_root(monkeypatch, tmp_path):
+    import cloudlockfixer.providers as pmod
+
+    sd_root = tmp_path / "SynologyDrive"
+    sd_root.mkdir()
+
+    monkeypatch.setattr(OneDriveProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(GoogleDriveProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(DropboxProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(BoxProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(NextcloudProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(PCloudProvider, "_roots", lambda self: [])
+    monkeypatch.setattr(SynologyDriveProvider, "_roots", lambda self: [sd_root])
+    monkeypatch.setattr(ICloudProvider, "_roots", lambda self: [])
+
+    old = pmod._PROVIDERS
+    pmod._PROVIDERS = _discover_providers()
+    try:
+        p = provider_for(sd_root / "document.pdf")
+        assert p is not None and p.name == "Synology Drive"
     finally:
         pmod._PROVIDERS = old

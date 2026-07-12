@@ -87,9 +87,25 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "de": "Löschen",
         "en": "Delete",
     },
+    "source_kind_choose": {
+        "de": "Quelle auswählen:",
+        "en": "Choose source type:",
+    },
+    "source_kind_folder": {
+        "de": "Ordner",
+        "en": "Folder",
+    },
+    "source_kind_file": {
+        "de": "Datei",
+        "en": "File",
+    },
     "choose_folder": {
         "de": "Ordner wählen",
         "en": "Choose folder",
+    },
+    "choose_file": {
+        "de": "Datei wählen",
+        "en": "Choose file",
     },
     "rename_prompt": {
         "de": "Neuer Name:",

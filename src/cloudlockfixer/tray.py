@@ -177,33 +177,64 @@ class TrayApp:
             self.menu.popup(self.tray.geometry().center())
 
     # ── Aktionen ────────────────────────────────────────────────────
-    def add_task_dialog(self) -> None:
+    def _choose_action(self) -> str | None:
         action, ok = QInputDialog.getItem(
             None, "CloudLockFixer", t("action_choose"),
             [t("action_rename"), t("action_move"), t("action_delete")], 0, False)
+        return action if ok else None
+
+    def _choose_new_name(self) -> str | None:
+        new_name, ok = QInputDialog.getText(
+            None, t("action_rename"), t("rename_prompt"))
         if not ok:
+            return None
+        new_name = new_name.strip()
+        return new_name or None
+
+    def _choose_existing_folder(self, title_key: str) -> str | None:
+        path = QFileDialog.getExistingDirectory(None, t(title_key))
+        return path or None
+
+    def _choose_existing_file(self) -> str | None:
+        path, _ = QFileDialog.getOpenFileName(None, t("choose_file"))
+        return path or None
+
+    def _confirm_delete(self, src: str) -> bool:
+        return QMessageBox.question(
+            None, t("confirm_delete_title"), t("confirm_delete", src=src)
+        ) == QMessageBox.StandardButton.Yes
+
+    def _choose_source_path(self) -> str | None:
+        source_kind, ok = QInputDialog.getItem(
+            None, "CloudLockFixer", t("source_kind_choose"),
+            [t("source_kind_folder"), t("source_kind_file")], 0, False)
+        if not ok:
+            return None
+        if source_kind == t("source_kind_file"):
+            return self._choose_existing_file()
+        return self._choose_existing_folder("choose_folder")
+
+    def add_task_dialog(self) -> None:
+        action = self._choose_action()
+        if not action:
             return
-        src = QFileDialog.getExistingDirectory(None, t("choose_folder"))
+        src = self._choose_source_path()
         if not src:
             return
         if action == t("action_rename"):
-            new, ok = QInputDialog.getText(None, t("action_rename"),
-                                           t("rename_prompt"))
-            if not ok or not new.strip():
+            new = self._choose_new_name()
+            if not new:
                 return
-            task = Task(chain=[Step(op="rename", src=src, arg=new.strip())])
+            task = Task(chain=[Step(op="rename", src=src, arg=new)])
         elif action == t("action_move"):
-            dst_parent = QFileDialog.getExistingDirectory(None, t("choose_target"))
+            dst_parent = self._choose_existing_folder("choose_target")
             if not dst_parent:
                 return
             name = os.path.basename(src.rstrip("/\\"))
             task = Task(chain=[Step(op="move", src=src,
                                     arg=os.path.join(dst_parent, name))])
         else:
-            if QMessageBox.question(
-                    None, t("confirm_delete_title"),
-                    t("confirm_delete", src=src)
-            ) != QMessageBox.StandardButton.Yes:
+            if not self._confirm_delete(src):
                 return
             task = Task(chain=[Step(op="delete", src=src)])
         self.queue.add(task)

@@ -63,7 +63,9 @@ des Sync-Clients.
 ### Tray-App
 Startet mit Windows, wenn Autostart aktiviert ist. Tray-Menü: *Task hinzufügen…*,
 *Jetzt ausführen* (auch *mit OneDrive-Pause*), *Intervall* (30-min-Schritte,
-Default 2 h), *Mit Windows starten*, *Queue/Log öffnen*.
+Default 2 h), *Mit Windows starten*, *Queue/Log öffnen*. Der Task-Dialog lässt
+jetzt ausdrücklich Datei oder Ordner als Quelle wählen, damit die GUI zum
+dokumentierten Datei-/Ordner-Workflow passt.
 
 ### CLI (für LLM/Skripte)
 ```

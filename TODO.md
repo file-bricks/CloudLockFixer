@@ -53,10 +53,16 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 ## Nächste Schritte (aus ROADMAP.md)
 
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
-- [ ] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md)
-- [ ] Cross-Platform: macOS-Support (siehe PORTIERUNGSPLAN.md)
-- [~] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive
+- [x] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md) -- DONE 2026-07-06
+      Lokaler Source-Support ist über `tests/source_platform_smoke.py` und die
+      GitHub-Actions-Matrix `ubuntu-latest` abgesichert; native Linux-Pakete
+      bleiben späterer Release-Scope.
+- [x] Cross-Platform: macOS-Support (siehe PORTIERUNGSPLAN.md) -- DONE 2026-07-06
+      Lokaler Source-Support ist über `tests/source_platform_smoke.py` und die
+      GitHub-Actions-Matrix `macos-latest` abgesichert; `.app`-/DMG-Paketierung
+      bleibt späterer Release-Scope.
+- [x] Weitere Provider: Box, Nextcloud, pCloud, Synology Drive
       Box erledigt 2026-06-17 (`~/Box` plus `CustomBoxLocation`-Registry-Pfad, `Box.exe`-Prozesssteuerung).
       Nextcloud erledigt 2026-06-16 (`nextcloud.cfg`-Root-Erkennung + Prozesssteuerung).
       pCloud erledigt 2026-06-28 (Volume-Label-Scan via `GetVolumeInformationW`, `virtual` mount, `pCloud.exe`-Prozesssteuerung, 9 Tests).
-      Offen bleibt Synology Drive.
+      Synology Drive erledigt 2026-06-30 (`~/SynologyDrive`-Default-Root, `cloud-drive-ui.exe`-Prozessprüfung/-Resume, 6 Tests).
