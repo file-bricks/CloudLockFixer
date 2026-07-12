@@ -44,12 +44,18 @@ def test_unknown_key_returns_key():
 
 def test_format_parameters():
     set_language("de")
-    result = t("status_open", n=5, failed=2)
-    assert "5" in result and "2" in result
+    result = t("status_open", n=5, retrying=2, failed=1)
+    assert "5" in result and "2" in result and "1" in result
 
     set_language("en")
-    result = t("status_open", n=3, failed=1)
-    assert "3" in result and "1" in result
+    result = t("status_open", n=3, retrying=1, failed=4)
+    assert "3" in result and "1" in result and "4" in result
+
+
+def test_run_summary_formats_permanent_failures():
+    set_language("en")
+    result = t("run_summary", done=0, failed=1, permanent=2, start=3, paused="")
+    assert "2 permanently failed" in result
 
 
 def test_format_missing_param_returns_template():

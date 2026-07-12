@@ -188,17 +188,20 @@ class Queue:
         with self._lock:
             return [t for t in self.tasks if t.status in ("pending", "running")]
 
-    def status_counts(self) -> tuple[int, int]:
-        """(n_pending, n_failed_with_retries) — Thread-sicher unter Lock."""
+    def status_counts(self) -> tuple[int, int, int]:
+        """(pending, retrying, failed) — Thread-sicher unter Lock."""
         with self._lock:
             n_pending = sum(
                 1 for t in self.tasks if t.status in ("pending", "running")
             )
-            n_failed = sum(
+            n_retrying = sum(
                 1 for t in self.tasks
-                if t.status == "pending" and t.retry_count > 0
+                if t.status in ("pending", "running") and t.retry_count > 0
             )
-            return n_pending, n_failed
+            n_failed = sum(
+                1 for t in self.tasks if t.status == "failed"
+            )
+            return n_pending, n_retrying, n_failed
 
     def save(self) -> None:
         with self._lock:

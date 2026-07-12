@@ -30,6 +30,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
 
 ### Behoben / Fixed
+- **Failed-Tasks sind im Status sichtbar:** Tasks, die nach dem Retry-Cap auf
+  `status="failed"` stehen, werden jetzt von `models.status_counts()` separat
+  gezählt und bleiben dadurch im Tray-Status sowie in der CLI-Run-Zusammenfassung
+  sichtbar, statt bei leerer Pending-Queue als "keine offenen Aufgaben" zu
+  verschwinden. 3 neue Regressionstests decken Counter, Tray-Status und
+  i18n-Formatierung ab.
 - **Review-Fixes (2026-07-12):**
   - **Virtual-Mount-Guard im Präventiv-Wächter:** `PreventiveWatcher.tick()`
     pausiert virtuelle Provider (Google Drive, pCloud) nie mehr; `tray.py`

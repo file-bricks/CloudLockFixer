@@ -18,8 +18,8 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "en": "no pending tasks",
     },
     "status_open": {
-        "de": "{n} offen ({failed} mit Fehlversuch)",
-        "en": "{n} pending ({failed} with retries)",
+        "de": "{n} offen ({retrying} mit Fehlversuch, {failed} fehlgeschlagen)",
+        "en": "{n} pending ({retrying} with retries, {failed} failed)",
     },
     "status_running": {
         "de": "läuft…",
@@ -200,8 +200,8 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "en": "Empty/invalid chain.",
     },
     "run_summary": {
-        "de": "Lauf fertig: {done} erledigt, {failed} weiterhin offen (Start: {start} offen).{paused}",
-        "en": "Run complete: {done} done, {failed} still pending (start: {start} pending).{paused}",
+        "de": "Lauf fertig: {done} erledigt, {failed} weiterhin offen, {permanent} endgültig fehlgeschlagen (Start: {start} offen).{paused}",
+        "en": "Run complete: {done} done, {failed} still pending, {permanent} permanently failed (start: {start} pending).{paused}",
     },
     "paused_providers": {
         "de": " Pausiert: {names}",

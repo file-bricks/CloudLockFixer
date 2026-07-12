@@ -14,6 +14,9 @@
       label; providers.py:208/402) — umbenannte Volumes werden fehlklassifiziert.
       Exakteres Matching NUR mit realen Labels beider Clients verifizieren
       (pCloud-Label könnte "pCloud Drive" sein — exakter Vergleich bräche das).
+- [x] P3: failed-Tasks (neu seit Retry-Cap 2026-07-12) tauchen im Tray-Status
+      nirgends auf (models.status_counts zählt sie nicht) — UI-Sichtbarkeit
+      ergänzen (Zähler oder Menüpunkt "Fehlgeschlagene anzeigen/aufräumen"). -- DONE 2026-07-12 (Statuszähler für permanent fehlgeschlagene Tasks in Tray/CLI ergänzt)
 
 ## i18n (Internationalisierung) — erledigt v1.1.0
 

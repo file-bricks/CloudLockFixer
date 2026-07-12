@@ -101,6 +101,7 @@ def main(argv: list[str] | None = None) -> int:
                        names=", ".join(summary["paused_providers"]))
         print(t("run_summary", done=summary["done"],
                 failed=summary["failed_again"],
+                permanent=summary["failed_permanent"],
                 start=summary["pending_start"], paused=paused))
         return 0
 

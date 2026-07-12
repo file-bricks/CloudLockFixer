@@ -302,25 +302,38 @@ def test_queue_status_counts_thread_safe(tmp_path):
     status_counts() um Race Condition zwischen UI- und Worker-Thread zu vermeiden."""
     q = Queue(tmp_path)
     # Leere Queue
-    n_pending, n_failed = q.status_counts()
-    assert n_pending == 0 and n_failed == 0
+    n_pending, n_retrying, n_failed = q.status_counts()
+    assert n_pending == 0 and n_retrying == 0 and n_failed == 0
 
     # Einen Task hinzufügen
     src = _mkdir_with_file(tmp_path / "src1")
     t1 = Task(chain=[Step(op="rename", src=str(src), arg="dst1")])
     q.add(t1)
-    n_pending, n_failed = q.status_counts()
-    assert n_pending == 1 and n_failed == 0
+    n_pending, n_retrying, n_failed = q.status_counts()
+    assert n_pending == 1 and n_retrying == 0 and n_failed == 0
 
-    # retry_count > 0 -> zählt als "failed_with_retries"
+    # retry_count > 0 -> zählt als "retrying"
     q.tasks[0].retry_count = 1
-    n_pending, n_failed = q.status_counts()
-    assert n_pending == 1 and n_failed == 1
+    n_pending, n_retrying, n_failed = q.status_counts()
+    assert n_pending == 1 and n_retrying == 1 and n_failed == 0
 
     # Status "done" -> nicht mehr pending
     q.tasks[0].status = "done"
-    n_pending, n_failed = q.status_counts()
-    assert n_pending == 0 and n_failed == 0
+    n_pending, n_retrying, n_failed = q.status_counts()
+    assert n_pending == 0 and n_retrying == 0 and n_failed == 0
+
+
+def test_queue_status_counts_includes_permanent_failed_tasks(tmp_path):
+    """Failed-Tasks muessen im Tray-Status sichtbar bleiben, auch wenn sie nicht
+    mehr pending sind und der Worker sie nicht erneut aufgreift."""
+    q = Queue(tmp_path)
+    q.add(Task(chain=[Step(op="delete", src="x")], status="failed"))
+
+    n_pending, n_retrying, n_failed = q.status_counts()
+
+    assert n_pending == 0
+    assert n_retrying == 0
+    assert n_failed == 1
 
 
 def test_queue_pending_property_thread_safe(tmp_path):
@@ -410,6 +423,30 @@ def test_refresh_status_calls_load_when_not_running(tmp_path):
     assert len(load_calls) == 1, (
         "_refresh_status() muss queue.load() aufrufen wenn _running=False"
     )
+
+
+def test_refresh_status_shows_failed_tasks_when_no_pending(tmp_path):
+    """Der Tray darf eine reine Failed-Queue nicht als 'keine offenen Aufgaben'
+    anzeigen, weil der Nutzer sonst den permanenten Fehler uebersieht."""
+    import os
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from unittest.mock import MagicMock
+
+    from cloudlockfixer.models import Queue
+    from cloudlockfixer.tray import TrayApp
+
+    tray = TrayApp.__new__(TrayApp)
+    tray.queue = Queue(tmp_path)
+    tray.queue.add(Task(chain=[Step(op="delete", src="x")], status="failed"))
+    tray._running = False
+    tray.status_action = MagicMock()
+    tray.tray = MagicMock()
+
+    tray._refresh_status()
+
+    text = tray.status_action.setText.call_args.args[0]
+    assert "fehlgeschlagen" in text or "failed" in text
+    assert "keine offenen Aufgaben" not in text
 
 
 def test_add_task_dialog_accepts_file_source_for_delete(tmp_path, monkeypatch):
