@@ -526,6 +526,61 @@ def test_synology_drive_resume_tries_known_paths(monkeypatch, tmp_path):
     assert Path(started[0]).name == "cloud-drive-ui.exe"
 
 
+def test_synology_drive_detects_custom_root_from_json_config(monkeypatch, tmp_path):
+    home_dir = tmp_path / "home"
+    home_dir.mkdir()
+    appdata = tmp_path / "appdata"
+    config_dir = appdata / "SynologyDrive" / "session"
+    config_dir.mkdir(parents=True)
+    custom_root = tmp_path / "CustomSyncRoot"
+    custom_root.mkdir()
+
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+    monkeypatch.setenv("APPDATA", str(appdata))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "localappdata"))
+
+    (config_dir / "sync_sessions.json").write_text(
+        """
+        {
+          "connections": [
+            {
+              "sync_sessions": [
+                {"local_path": "%s"},
+                {"local_path": "%s"}
+              ]
+            }
+          ]
+        }
+        """ % (str(custom_root).replace("\\", "\\\\"), str(custom_root).replace("\\", "\\\\")),
+        encoding="utf-8",
+    )
+
+    roots = SynologyDriveProvider()._roots()
+    assert roots == [custom_root]
+
+
+def test_synology_drive_detects_custom_root_from_conf_lines(monkeypatch, tmp_path):
+    home_dir = tmp_path / "home"
+    home_dir.mkdir()
+    localappdata = tmp_path / "localappdata"
+    config_dir = localappdata / "SynologyDrive" / "config"
+    config_dir.mkdir(parents=True)
+    custom_root = tmp_path / "AnotherSyncRoot"
+    custom_root.mkdir()
+
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+    monkeypatch.setenv("APPDATA", str(tmp_path / "appdata"))
+    monkeypatch.setenv("LOCALAPPDATA", str(localappdata))
+
+    (config_dir / "settings.conf").write_text(
+        f'local_path="{custom_root}"\nlocal_path="Z:\\\\missing"\n',
+        encoding="utf-8",
+    )
+
+    roots = SynologyDriveProvider()._roots()
+    assert roots == [custom_root]
+
+
 def test_synology_drive_included_in_discover_when_root_found(monkeypatch, tmp_path):
     monkeypatch.setattr(SynologyDriveProvider, "_roots", lambda self: [tmp_path / "SynologyDrive"])
     providers = _discover_providers()

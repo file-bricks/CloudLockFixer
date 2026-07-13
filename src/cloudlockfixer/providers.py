@@ -10,6 +10,7 @@ import ctypes
 import json
 import logging
 import os
+import re
 import string
 import subprocess
 import sys
@@ -170,6 +171,88 @@ def _read_box_custom_location() -> Path | None:
         return None
     base = Path(normalized)
     return base if base.name.lower() == "box" else base / "Box"
+
+
+def _extract_json_paths(node: object, key_names: set[str]) -> list[Path]:
+    """Collect path-like strings for the given keys from nested JSON data."""
+    paths: list[Path] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in key_names and isinstance(value, str):
+                normalized = value.strip().strip('"').replace("/", os.sep)
+                if normalized:
+                    paths.append(Path(normalized))
+            else:
+                paths.extend(_extract_json_paths(value, key_names))
+    elif isinstance(node, list):
+        for item in node:
+            paths.extend(_extract_json_paths(item, key_names))
+    return paths
+
+
+def _read_synology_custom_roots() -> list[Path]:
+    """Read custom Synology sync roots from local config files if present.
+
+    Synology's mass-deployment guide configures sync tasks via the field
+    ``local_path``. The desktop client may materialize equivalent task config in
+    its app-data directories; we scan small text config files there and accept
+    only existing local paths. This keeps the default ``~/SynologyDrive`` path
+    as fallback while allowing user-defined sync folders.
+    """
+    candidates: list[Path] = []
+    base_dirs = [
+        Path(os.environ.get("APPDATA", "")) / "SynologyDrive",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive",
+    ]
+    key_names = {"local_path", "localPath"}
+    line_re = re.compile(
+        r"""(?ix)
+        ["']?local(?:_|)path["']?
+        \s*[:=]\s*
+        ["'](?P<path>[a-z]:[\\/][^"']+)["']
+        """
+    )
+
+    for base in base_dirs:
+        if not base.exists():
+            continue
+
+        probe_dirs = [base]
+        for name in ("config", "session", "data"):
+            child = base / name
+            if child.exists():
+                probe_dirs.append(child)
+
+        seen_files: set[str] = set()
+        for folder in probe_dirs:
+            for pattern in ("*.json", "*.conf", "*.cfg"):
+                for cfg_path in folder.rglob(pattern):
+                    if not cfg_path.is_file():
+                        continue
+                    key = str(cfg_path).lower()
+                    if key in seen_files:
+                        continue
+                    seen_files.add(key)
+                    try:
+                        if cfg_path.stat().st_size > 1_000_000:
+                            continue
+                        raw = cfg_path.read_text(encoding="utf-8", errors="ignore")
+                    except OSError:
+                        continue
+
+                    try:
+                        parsed = json.loads(raw)
+                    except json.JSONDecodeError:
+                        parsed = None
+                    if parsed is not None:
+                        candidates.extend(_extract_json_paths(parsed, key_names))
+
+                    for match in line_re.finditer(raw):
+                        normalized = match.group("path").strip().replace("/", os.sep)
+                        if normalized:
+                            candidates.append(Path(normalized))
+
+    return _dedup_paths([p for p in candidates if p.exists()])
 
 
 # ── OneDrive ───────────────────────────────────────────────────────
@@ -483,6 +566,7 @@ class SynologyDriveProvider(SyncProvider):
         default_root = Path.home() / "SynologyDrive"
         if default_root.exists():
             roots.append(default_root)
+        roots.extend(_read_synology_custom_roots())
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:

@@ -6,10 +6,13 @@
       pause() killt cloud-drive-ui.exe UND SynologyDrive.exe, resume() startet
       nur cloud-drive-ui.exe. Am echten Synology-Prozessmodell verifizieren,
       ob der Daemon vom UI-Start mitgezogen wird — sonst bleibt Sync tot.
-- [ ] P2: Synology Custom-Sync-Ordner wird nicht erkannt (nur ~/SynologyDrive
-      hardcodiert; providers.py:445-450). Einziger Folder-Provider ohne
-      Custom-Root-Erkennung. Recherche: wo speichert der Synology-Drive-Client
-      den Sync-Pfad (Config/Registry)? Dann analog Dropbox/Nextcloud lesen.
+- [x] P2: Synology Custom-Sync-Ordner wird nicht erkannt (nur ~/SynologyDrive
+      hardcodiert; providers.py:445-450). DONE 2026-07-13:
+      `_read_synology_custom_roots()` scannt jetzt lokale Synology-AppData-
+      Konfigurationsdateien (`*.json`/`*.conf`/`*.cfg`) nach `local_path` /
+      `localPath`, akzeptiert nur existierende Pfade und ergänzt diese zur
+      Default-Erkennung. Regressionen: JSON- und Zeilenformat-Fälle in
+      `tests/test_providers_multi.py`.
 - [ ] P3: Volume-Label-Matching per Substring ("Google Drive"/"pCloud" in
       label; providers.py:208/402) — umbenannte Volumes werden fehlklassifiziert.
       Exakteres Matching NUR mit realen Labels beider Clients verifizieren

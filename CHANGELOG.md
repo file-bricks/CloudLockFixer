@@ -17,6 +17,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `%LOCALAPPDATA%\\SynologyDrive\\SynologyDrive.app\\bin\\cloud-drive-ui.exe`
   installation path. Covered by focused provider discovery, routing and resume
   tests.
+- **Synology custom sync roots (Windows):** `SynologyDriveProvider` now scans
+  local Synology app-data config files (`*.json` / `*.conf` / `*.cfg`) for
+  `local_path` / `localPath` entries and accepts existing custom sync folders
+  in addition to the default `~/SynologyDrive` root. Covered by focused JSON-
+  and line-format provider tests.
 - **pCloud provider (Windows):** `PCloudProvider` erkennt pCloud Drive als virtuellen
   Laufwerks-Mount (`mount_type="virtual"`) per `GetVolumeInformationW`-Volume-Label-Scan
   (Label muss "pCloud" enthalten). Prozesssteuerung via `pCloud.exe`; Resume sucht in
