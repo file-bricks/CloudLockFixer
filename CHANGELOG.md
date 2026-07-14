@@ -6,6 +6,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **Cross-platform data directory abstraction:** `paths.data_dir()` now uses
+  the Windows `%LOCALAPPDATA%\CloudLockFixer` location, macOS
+  `~/Library/Application Support/CloudLockFixer`, and Linux
+  `$XDG_DATA_HOME/cloudlockfixer` with `~/.local/share/cloudlockfixer` fallback.
+  Five focused path tests cover the platform branches without target hardware.
 - **Cross-platform source support revalidated:** Linux/macOS source support is
   now treated as done at source-smoke level, backed by
   `tests/source_platform_smoke.py`, the existing GitHub Actions matrix for

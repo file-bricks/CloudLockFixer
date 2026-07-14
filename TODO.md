@@ -74,6 +74,11 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 ## Nächste Schritte (aus ROADMAP.md)
 
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
+- [x] Cross-Platform: Plattform-Pfade für `data_dir()` -- DONE 2026-07-14
+      `paths.data_dir()` nutzt jetzt `%LOCALAPPDATA%\CloudLockFixer` unter
+      Windows, `~/Library/Application Support/CloudLockFixer` unter macOS und
+      `$XDG_DATA_HOME/cloudlockfixer` bzw. `~/.local/share/cloudlockfixer` unter
+      Linux. Regressionen: `tests/test_paths_cross_platform.py`.
 - [x] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md) -- DONE 2026-07-06
       Lokaler Source-Support ist über `tests/source_platform_smoke.py` und die
       GitHub-Actions-Matrix `ubuntu-latest` abgesichert; native Linux-Pakete

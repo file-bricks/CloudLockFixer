@@ -78,8 +78,9 @@ def test_paths_data_dir_cross_platform():
     from cloudlockfixer import paths
     d = paths.data_dir()
     assert isinstance(d, Path)
-    # Linux/macOS: LOCALAPPDATA fehlt -> ~/.cloudlockfixer
     # Windows: %LOCALAPPDATA%\CloudLockFixer
+    # Linux: $XDG_DATA_HOME/cloudlockfixer or ~/.local/share/cloudlockfixer
+    # macOS: ~/Library/Application Support/CloudLockFixer
     assert d.exists()
 
 

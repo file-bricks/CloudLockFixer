@@ -23,9 +23,20 @@ def pythonw() -> str:
     return exe
 
 
+def _data_dir_path() -> Path:
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA")
+        return Path(base) / "CloudLockFixer" if base else Path.home() / ".cloudlockfixer"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "CloudLockFixer"
+
+    xdg = os.environ.get("XDG_DATA_HOME")
+    base = Path(xdg) if xdg else Path.home() / ".local" / "share"
+    return base / "cloudlockfixer"
+
+
 def data_dir() -> Path:
-    base = os.environ.get("LOCALAPPDATA")
-    root = Path(base) / "CloudLockFixer" if base else Path.home() / ".cloudlockfixer"
+    root = _data_dir_path()
     root.mkdir(parents=True, exist_ok=True)
     return root
 

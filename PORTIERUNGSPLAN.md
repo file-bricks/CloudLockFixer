@@ -112,8 +112,8 @@ Datei: `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist`
 
 ## Phase 4: Pfade-Abstraktion
 
-`paths.py` nutzt bereits `os.environ.get("LOCALAPPDATA")` mit Fallback auf
-`Path.home() / ".cloudlockfixer"`. Für Linux/macOS:
+Stand 2026-07-14: `paths.data_dir()` ist als Source-Level-Portierung umgesetzt
+und durch `tests/test_paths_cross_platform.py` abgedeckt. Die Laufzeitpfade sind:
 
 ```python
 def data_dir() -> Path:
@@ -126,6 +126,9 @@ def data_dir() -> Path:
     xdg = os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))
     return Path(xdg) / "cloudlockfixer"
 ```
+
+Nicht abgedeckt sind weiterhin echte Zielplattform-Installer und die Integration
+mit Linux-/macOS-Autostart- oder Kontextmenümechanismen.
 
 ## Phase 5: Build-Abstraktion
 
