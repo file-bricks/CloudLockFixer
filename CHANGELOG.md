@@ -5,6 +5,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Geändert / Changed
+- `llms.txt` now reflects the current unreleased source state: 154 passing
+  tests, the cross-platform data directory contract, the source-platform smoke
+  test entry point, and the expanded provider set through Box, Nextcloud,
+  pCloud and Synology Drive.
+
 ### Hinzugefügt / Added
 - **Cross-platform data directory abstraction:** `paths.data_dir()` now uses
   the Windows `%LOCALAPPDATA%\CloudLockFixer` location, macOS
