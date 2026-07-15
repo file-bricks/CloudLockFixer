@@ -10,6 +10,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   tests, the cross-platform data directory contract, the source-platform smoke
   test entry point, and the expanded provider set through Box, Nextcloud,
   pCloud and Synology Drive.
+- Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
+  `Open queue/log`, because the action opens the local app folder with
+  `queue.txt` and log files rather than a dedicated queue/log view.
 
 ### Hinzugefügt / Added
 - **Cross-platform data directory abstraction:** `paths.data_dir()` now uses

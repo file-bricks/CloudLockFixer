@@ -42,9 +42,9 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "de": "Jetzt ausführen (mit Sync-Pause)",
         "en": "Run now (with sync pause)",
     },
-    "open_queue_log": {
-        "de": "Queue/Log öffnen",
-        "en": "Open queue/log",
+    "open_data_folder": {
+        "de": "Datenordner öffnen",
+        "en": "Open data folder",
     },
     "interval_menu": {
         "de": "Intervall",

@@ -123,7 +123,7 @@ class TrayApp:
                                     triggered=lambda: self.run_async(False)))
         self.menu.addAction(QAction(t("run_now_with_pause"), self.menu,
                                     triggered=lambda: self.run_async(True)))
-        self.menu.addAction(QAction(t("open_queue_log"), self.menu,
+        self.menu.addAction(QAction(t("open_data_folder"), self.menu,
                                     triggered=self._open_data_dir))
 
         interval_menu = self.menu.addMenu(t("interval_menu"))

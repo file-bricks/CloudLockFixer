@@ -36,6 +36,15 @@ def test_english_translation():
     assert t("quit_label") == "Quit"
     assert t("run_now") == "Run now"
     assert t("queue_empty") == "Queue empty."
+    assert t("open_data_folder") == "Open data folder"
+
+
+def test_open_data_folder_label_matches_action_scope():
+    set_language("de")
+    assert t("open_data_folder") == "Datenordner öffnen"
+
+    set_language("en")
+    assert "folder" in t("open_data_folder").lower()
 
 
 def test_unknown_key_returns_key():
