@@ -31,11 +31,20 @@
 
 ## v2.0.0 — Cross-Platform
 
-- [ ] Linux-Support (siehe PORTIERUNGSPLAN.md)
-- [ ] macOS-Support (siehe PORTIERUNGSPLAN.md)
+- [x] Linux-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
+  `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
+- [x] macOS-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
+  `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [ ] Plattform-Abstraktion für Prozessmanagement
 - [ ] Plattform-Abstraktion für Autostart/Kontextmenü
-- [ ] CI/CD für Multi-Plattform-Builds
+- [x] CI für Linux/macOS-Source-Smokes
+- [ ] CI/CD für native Multi-Plattform-Builds und Paketierung
+
+## v2.x — Release-Scope nach dem Source-Support
+
+- [ ] Native Linux-Integration jenseits des Source-Smokes entscheiden
+- [ ] Native macOS-App-/Paketierungsweg entscheiden
+- [ ] Plattformspezifische Autostart-/Kontextmenü-Integrationen außerhalb Windows
 
 ## Langfristig
 

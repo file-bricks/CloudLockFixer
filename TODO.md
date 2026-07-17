@@ -74,6 +74,12 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 ## Nächste Schritte (aus ROADMAP.md)
 
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
+- [x] Projekt-Testzahl und Cross-Platform-Status in README/`llms.txt`/Roadmap
+      auf den echten lokalen Stand ziehen. -- DONE 2026-07-17
+      `PYTHONPATH=src python -m pytest -q` liefert jetzt 157/157 grün; README,
+      README.de, `llms.txt`, ROADMAP und CHANGELOG sind daran synchronisiert.
+      Neuer Guard `tests/test_docs_contract.py` hält Releaseversion und
+      dokumentierte Testzahl gegen Paketstand bzw. gesammelte Pytest-Suite fest.
 - [x] Cross-Platform: Plattform-Pfade für `data_dir()` -- DONE 2026-07-14
       `paths.data_dir()` nutzt jetzt `%LOCALAPPDATA%\CloudLockFixer` unter
       Windows, `~/Library/Application Support/CloudLockFixer` unter macOS und
@@ -92,3 +98,27 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
       Nextcloud erledigt 2026-06-16 (`nextcloud.cfg`-Root-Erkennung + Prozesssteuerung).
       pCloud erledigt 2026-06-28 (Volume-Label-Scan via `GetVolumeInformationW`, `virtual` mount, `pCloud.exe`-Prozesssteuerung, 9 Tests).
       Synology Drive erledigt 2026-06-30 (`~/SynologyDrive`-Default-Root, `cloud-drive-ui.exe`-Prozessprüfung/-Resume, 6 Tests).
+
+
+## TASKPLAN-FORMALISIERUNG — 2026-07-16
+
+Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer. Zehn Aufgaben formalisiert, nicht umgesetzt; Produktdateien, Tests und Builds blieben unverändert.
+
+- TASKPLAN #852 / TW-CLF-01 — Versions- und Release-Stand konsolidieren
+- TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren
+- TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen
+- TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren
+- TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten
+- TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern
+- TASKPLAN #858 / TW-CLF-07 — Touch-based-Migration nach Plan D vorbereiten
+- TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen
+- TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern
+- TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren
+
+Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
+während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
+pytest -q` liefert lokal 157 grüne Tests und ist jetzt in README/`llms.txt`/
+CHANGELOG nachgezogen; Cross-Platform-Source-Support ist in der Roadmap explizit
+als erledigter Smoke-/CI-Stand markiert. Offen bleiben Synology-, Volume-Label-,
+Copy-Integritäts-, Plan-D-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
+sowie die separate Root-Release-Entscheidung.

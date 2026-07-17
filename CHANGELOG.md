@@ -6,15 +6,22 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Geändert / Changed
-- `llms.txt` now reflects the current unreleased source state: 154 passing
+- `llms.txt` now reflects the current unreleased source state: 157 passing
   tests, the cross-platform data directory contract, the source-platform smoke
   test entry point, and the expanded provider set through Box, Nextcloud,
   pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
+- README.md, README.de.md and the roadmap/TODO notes now use the live 157-test
+  suite count and align the Windows-first wording with the existing
+  Linux/macOS source-smoke support.
 
 ### Hinzugefügt / Added
+- `tests/test_docs_contract.py` verifies that `llms.txt` keeps the release
+  version in sync with `cloudlockfixer.__version__` and that the published test
+  count in the README files, `llms.txt` and `CHANGELOG.md` matches the actual
+  collected pytest suite size.
 - **Cross-platform data directory abstraction:** `paths.data_dir()` now uses
   the Windows `%LOCALAPPDATA%\CloudLockFixer` location, macOS
   `~/Library/Application Support/CloudLockFixer`, and Linux

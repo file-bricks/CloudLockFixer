@@ -6,7 +6,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.2
-Current source state: unreleased multicloud and cross-platform updates with 154
+Current source state: unreleased multicloud and cross-platform updates with 157
 passing tests.
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
@@ -67,4 +67,4 @@ ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
 a local-first delayed action queue for rename, move and delete operations that
 fail because Windows Cloud Files providers temporarily lock paths.
 
-## Last-checked: 2026-07-15
+## Last-checked: 2026-07-17

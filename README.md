@@ -118,14 +118,15 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 154 passing (core + P2/P3 + i18n + multicloud incl.
+- **Tests:** `pytest`, 157 passing (core + P2/P3 + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + retry-cap + failed-task visibility + provider-lock
   regressions + cross-platform data-dir contracts).
 - **Open/future:** more provider adapters; optional suppression of sync-client
   relaunch during long operations.
 
-Windows-only; the core is platform-neutral for later ports.
+Windows-first in packaged release scope; the source tree is additionally covered
+by Linux/macOS smoke tests for the current non-GUI core path.
 Design notes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## License

@@ -117,7 +117,7 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **154 grün** (Core + P2/P3 + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **157 grün** (Core + P2/P3 + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + Retry-Cap + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-Verträge).
@@ -128,8 +128,9 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **Offen/künftig:** weitere Provider-Adapter; optional Relaunch-Unterdrückung
   des Sync-Clients während langer Operationen.
 
-Windows-only (`cldflt` ist Windows-spezifisch); der Kern ist plattformneutral
-für spätere Ports. Design: [`docs/DESIGN.md`](docs/DESIGN.md).
+Windows-first im Paket-/Release-Scope (`cldflt` ist Windows-spezifisch); der
+aktuelle Nicht-GUI-Kern ist zusätzlich per Linux-/macOS-Source-Smoke abgesichert.
+Design: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Lizenz
 
