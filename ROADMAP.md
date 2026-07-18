@@ -37,6 +37,9 @@
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [ ] Plattform-Abstraktion für Prozessmanagement
 - [ ] Plattform-Abstraktion für Autostart/Kontextmenü
+  - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
+  - [ ] macOS-LaunchAgent
+  - [ ] Linux-/macOS-Kontextmenü
 - [x] CI für Linux/macOS-Source-Smokes
 - [ ] CI/CD für native Multi-Plattform-Builds und Paketierung
 
@@ -44,7 +47,8 @@
 
 - [ ] Native Linux-Integration jenseits des Source-Smokes entscheiden
 - [ ] Native macOS-App-/Paketierungsweg entscheiden
-- [ ] Plattformspezifische Autostart-/Kontextmenü-Integrationen außerhalb Windows
+- [x] Linux-XDG-Autostart auf Source-Ebene
+- [ ] macOS-LaunchAgent und Linux-/macOS-Kontextmenüs
 
 ## Langfristig
 

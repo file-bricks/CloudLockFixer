@@ -6,6 +6,7 @@ Prüft auf Linux und macOS (und Windows) ohne Cloud-Sync-Client oder GUI:
 - models: parse_txt_line, Queue-Persistenz
 - paths: data_dir cross-platform
 - worker: run_once ohne Cloud-Provider
+- Linux: XDG-Autostart anlegen, validieren und entfernen
 """
 from __future__ import annotations
 
@@ -95,3 +96,28 @@ def test_worker_run_once_local(tmp_path):
     assert summary["done"] == 1
     assert (tmp_path / "renamed.txt").exists()
     assert not src.exists()
+
+
+def test_linux_xdg_autostart_roundtrip(tmp_path, monkeypatch):
+    """Linux runners prove the XDG desktop entry can be enabled and removed."""
+    import sys
+
+    import pytest
+
+    if not sys.platform.startswith("linux"):
+        pytest.skip("Linux XDG autostart smoke")
+
+    from cloudlockfixer import autostart
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    desktop_file = tmp_path / "config" / "autostart" / "cloudlockfixer.desktop"
+
+    assert autostart.enable()
+    assert autostart.is_enabled()
+    content = desktop_file.read_text(encoding="utf-8")
+    assert content.startswith("[Desktop Entry]\n")
+    assert "Exec=" in content
+    assert "Terminal=false\n" in content
+
+    assert autostart.disable()
+    assert not desktop_file.exists()

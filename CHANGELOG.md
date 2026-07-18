@@ -6,18 +6,24 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Geändert / Changed
-- `llms.txt` now reflects the current unreleased source state: 157 passing
-  tests, the cross-platform data directory contract, the source-platform smoke
-  test entry point, and the expanded provider set through Box, Nextcloud,
-  pCloud and Synology Drive.
+- `llms.txt` now reflects the current unreleased source state: 161 passing
+  tests, the cross-platform data directory and Linux XDG autostart contracts,
+  the source-platform smoke test entry point, and the expanded provider set
+  through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 157-test
-  suite count and align the Windows-first wording with the existing
-  Linux/macOS source-smoke support.
+- README.md, README.de.md and the roadmap/TODO notes now use the live 161-test
+  suite count and distinguish packaged Windows scope from Linux/macOS source
+  support and the implemented Linux XDG autostart integration.
 
 ### Hinzugefügt / Added
+- **Linux XDG autostart:** `autostart.py` now writes, validates, refreshes and
+  removes `cloudlockfixer.desktop` below `$XDG_CONFIG_HOME/autostart` (or
+  `~/.config/autostart`) with an escaped `Exec` command and atomic replacement.
+  Four focused cross-platform contract tests plus the Linux source-platform
+  smoke cover roundtrip, stale-entry refresh, escaping and the explicit macOS
+  unsupported boundary; a real Ubuntu/WSL roundtrip also passed.
 - `tests/test_docs_contract.py` verifies that `llms.txt` keeps the release
   version in sync with `cloudlockfixer.__version__` and that the published test
   count in the README files, `llms.txt` and `CHANGELOG.md` matches the actual

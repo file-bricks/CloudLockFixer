@@ -2,8 +2,9 @@
 
 ## Übersicht
 
-CloudLockFixer ist aktuell Windows-only. Die Kernlogik (ops.py, models.py, worker.py)
-ist bereits plattformneutral. Plattformspezifisch sind:
+Der paketierte Release von CloudLockFixer ist aktuell Windows-only. Die Kernlogik
+(ops.py, models.py, worker.py) ist bereits plattformneutral; Linux-XDG-Autostart
+ist seit 2026-07-18 auf Source-Ebene umgesetzt. Plattformspezifisch sind:
 
 | Modul | Windows | Linux | macOS |
 |-------|---------|-------|-------|
@@ -60,7 +61,11 @@ Das ist sicherer als Windows taskkill (wo es keinen echten Pause-Mechanismus gib
 
 ## Phase 2: Autostart-Abstraktion
 
-### Linux (XDG Autostart)
+### Linux (XDG Autostart) — umgesetzt 2026-07-18
+
+`src/cloudlockfixer/autostart.py` nutzt `$XDG_CONFIG_HOME/autostart` mit
+`~/.config/autostart` als Fallback. Der Eintrag wird atomar geschrieben, gegen
+den aktuellen Startbefehl validiert und idempotent entfernt.
 
 Datei: `~/.config/autostart/cloudlockfixer.desktop`
 ```ini
@@ -127,8 +132,8 @@ def data_dir() -> Path:
     return Path(xdg) / "cloudlockfixer"
 ```
 
-Nicht abgedeckt sind weiterhin echte Zielplattform-Installer und die Integration
-mit Linux-/macOS-Autostart- oder Kontextmenümechanismen.
+Nicht abgedeckt sind weiterhin echte Zielplattform-Installer, der macOS-
+LaunchAgent und Linux-/macOS-Kontextmenümechanismen.
 
 ## Phase 5: Build-Abstraktion
 
@@ -156,11 +161,12 @@ CI/CD: GitHub Actions Matrix-Build (windows-latest, ubuntu-latest, macos-latest)
 ### Source-Platform Smoke-Tests (CI aktiv)
 
 `tests/source_platform_smoke.py` + `.github/workflows/source-platform-smoke.yml` prüfen auf
-`ubuntu-latest` und `macos-latest` headless: Import, Version, ops, Queue, paths, worker.
-Kein Cloud-Client, kein GUI, kein pip-Extra (nur pytest). Stand: 2026-06-10.
+`ubuntu-latest` und `macos-latest` headless: Import, Version, ops, Queue, paths und
+worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip. Kein Cloud-Client, kein
+GUI, kein pip-Extra (nur pytest). Stand: 2026-07-18.
 
-Revalidiert 2026-07-06: lokaler Source-Smoke plus angrenzende Kern-/Provider-Tests
-liefen mit `PYTHONPATH=src` grün (`76 passed`). Damit sind Linux-/macOS-Source-
-Support-TODOs abgeschlossen. Nicht abgeschlossen sind native Linux-/macOS-Pakete,
-echte Zielplattform-Integrationstests und plattformspezifische Autostart-/
-Kontextmenü-Installer.
+Revalidiert 2026-07-18: Die vollständige lokale Suite umfasst 161 Tests; zusätzlich
+bestand ein echter Ubuntu-/WSL-Roundtrip für den Linux-XDG-Autostart. Damit sind
+die Linux-/macOS-Source-Smokes und Linux-XDG-Autostart abgeschlossen. Offen bleiben
+native Linux-/macOS-Pakete, macOS-LaunchAgent, reale GUI-/Cloud-Client-Integration
+und plattformspezifische Kontextmenüs.

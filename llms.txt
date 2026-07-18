@@ -6,7 +6,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.2
-Current source state: unreleased multicloud and cross-platform updates with 157
+Current source state: unreleased multicloud and cross-platform updates with 161
 passing tests.
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
@@ -29,10 +29,11 @@ Key files:
 - `README.de.md`: German user overview and quickstart
 - `docs/DESIGN.md`: design and safety model
 - `src/cloudlockfixer/paths.py`: platform-specific runtime data directory
+- `src/cloudlockfixer/autostart.py`: Windows Registry and Linux XDG autostart
 - `src/cloudlockfixer/ops.py`: copy/delete and retry-safe filesystem operations
 - `src/cloudlockfixer/providers.py`: cloud provider detection and pause policy
 - `tests/test_review_fixes_2026_07_12.py`: virtual-mount, drive-scan, retry-cap and provider-lock regressions
-- `tests/source_platform_smoke.py`: headless Linux/macOS source smoke checks
+- `tests/source_platform_smoke.py`: headless Linux/macOS source smoke checks, including Linux XDG autostart
 - `tests/`: regression tests for core, i18n, provider and tray-adjacent behavior
 
 ## Audience

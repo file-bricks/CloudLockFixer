@@ -76,7 +76,7 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
 - [x] Projekt-Testzahl und Cross-Platform-Status in README/`llms.txt`/Roadmap
       auf den echten lokalen Stand ziehen. -- DONE 2026-07-17
-      `PYTHONPATH=src python -m pytest -q` liefert jetzt 157/157 grün; README,
+      `PYTHONPATH=src python -m pytest -q` lieferte am 2026-07-17 noch 157/157 grün; README,
       README.de, `llms.txt`, ROADMAP und CHANGELOG sind daran synchronisiert.
       Neuer Guard `tests/test_docs_contract.py` hält Releaseversion und
       dokumentierte Testzahl gegen Paketstand bzw. gesammelte Pytest-Suite fest.
@@ -85,6 +85,11 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
       Windows, `~/Library/Application Support/CloudLockFixer` unter macOS und
       `$XDG_DATA_HOME/cloudlockfixer` bzw. `~/.local/share/cloudlockfixer` unter
       Linux. Regressionen: `tests/test_paths_cross_platform.py`.
+- [x] Cross-Platform: Linux-XDG-Autostart -- DONE 2026-07-18
+      `$XDG_CONFIG_HOME/autostart/cloudlockfixer.desktop` (Fallback: `~/.config`)
+      wird atomar angelegt, gegen den aktuellen Startbefehl geprüft und idempotent
+      entfernt. Vier Vertrags-Tests plus Linux-Source-Smoke und echter Ubuntu-/WSL-
+      Roundtrip sind grün; native Linux-Pakete bleiben späterer Release-Scope.
 - [x] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md) -- DONE 2026-07-06
       Lokaler Source-Support ist über `tests/source_platform_smoke.py` und die
       GitHub-Actions-Matrix `ubuntu-latest` abgesichert; native Linux-Pakete
@@ -117,8 +122,9 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 
 Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
 während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
-pytest -q` liefert lokal 157 grüne Tests und ist jetzt in README/`llms.txt`/
-CHANGELOG nachgezogen; Cross-Platform-Source-Support ist in der Roadmap explizit
-als erledigter Smoke-/CI-Stand markiert. Offen bleiben Synology-, Volume-Label-,
+pytest -q` liefert lokal 161 gesammelte Tests und ist in README/`llms.txt`/
+CHANGELOG nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-Autostart
+sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
+bleiben Synology-, Volume-Label-,
 Copy-Integritäts-, Plan-D-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
 sowie die separate Root-Release-Entscheidung.
