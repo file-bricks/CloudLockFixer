@@ -6,14 +6,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Geändert / Changed
-- `llms.txt` now reflects the current unreleased source state: 161 passing
+- `llms.txt` now reflects the current unreleased source state: 162 passing
   tests, the cross-platform data directory and Linux XDG autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 161-test
+- README.md, README.de.md and the roadmap/TODO notes now use the live 162-test
   suite count and distinguish packaged Windows scope from Linux/macOS source
   support and the implemented Linux XDG autostart integration.
 
@@ -96,6 +96,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - `.github/workflows/source-platform-smoke.yml`: CI-Matrix für `ubuntu-latest` und `macos-latest`, die die Smoke-Tests bei jedem Push/PR auf `main` ausführt.
 
 ### Behoben / Fixed
+- **Copy-Verifikation vor Löschen:** Der Copy+Delete-Fallback prüfte bislang nur
+  Dateizahl und Gesamtgröße. Eine beschädigte Kopie mit identischer Größe konnte
+  deshalb als vollständig gelten und das Löschen der Quelle freigeben.
+  `_payload_signature()` berücksichtigt jetzt einen streamingfähigen SHA-256-
+  Inhaltsdigest inklusive relativer Dateinamen; der Regressionstest deckt zwei
+  gleich große Dateien mit abweichenden Bytes ab.
 - **Bug #BW-1 — GoogleDriveProvider.resume() semantische Versionssortierung:**
   `sorted(glob("*/GoogleDriveFS.exe"), reverse=True)` nutzte lexikografische Sortierung;
   Versionsordner wie `"9.0.0"` rangierten dabei über `"62.0.1"` (`'9' > '6'`

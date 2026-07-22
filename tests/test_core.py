@@ -109,6 +109,17 @@ def test_verify_fail_cleans_dst_allows_retry(tmp_path, monkeypatch):
     assert ok2, f"Retry muss klappen: {msg2}"
 
 
+def test_verify_copy_rejects_equal_size_different_content(tmp_path):
+    """Ein Größenvergleich allein darf eine beschädigte Kopie nicht freigeben."""
+    src = tmp_path / "source.bin"
+    dst = tmp_path / "target.bin"
+    src.write_bytes(b"original-payload")
+    dst.write_bytes(b"corrupt!-payload")
+
+    assert src.stat().st_size == dst.stat().st_size
+    assert not ops._verify_copy(src, dst)
+
+
 def test_move_conflict_when_dst_differs(tmp_path):
     src = _mkdir_with_file(tmp_path / "old", "A")
     dst = _mkdir_with_file(tmp_path / "new", "B")  # anderer Inhalt

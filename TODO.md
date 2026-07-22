@@ -114,7 +114,12 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 - TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen
 - TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren
 - TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten
-- TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern
+- [x] TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern.
+  DONE 2026-07-22: Die vorherige Prüfung verglich nur Dateizahl und Gesamtgröße;
+  gleich große, aber abweichende Inhalte hätten dadurch das Löschen der Quelle
+  freigegeben. `ops._payload_signature()` bezieht jetzt einen streamingfähigen
+  SHA-256-Inhaltsdigest inklusive relativer Dateinamen ein; Regression:
+  `test_verify_copy_rejects_equal_size_different_content`.
 - TASKPLAN #858 / TW-CLF-07 — Touch-based-Migration nach Plan D vorbereiten
 - TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen
 - TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern

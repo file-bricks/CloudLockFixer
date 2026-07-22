@@ -12,6 +12,7 @@ NICHT erneut (kein Datenverlust, kein Doppel-Copy).
 from __future__ import annotations
 
 import errno as _errno
+import hashlib
 import os
 import shutil
 import stat
@@ -65,19 +66,28 @@ def _rmtree(p: Path) -> None:
         shutil.rmtree(p, onerror=_on_rm_error)
 
 
-def _payload_signature(p: Path) -> tuple[int, int]:
-    """(Anzahl Dateien, Gesamtgroesse) — nur als Sanity-Verify direkt nach Copy."""
-    if p.is_file():
-        return (1, p.stat().st_size)
-    n = total = 0
-    for f in p.rglob("*"):
-        if f.is_file():
-            n += 1
-            try:
-                total += f.stat().st_size
-            except OSError:
-                pass
-    return (n, total)
+def _payload_signature(p: Path) -> tuple[int, int, str]:
+    """Dateizahl, Gesamtgröße und Inhaltsdigest für die Copy-Verifikation.
+
+    Gleich viele Bytes sind kein Integritätsnachweis: Eine beschädigte Kopie kann
+    dieselbe Größe wie die Quelle haben. Der Digest wird gestreamt, damit auch
+    große Cloud-Dateien nicht vollständig in den Speicher geladen werden.
+    """
+    files = [p] if p.is_file() else sorted(f for f in p.rglob("*") if f.is_file())
+    digest = hashlib.sha256()
+    total = 0
+    for f in files:
+        # Beim Umbenennen einer einzelnen Datei unterscheiden sich Quelle und
+        # Zielname absichtlich. Innerhalb eines Verzeichnisses müssen die
+        # relativen Namen dagegen Teil der Signatur bleiben.
+        relative_name = "" if p.is_file() else f.relative_to(p).as_posix()
+        digest.update(relative_name.encode("utf-8", "surrogateescape"))
+        digest.update(b"\0")
+        with f.open("rb") as handle:
+            while chunk := handle.read(1024 * 1024):
+                digest.update(chunk)
+                total += len(chunk)
+    return (len(files), total, digest.hexdigest())
 
 
 def _verify_copy(src: Path, dst: Path) -> bool:
