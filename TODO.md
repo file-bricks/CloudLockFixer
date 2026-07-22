@@ -126,7 +126,12 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
   freigegeben. `ops._payload_signature()` bezieht jetzt einen streamingfähigen
   SHA-256-Inhaltsdigest inklusive relativer Dateinamen ein; Regression:
   `test_verify_copy_rejects_equal_size_different_content`.
-- TASKPLAN #858 / TW-CLF-07 — Touch-based-Migration nach Plan D vorbereiten
+- [x] TASKPLAN #858 / TW-CLF-07 — Touch-based-Migration nach Plan D vorbereiten.
+  DONE 2026-07-22: Das öffentliche Repository wurde frisch nach
+  `C:\_Local_DEV\repos\CloudLockFixer` geklont, vollständig getestet und als
+  alleiniger Entwicklungsklon verifiziert. `releases.json`, Workstation-
+  `repos.json`/`REPOS-INDEX.md` und der OneDrive-Pointer sind synchron; der alte
+  OneDrive-Arbeitsbaum enthält kein `.git`, keinen Quellcode und keine Caches mehr.
 - TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen
 - TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern
 - TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren
@@ -137,5 +142,5 @@ pytest -q` liefert lokal 164 gesammelte Tests und ist in README/`llms.txt`/
 CHANGELOG nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart
 sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
 bleiben Synology-, Volume-Label-,
-Copy-Integritäts-, Plan-D-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
+Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
 sowie die separate Root-Release-Entscheidung.

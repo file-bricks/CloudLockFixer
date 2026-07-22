@@ -6,6 +6,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Geändert / Changed
+- Development now follows Plan D: the verified Git working tree lives outside
+  OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
+  remains the canonical code and synchronization source.
 - `llms.txt` now reflects the current unreleased source state: 164 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
