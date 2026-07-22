@@ -274,6 +274,7 @@ class TrayApp:
         ok = autostart.enable() if checked else autostart.disable()
         if not ok:
             self.autostart_action.setChecked(autostart.is_enabled())
+            self._show_setting_change_error(t("autostart_label"))
 
     def _set_interval(self, minutes: int) -> None:
         self.settings["interval_min"] = minutes
@@ -314,6 +315,16 @@ class TrayApp:
         ok = contextmenu.install() if checked else contextmenu.uninstall()
         if not ok:
             self.context_action.setChecked(contextmenu.is_installed())
+            self._show_setting_change_error(t("context_menu_label"))
+
+    @staticmethod
+    def _show_setting_change_error(setting: str) -> None:
+        """Make a rejected tray setting explicit and keyboard-accessible."""
+        QMessageBox.warning(
+            None,
+            "CloudLockFixer",
+            t("setting_change_failed", setting=setting),
+        )
 
     # ── P3: Präventiv-Wächter ───────────────────────────────────────
     def _toggle_watcher(self, checked: bool) -> None:

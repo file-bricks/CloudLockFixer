@@ -120,7 +120,7 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 164 passing (core + P2/P3 + i18n + multicloud incl.
+- **Tests:** `pytest`, 165 passing (core + P2/P3 + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + retry-cap + failed-task visibility + provider-lock
   regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent

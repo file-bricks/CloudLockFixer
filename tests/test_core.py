@@ -488,3 +488,36 @@ def test_add_task_dialog_accepts_file_source_for_delete(tmp_path, monkeypatch):
     assert step.op == "delete"
     assert step.src == str(src)
     tray.tray.showMessage.assert_called_once()
+
+
+def test_failed_tray_setting_change_restores_state_and_explains_error(monkeypatch):
+    """UX/A11y: Ein abgewiesenes Häkchen darf nicht still zurückspringen."""
+    from unittest.mock import MagicMock
+
+    import cloudlockfixer.contextmenu as contextmenu_mod
+    import cloudlockfixer.autostart as autostart_mod
+    import cloudlockfixer.tray as tray_mod
+    from cloudlockfixer.i18n import set_language
+    from cloudlockfixer.tray import TrayApp
+
+    set_language("de")
+    warning = MagicMock()
+    monkeypatch.setattr(tray_mod.QMessageBox, "warning", warning)
+    monkeypatch.setattr(autostart_mod, "enable", lambda: False)
+    monkeypatch.setattr(autostart_mod, "is_enabled", lambda: False)
+    monkeypatch.setattr(contextmenu_mod, "install", lambda: False)
+    monkeypatch.setattr(contextmenu_mod, "is_installed", lambda: False)
+
+    tray = TrayApp.__new__(TrayApp)
+    tray.autostart_action = MagicMock()
+    tray.context_action = MagicMock()
+
+    tray._toggle_autostart(True)
+    tray._toggle_context(True)
+
+    tray.autostart_action.setChecked.assert_called_once_with(False)
+    tray.context_action.setChecked.assert_called_once_with(False)
+    messages = [call.args[2] for call in warning.call_args_list]
+    assert any("Mit Windows starten" in message for message in messages)
+    assert any("Explorer-Kontextmenü" in message for message in messages)
+    assert all("bisherige Einstellung bleibt aktiv" in message for message in messages)

@@ -9,14 +9,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 164 passing
+- `llms.txt` now reflects the current unreleased source state: 165 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 164-test
+- README.md, README.de.md and the roadmap/TODO notes now use the live 165-test
   suite count and distinguish packaged Windows scope from Linux/macOS source
   support and the implemented Linux XDG/macOS LaunchAgent integrations.
 
@@ -71,6 +71,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
 
 ### Behoben / Fixed
+- **Tray-Einstellungsfehler sind erklärt:** Wenn Windows Autostart oder das
+  Explorer-Kontextmenü nicht anlegen beziehungsweise entfernen kann, setzt die
+  App das Häkchen weiterhin auf den tatsächlichen Zustand zurück und zeigt nun
+  zusätzlich eine fokussierbare, lokalisierte Fehlermeldung. Ein
+  Regressionstest deckt beide abgewiesenen Umschalter ab.
 - **Failed-Tasks sind im Status sichtbar:** Tasks, die nach dem Retry-Cap auf
   `status="failed"` stehen, werden jetzt von `models.status_counts()` separat
   gezählt und bleiben dadurch im Tray-Status sowie in der CLI-Run-Zusammenfassung

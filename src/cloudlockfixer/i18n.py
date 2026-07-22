@@ -158,6 +158,10 @@ _CATALOG: dict[str, dict[Language, str]] = {
         "de": "Neustart erforderlich für Sprachwechsel.",
         "en": "Restart required for language change.",
     },
+    "setting_change_failed": {
+        "de": "{setting} konnte nicht geändert werden. Die bisherige Einstellung bleibt aktiv.",
+        "en": "Could not change {setting}. The previous setting remains active.",
+    },
     # -- cli.py --
     "cli_desc": {
         "de": "CloudLockFixer CLI",
