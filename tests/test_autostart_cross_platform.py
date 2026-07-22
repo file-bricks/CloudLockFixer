@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import plistlib
 from pathlib import Path, PurePosixPath
 
 import cloudlockfixer.autostart as autostart
@@ -84,9 +85,79 @@ def test_linux_autostart_escapes_desktop_exec_metacharacters(monkeypatch, tmp_pa
     ) in content
 
 
-def test_macos_autostart_remains_explicitly_unsupported(monkeypatch):
+def _configure_macos(
+    monkeypatch,
+    tmp_path: Path,
+    *,
+    executable: str = "/usr/bin/python3",
+    launcher: str = "/Users/test/Cloud Lock/clf_launcher.pyw",
+) -> Path:
     monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(sys, "frozen", False, raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setattr(paths, "pythonw", lambda: executable)
+    monkeypatch.setattr(paths, "launcher", lambda: PurePosixPath(launcher))
+    return tmp_path / "Library" / "LaunchAgents" / "com.cloudlockfixer.agent.plist"
+
+
+def test_macos_launch_agent_roundtrip(monkeypatch, tmp_path):
+    launch_agent = _configure_macos(monkeypatch, tmp_path)
 
     assert not autostart.is_enabled()
-    assert not autostart.enable()
-    assert not autostart.disable()
+    assert autostart.enable()
+
+    with launch_agent.open("rb") as handle:
+        payload = plistlib.load(handle)
+    assert payload == {
+        "KeepAlive": False,
+        "Label": "com.cloudlockfixer.agent",
+        "ProgramArguments": [
+            "/usr/bin/python3",
+            "/Users/test/Cloud Lock/clf_launcher.pyw",
+        ],
+        "RunAtLoad": True,
+    }
+    assert autostart.is_enabled()
+
+    assert autostart.disable()
+    assert not launch_agent.exists()
+    assert autostart.disable()
+
+
+def test_macos_launch_agent_rejects_stale_or_malformed_plist(monkeypatch, tmp_path):
+    launch_agent = _configure_macos(monkeypatch, tmp_path)
+    launch_agent.parent.mkdir(parents=True)
+    launch_agent.write_bytes(b"not a plist")
+
+    assert not autostart.is_enabled()
+    assert autostart.enable()
+    assert autostart.is_enabled()
+
+    with launch_agent.open("rb") as handle:
+        payload = plistlib.load(handle)
+    payload["ProgramArguments"] = ["/tmp/old-cloudlockfixer"]
+    with launch_agent.open("wb") as handle:
+        plistlib.dump(payload, handle)
+
+    assert not autostart.is_enabled()
+    assert autostart.enable()
+    assert autostart.is_enabled()
+
+
+def test_macos_launch_agent_preserves_argument_boundaries(monkeypatch, tmp_path):
+    launch_agent = _configure_macos(
+        monkeypatch,
+        tmp_path,
+        executable="/Applications/Python & Tools/python3",
+        launcher='/Users/test/Cloud <Lock> & "Fix"/clf_launcher.pyw',
+    )
+
+    assert autostart.enable()
+    with launch_agent.open("rb") as handle:
+        payload = plistlib.load(handle)
+
+    assert payload["ProgramArguments"] == [
+        "/Applications/Python & Tools/python3",
+        '/Users/test/Cloud <Lock> & "Fix"/clf_launcher.pyw',
+    ]

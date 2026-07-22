@@ -44,7 +44,8 @@ sync client.
   folder activity
 - Supported Windows providers today: OneDrive, Google Drive, Dropbox, Box,
   iCloud, Nextcloud, pCloud, and Synology Drive
-- Autostart via the Windows registry or a Linux XDG desktop entry;
+- Autostart via the Windows registry, a Linux XDG desktop entry, or a macOS
+  LaunchAgent plist;
   single-instance tray app
 
 ## Installation
@@ -119,16 +120,18 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 162 passing (core + P2/P3 + i18n + multicloud incl.
+- **Tests:** `pytest`, 164 passing (core + P2/P3 + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + retry-cap + failed-task visibility + provider-lock
-  regressions + cross-platform data-dir and Linux XDG autostart contracts).
+  regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent
+  autostart contracts).
 - **Open/future:** more provider adapters; optional suppression of sync-client
   relaunch during long operations.
 
 Windows-first in packaged release scope. The source tree is additionally covered
-by Linux/macOS smoke tests for the current non-GUI core path, including a Linux
-XDG autostart roundtrip. Native Linux packages and macOS autostart remain open.
+by Linux/macOS smoke tests for the current non-GUI core path, including Linux
+XDG and macOS LaunchAgent autostart roundtrips. Native packages and real
+target-platform GUI/cloud-client integration remain open.
 Design notes: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## License

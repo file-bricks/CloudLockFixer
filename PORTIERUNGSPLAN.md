@@ -78,7 +78,12 @@ NoDisplay=false
 X-GNOME-Autostart-enabled=true
 ```
 
-### macOS (LaunchAgent)
+### macOS (LaunchAgent) — umgesetzt 2026-07-22
+
+`src/cloudlockfixer/autostart.py` erzeugt die plist atomar mit `plistlib`,
+validiert Label, aktuelle `ProgramArguments`, `RunAtLoad` und `KeepAlive` und
+entfernt den Eintrag idempotent. Die Konfiguration gilt beim nächsten Login;
+ein laufender Agent wird bewusst nicht automatisch per `launchctl` verändert.
 
 Datei: `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist`
 ```xml
@@ -132,8 +137,9 @@ def data_dir() -> Path:
     return Path(xdg) / "cloudlockfixer"
 ```
 
-Nicht abgedeckt sind weiterhin echte Zielplattform-Installer, der macOS-
-LaunchAgent und Linux-/macOS-Kontextmenümechanismen.
+Nicht abgedeckt sind weiterhin echte Zielplattform-Installer, ein realer
+Mac-Login-/`launchctl`-/GUI-/Cloud-Client-Smoke und Linux-/macOS-
+Kontextmenümechanismen.
 
 ## Phase 5: Build-Abstraktion
 
@@ -162,11 +168,13 @@ CI/CD: GitHub Actions Matrix-Build (windows-latest, ubuntu-latest, macos-latest)
 
 `tests/source_platform_smoke.py` + `.github/workflows/source-platform-smoke.yml` prüfen auf
 `ubuntu-latest` und `macos-latest` headless: Import, Version, ops, Queue, paths und
-worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip. Kein Cloud-Client, kein
-GUI, kein pip-Extra (nur pytest). Stand: 2026-07-18.
+worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip und auf macOS den
+LaunchAgent-plist-Roundtrip. Kein Cloud-Client, kein GUI, kein pip-Extra (nur
+pytest). Stand: 2026-07-22.
 
-Revalidiert 2026-07-18: Die vollständige lokale Suite umfasst 161 Tests; zusätzlich
-bestand ein echter Ubuntu-/WSL-Roundtrip für den Linux-XDG-Autostart. Damit sind
-die Linux-/macOS-Source-Smokes und Linux-XDG-Autostart abgeschlossen. Offen bleiben
-native Linux-/macOS-Pakete, macOS-LaunchAgent, reale GUI-/Cloud-Client-Integration
-und plattformspezifische Kontextmenüs.
+Revalidiert 2026-07-22: Die vollständige lokale Suite umfasst 164 Tests; zusätzlich
+bestand bereits ein echter Ubuntu-/WSL-Roundtrip für den Linux-XDG-Autostart.
+Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart und macOS-LaunchAgent
+auf Source-Ebene abgeschlossen. Offen bleiben native Linux-/macOS-Pakete, ein
+echter Mac-Login-/`launchctl`-/GUI-/Cloud-Client-Smoke und plattformspezifische
+Kontextmenüs.

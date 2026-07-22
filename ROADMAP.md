@@ -38,7 +38,7 @@
 - [ ] Plattform-Abstraktion für Prozessmanagement
 - [ ] Plattform-Abstraktion für Autostart/Kontextmenü
   - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
-  - [ ] macOS-LaunchAgent
+  - [x] macOS-LaunchAgent auf Source-Ebene (DONE 2026-07-22)
   - [ ] Linux-/macOS-Kontextmenü
 - [x] CI für Linux/macOS-Source-Smokes
 - [ ] CI/CD für native Multi-Plattform-Builds und Paketierung
@@ -48,7 +48,8 @@
 - [ ] Native Linux-Integration jenseits des Source-Smokes entscheiden
 - [ ] Native macOS-App-/Paketierungsweg entscheiden
 - [x] Linux-XDG-Autostart auf Source-Ebene
-- [ ] macOS-LaunchAgent und Linux-/macOS-Kontextmenüs
+- [x] macOS-LaunchAgent auf Source-Ebene
+- [ ] Linux-/macOS-Kontextmenüs
 
 ## Langfristig
 

@@ -7,6 +7,7 @@ Prüft auf Linux und macOS (und Windows) ohne Cloud-Sync-Client oder GUI:
 - paths: data_dir cross-platform
 - worker: run_once ohne Cloud-Provider
 - Linux: XDG-Autostart anlegen, validieren und entfernen
+- macOS: LaunchAgent-plist anlegen, validieren und entfernen
 """
 from __future__ import annotations
 
@@ -121,3 +122,33 @@ def test_linux_xdg_autostart_roundtrip(tmp_path, monkeypatch):
 
     assert autostart.disable()
     assert not desktop_file.exists()
+
+
+def test_macos_launch_agent_roundtrip(tmp_path, monkeypatch):
+    """macOS runners prove the LaunchAgent plist can be enabled and removed."""
+    import plistlib
+    import sys
+
+    import pytest
+
+    if sys.platform != "darwin":
+        pytest.skip("macOS LaunchAgent smoke")
+
+    from cloudlockfixer import autostart
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    launch_agent = (
+        tmp_path / "Library" / "LaunchAgents" / "com.cloudlockfixer.agent.plist"
+    )
+
+    assert autostart.enable()
+    assert autostart.is_enabled()
+    with launch_agent.open("rb") as handle:
+        payload = plistlib.load(handle)
+    assert payload["Label"] == "com.cloudlockfixer.agent"
+    assert payload["RunAtLoad"] is True
+    assert payload["KeepAlive"] is False
+    assert payload["ProgramArguments"]
+
+    assert autostart.disable()
+    assert not launch_agent.exists()

@@ -43,7 +43,8 @@ des Sync-Clients.
   pausiert/fortsetzt
 - Unterstützte Windows-Provider aktuell: OneDrive, Google Drive, Dropbox, Box,
   iCloud, Nextcloud, pCloud und Synology Drive
-- Autostart über Windows-Registry oder Linux-XDG-Desktop-Eintrag;
+- Autostart über Windows-Registry, Linux-XDG-Desktop-Eintrag oder macOS-
+  LaunchAgent-plist;
   Single-Instance-Tray-App
 
 ## Installation
@@ -118,11 +119,11 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **162 grün** (Core + P2/P3 + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **164 grün** (Core + P2/P3 + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + Retry-Cap + Failed-Task-Sichtbarkeit +
-  Provider-Lock-Regressionen + Cross-Platform-Datenpfad- und Linux-XDG-
-  Autostart-Verträge).
+  Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und
+  macOS-LaunchAgent-Autostart-Verträge).
 - **Im Lifetest gehärtet (2026-05-29):** `is_running()/pause()` robust gegen
   nicht-UTF-8-`tasklist`-Ausgabe; `delete` entfernt read-only-Attribute statt an
   WinError 5 zu scheitern. Erster echter Einsatz: ein Ordner-Rename, den manuelle
@@ -132,8 +133,8 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 
 Windows-first im Paket-/Release-Scope (`cldflt` ist Windows-spezifisch). Der
 aktuelle Nicht-GUI-Kern ist zusätzlich per Linux-/macOS-Source-Smoke abgesichert,
-inklusive Linux-XDG-Autostart-Roundtrip. Native Linux-Pakete und macOS-Autostart
-bleiben offen.
+inklusive Linux-XDG- und macOS-LaunchAgent-Autostart-Roundtrips. Native Pakete
+und reale GUI-/Cloud-Client-Integration auf den Zielplattformen bleiben offen.
 Design: [`docs/DESIGN.md`](docs/DESIGN.md).
 
 ## Lizenz

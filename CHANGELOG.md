@@ -6,24 +6,30 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Geändert / Changed
-- `llms.txt` now reflects the current unreleased source state: 162 passing
-  tests, the cross-platform data directory and Linux XDG autostart contracts,
+- `llms.txt` now reflects the current unreleased source state: 164 passing
+  tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 162-test
+- README.md, README.de.md and the roadmap/TODO notes now use the live 164-test
   suite count and distinguish packaged Windows scope from Linux/macOS source
-  support and the implemented Linux XDG autostart integration.
+  support and the implemented Linux XDG/macOS LaunchAgent integrations.
 
 ### Hinzugefügt / Added
+- **macOS LaunchAgent autostart:** `autostart.py` now atomically writes,
+  validates, refreshes and removes
+  `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist`. `plistlib` preserves
+  argument boundaries and XML escaping. Three focused contracts plus the
+  `macos-latest` source-platform smoke cover roundtrip, stale/malformed plist
+  repair and paths with spaces or XML metacharacters. This is source-level
+  evidence; a real Mac login/launchctl and GUI/cloud-client run remain open.
 - **Linux XDG autostart:** `autostart.py` now writes, validates, refreshes and
   removes `cloudlockfixer.desktop` below `$XDG_CONFIG_HOME/autostart` (or
   `~/.config/autostart`) with an escaped `Exec` command and atomic replacement.
-  Four focused cross-platform contract tests plus the Linux source-platform
-  smoke cover roundtrip, stale-entry refresh, escaping and the explicit macOS
-  unsupported boundary; a real Ubuntu/WSL roundtrip also passed.
+  Three focused contracts plus the Linux source-platform smoke cover roundtrip,
+  stale-entry refresh and escaping; a real Ubuntu/WSL roundtrip also passed.
 - `tests/test_docs_contract.py` verifies that `llms.txt` keeps the release
   version in sync with `cloudlockfixer.__version__` and that the published test
   count in the README files, `llms.txt` and `CHANGELOG.md` matches the actual

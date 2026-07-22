@@ -1,13 +1,16 @@
-"""Autostart integration for Windows and Linux desktop sessions."""
+"""Autostart integration for Windows, Linux and macOS desktop sessions."""
 from __future__ import annotations
 
 import os
+import plistlib
 import sys
 from pathlib import Path
 
 _RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 _VALUE = "CloudLockFixer"
 _LINUX_DESKTOP_FILE = "cloudlockfixer.desktop"
+_MACOS_LAUNCH_AGENT_FILE = "com.cloudlockfixer.agent.plist"
+_MACOS_LAUNCH_AGENT_LABEL = "com.cloudlockfixer.agent"
 
 
 def _launch_args() -> tuple[str, ...]:
@@ -101,9 +104,64 @@ def _linux_disable() -> bool:
         return False
 
 
+def _macos_launch_agent_path() -> Path:
+    return Path.home() / "Library" / "LaunchAgents" / _MACOS_LAUNCH_AGENT_FILE
+
+
+def _macos_launch_agent_payload() -> dict[str, object]:
+    return {
+        "Label": _MACOS_LAUNCH_AGENT_LABEL,
+        "ProgramArguments": list(_launch_args()),
+        "RunAtLoad": True,
+        "KeepAlive": False,
+    }
+
+
+def _macos_is_enabled() -> bool:
+    try:
+        with _macos_launch_agent_path().open("rb") as handle:
+            payload = plistlib.load(handle)
+    except (OSError, plistlib.InvalidFileException):
+        return False
+    return payload == _macos_launch_agent_payload()
+
+
+def _macos_enable() -> bool:
+    target = _macos_launch_agent_path()
+    temporary = target.with_name(f".{target.name}.tmp")
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary.write_bytes(
+            plistlib.dumps(
+                _macos_launch_agent_payload(),
+                fmt=plistlib.FMT_XML,
+                sort_keys=True,
+            )
+        )
+        temporary.replace(target)
+        target.chmod(0o644)
+        return True
+    except OSError:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return False
+
+
+def _macos_disable() -> bool:
+    try:
+        _macos_launch_agent_path().unlink(missing_ok=True)
+        return True
+    except OSError:
+        return False
+
+
 def is_enabled() -> bool:
     if sys.platform.startswith("linux"):
         return _linux_is_enabled()
+    if sys.platform == "darwin":
+        return _macos_is_enabled()
     if sys.platform != "win32":
         return False
 
@@ -120,6 +178,8 @@ def is_enabled() -> bool:
 def enable() -> bool:
     if sys.platform.startswith("linux"):
         return _linux_enable()
+    if sys.platform == "darwin":
+        return _macos_enable()
     if sys.platform != "win32":
         return False
 
@@ -141,6 +201,8 @@ def enable() -> bool:
 def disable() -> bool:
     if sys.platform.startswith("linux"):
         return _linux_disable()
+    if sys.platform == "darwin":
+        return _macos_disable()
     if sys.platform != "win32":
         return False
 

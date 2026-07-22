@@ -88,8 +88,14 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 - [x] Cross-Platform: Linux-XDG-Autostart -- DONE 2026-07-18
       `$XDG_CONFIG_HOME/autostart/cloudlockfixer.desktop` (Fallback: `~/.config`)
       wird atomar angelegt, gegen den aktuellen Startbefehl geprüft und idempotent
-      entfernt. Vier Vertrags-Tests plus Linux-Source-Smoke und echter Ubuntu-/WSL-
+      entfernt. Drei Vertrags-Tests plus Linux-Source-Smoke und echter Ubuntu-/WSL-
       Roundtrip sind grün; native Linux-Pakete bleiben späterer Release-Scope.
+- [x] Cross-Platform: macOS-LaunchAgent -- DONE 2026-07-22
+      `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist` wird atomar aus
+      den aktuellen Startargumenten erzeugt, gegen Label/Argumente/RunAtLoad/
+      KeepAlive validiert und idempotent entfernt. Drei Vertrags-Tests plus der
+      `macos-latest`-Source-Smoke decken Roundtrip, stale/defekte plist und
+      Sonderzeichen ab; echter Mac-Login-/launchctl-/GUI-Smoke bleibt offen.
 - [x] Cross-Platform: Linux-Support (siehe PORTIERUNGSPLAN.md) -- DONE 2026-07-06
       Lokaler Source-Support ist über `tests/source_platform_smoke.py` und die
       GitHub-Actions-Matrix `ubuntu-latest` abgesichert; native Linux-Pakete
@@ -127,8 +133,8 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 
 Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
 während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
-pytest -q` liefert lokal 161 gesammelte Tests und ist in README/`llms.txt`/
-CHANGELOG nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-Autostart
+pytest -q` liefert lokal 164 gesammelte Tests und ist in README/`llms.txt`/
+CHANGELOG nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart
 sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
 bleiben Synology-, Volume-Label-,
 Copy-Integritäts-, Plan-D-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
