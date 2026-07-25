@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloudlockfixer"
+version = "0.2.2"
+description = "Windows tray and CLI tool for delayed rename, move and delete operations in cloud-sync folders"
+readme = "README.md"
+authors = [
+    { name = "file-bricks", email = "info@file-bricks.org" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment",
+    "Topic :: System :: Filesystems",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/file-bricks/CloudLockFixer"
+Repository = "https://github.com/file-bricks/CloudLockFixer.git"
+"Bug Tracker" = "https://github.com/file-bricks/CloudLockFixer/issues"
+
+[project.scripts]
+cloudlockfixer = "cloudlockfixer.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v"

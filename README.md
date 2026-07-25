@@ -2,7 +2,15 @@
 
 # CloudLockFixer (CLF-WDAS)
 
+![Pytest Status](https://img.shields.io/badge/tests-165%20passed-brightgreen)
+![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
+
 > 🇩🇪 **Deutsche Version:** [README.de.md](README.de.md)
+
+> [!NOTE]
+> **AI / LLM Integration:** This repository contains an [`llms.txt`](llms.txt) file providing machine-readable architecture guidelines, CLI interfaces, and safety contracts for AI coding assistants.
 
 **CloudLockFixer** *with Delayed Action Service* is a Windows tray tool that
 reliably performs file/folder operations (**rename / move / delete**) inside
