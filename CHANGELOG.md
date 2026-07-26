@@ -10,7 +10,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Shields.io Badges (Tests, Python-Versionen, Lizenz, LLM-Ready) und LLM-Integrationshinweis in `README.md`.
 
 ### Geändert / Changed
-- `llms.txt` mit `Last-checked: 2026-07-25` Header versehen.
+- `llms.txt` mit `Last-checked: 2026-07-26` Header versehen.
+- Technische Hygiene & Doku-Wartung (Pfad A): 165/165 Pytest-Tests verifiziert und `llms.txt` Verification Timestamp auf 2026-07-26 aktualisiert.
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
