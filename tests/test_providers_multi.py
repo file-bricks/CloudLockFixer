@@ -6,7 +6,8 @@ from unittest.mock import patch
 from cloudlockfixer.providers import (
     BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider,
     OneDriveProvider, PCloudProvider, SynologyDriveProvider,
-    SyncProvider, _discover_providers, _get_providers, _is_subpath,
+    SyncProvider, _GOOGLE_DRIVE_VOLUME_LABELS, _PCLOUD_VOLUME_LABELS,
+    _discover_providers, _get_providers, _is_subpath, _volume_label_matches,
     available_providers, provider_for,
 )
 from cloudlockfixer.worker import _providers_to_pause
@@ -54,6 +55,8 @@ def test_onedrive_is_folder_type():
 
 def test_googledrive_is_virtual_type():
     assert GoogleDriveProvider().mount_type == "virtual"
+    assert _volume_label_matches("  Google   Drive ", _GOOGLE_DRIVE_VOLUME_LABELS)
+    assert not _volume_label_matches("My Google Drive", _GOOGLE_DRIVE_VOLUME_LABELS)
 
 
 def test_dropbox_is_folder_type():
@@ -355,13 +358,13 @@ def test_pcloud_detects_volume_with_pcloud_label(monkeypatch):
     import ctypes as _ctypes
     import string
 
-    # Simuliere ein einzelnes Laufwerk P: mit Label "pCloud Drive"
+    # Simuliere ein echtes pCloud-Label und ein ähnlich benanntes Fremd-Volume.
     def fake_get_logical_drives():
-        idx = string.ascii_uppercase.index("P")
-        return 1 << idx
+        return ((1 << string.ascii_uppercase.index("P"))
+                | (1 << string.ascii_uppercase.index("Q")))
 
     def fake_get_volume_label(letter: str) -> str:
-        return "pCloud Drive" if letter == "P" else ""
+        return {"P": "pCloud Drive", "Q": "pCloud Backup"}.get(letter, "")
 
     monkeypatch.setattr(
         _ctypes.windll.kernel32, "GetLogicalDrives", fake_get_logical_drives,
@@ -378,6 +381,11 @@ def test_pcloud_detects_volume_with_pcloud_label(monkeypatch):
     assert any(str(r).startswith("P:") for r in roots), (
         f"Laufwerk P: erwartet, erhalten: {roots}"
     )
+    assert not any(str(r).startswith("Q:") for r in roots), (
+        f"umbenanntes Fremd-Volume Q: darf nicht erkannt werden: {roots}"
+    )
+    assert _volume_label_matches(" PCLOUD   DRIVE ", _PCLOUD_VOLUME_LABELS)
+    assert not _volume_label_matches("pCloud", _PCLOUD_VOLUME_LABELS)
 
 
 def test_pcloud_no_roots_when_no_pcloud_volume(monkeypatch):

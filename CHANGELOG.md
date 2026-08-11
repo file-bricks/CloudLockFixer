@@ -10,6 +10,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Shields.io Badges (Tests, Python-Versionen, Lizenz, LLM-Ready) und LLM-Integrationshinweis in `README.md`.
 
 ### Geändert / Changed
+- Volume-Label-Erkennung für Google Drive und pCloud verwendet nun eine
+  normalisierte Exakt-Allowlist statt einer unsicheren Teilstring-Suche; frei
+  umbenannte Laufwerke werden dadurch nicht als Cloud-Mount fehlklassifiziert.
+- `RELEASE_GATE.md` hält die kanonische Source-Version 0.2.2, den historischen
+  v1.0.0-Tag und die offenen Windows-/Security-Gates getrennt fest.
 - `llms.txt` mit `Last-checked: 2026-07-26` Header versehen.
 - Technische Hygiene & Doku-Wartung (Pfad A): 165/165 Pytest-Tests verifiziert und `llms.txt` Verification Timestamp auf 2026-07-26 aktualisiert.
 - Development now follows Plan D: the verified Git working tree lives outside

@@ -37,6 +37,14 @@ Repository = "https://github.com/file-bricks/CloudLockFixer.git"
 [project.scripts]
 cloudlockfixer = "cloudlockfixer.cli:main"
 
+# The package version is the source of truth for the current release line.
+# The v1.0.0 tag is historical; the current tree remains unreleased until the
+# Windows release gate in RELEASE_GATE.md has passed.
+[tool.cloudlockfixer.release]
+state = "unreleased"
+baseline_tag = "v0.2.2"
+historical_initial_tag = "v1.0.0"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

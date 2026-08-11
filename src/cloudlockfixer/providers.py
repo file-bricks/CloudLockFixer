@@ -120,6 +120,24 @@ _SEM_FAILCRITICALERRORS = 0x0001  # unterdrückt die "Kein Datenträger"-Dialogb
 _DRIVE_FIXED = 3
 _DRIVE_REMOTE = 4
 
+# Volume labels are user-visible strings and can be changed by the user.  A
+# substring check would therefore classify e.g. ``"My Google Drive Backup"``
+# as a virtual provider and could make the worker kill the wrong process.  The
+# clients' known labels are matched exactly after harmless case/whitespace
+# normalization; suffixes or prefixes remain non-matches.
+_GOOGLE_DRIVE_VOLUME_LABELS = frozenset({"google drive"})
+_PCLOUD_VOLUME_LABELS = frozenset({"pcloud drive"})
+
+
+def _normalize_volume_label(label: str) -> str:
+    """Normalize a Windows volume label without changing its meaning."""
+    return " ".join(str(label).strip().casefold().split())
+
+
+def _volume_label_matches(label: str, accepted: frozenset[str]) -> bool:
+    """Return whether *label* is one of the provider's known exact labels."""
+    return _normalize_volume_label(label) in accepted
+
 
 def _get_volume_label(drive_letter: str) -> str:
     """Read volume label via Win32 API (no subprocess).
@@ -314,7 +332,7 @@ class GoogleDriveProvider(SyncProvider):
         for i, letter in enumerate(string.ascii_uppercase):
             if bitmask & (1 << i):
                 label = _get_volume_label(letter)
-                if "Google Drive" in label:
+                if _volume_label_matches(label, _GOOGLE_DRIVE_VOLUME_LABELS):
                     roots.append(Path(f"{letter}:\\"))
         return _dedup_paths(roots)
 
@@ -516,7 +534,7 @@ class PCloudProvider(SyncProvider):
         for i, letter in enumerate(string.ascii_uppercase):
             if bitmask & (1 << i):
                 label = _get_volume_label(letter)
-                if "pCloud" in label:
+                if _volume_label_matches(label, _PCLOUD_VOLUME_LABELS):
                     roots.append(Path(f"{letter}:\\"))
         return _dedup_paths(roots)
 

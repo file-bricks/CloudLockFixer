@@ -32,6 +32,16 @@ def test_llms_release_version_matches_package_version() -> None:
     text = (PROJECT_ROOT / "llms.txt").read_text(encoding="utf-8")
     assert f"Release version: {cloudlockfixer.__version__}" in text
 
+    pyproject = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    project_version = re.search(r'(?m)^version\s*=\s*"([^"]+)"', pyproject)
+    assert project_version and project_version.group(1) == cloudlockfixer.__version__
+    assert 'state = "unreleased"' in pyproject
+    assert 'baseline_tag = "v0.2.2"' in pyproject
+
+    release_gate = (PROJECT_ROOT / "RELEASE_GATE.md").read_text(encoding="utf-8")
+    assert "Kanonische Source-Version:** `0.2.2`" in release_gate
+    assert "Historischer Initial-Tag:** `v1.0.0`" in release_gate
+
 
 def test_docs_reference_current_collected_test_count() -> None:
     count = _collect_pytest_count()
