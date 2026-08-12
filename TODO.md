@@ -115,9 +115,9 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 
 Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer. Zehn Aufgaben formalisiert, nicht umgesetzt; Produktdateien, Tests und Builds blieben unverändert.
 
-- TASKPLAN #852 / TW-CLF-01 — Versions- und Release-Stand konsolidieren
-- TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren
-- TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen
+- [x] TASKPLAN #852 / TW-CLF-01 — Versions- und Release-Stand konsolidieren — DONE 2026-07-28 (Git-Arbeitskopie mit origin/main synchronisiert, fast-forwarded & 165 Tests grün)
+- [x] TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren — DONE 2026-07-22 (165 lokale Python-Tests; Linux/macOS nur Source-/CI-Nachweis, kein nativer Release)
+- [x] TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen — DONE 2026-08-11 (TASKSOLVER-Readback gegen Source-/CI-Stand: 8 Provider, `&&`-Ketten, Datenordner-Aktion, Retry-Cap 5; native/integrative Gatter bleiben offen)
 - TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren
 - TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten
 - [x] TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern.
@@ -132,14 +132,14 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
   alleiniger Entwicklungsklon verifiziert. `releases.json`, Workstation-
   `repos.json`/`REPOS-INDEX.md` und der OneDrive-Pointer sind synchron; der alte
   OneDrive-Arbeitsbaum enthält kein `.git`, keinen Quellcode und keine Caches mehr.
-- TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen
-- TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern
+- [x] TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen — DONE 2026-07-22
+- [x] TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern — DONE 2026-07-22
 - TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren
 
 Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
 während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
-pytest -q` liefert lokal 164 gesammelte Tests und ist in README/`llms.txt`/
-CHANGELOG nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart
+pytest -q` sammelt lokal 165 Tests und ist in README/`llms.txt`/CHANGELOG
+nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart
 sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
 bleiben Synology-, Volume-Label-,
 Build-/CI-, Startdiagnose- und Windows-Smoke-Gates

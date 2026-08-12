@@ -25,10 +25,13 @@ keine Details in einem öffentlichen Issue.
 CloudLockFixer führt destruktive Dateisystem-Operationen aus und steuert
 Sync-Clients. Sicherheitsrelevant sind insbesondere:
 
-- Dateisystem-Operationen (umbenennen / verschieben / löschen via copy+delete)
-- Steuerung von Sync-Clients (Prozess beenden/starten, z. B. `OneDrive.exe`)
-- Windows-Registry-Einträge (Autostart `HKCU\...\Run`, Explorer-Kontextmenü)
-- Verarbeitung der Queue-Eingaben (`queue.txt` / `queue.json`, CLI-Argumente)
+- Dateisystem-Operationen (umbenennen / verschieben / löschen via copy+delete mit SHA-256-Inhaltsdigest-Prüfung vor Quell-Löschungen)
+- Steuerung von Sync-Clients (Prozess beenden/starten, z. B. `OneDrive.exe`, `SynologyDrive.exe`, `pCloud.exe`)
+- Autostart-Mechanismen & System-Integration (Windows Registry `HKCU\...\Run`, Linux XDG `.config/autostart`, macOS LaunchAgent `~/Library/LaunchAgents`, Explorer-Kontextmenü)
+- Verarbeitung der Queue-Eingaben (`queue.txt` / `queue.json`, CLI-Argumente und `&&`-Ketten)
+- Retry-/Fehlerzustand: Default-Cap 5; danach wird ein Task als `failed` aus der
+  Pending-Auswahl entfernt. Das ist keine Sicherheitsfreigabe für native
+  Prozess- oder Paketierungsintegration.
 
 ### Reaktionszeit
 
@@ -62,10 +65,13 @@ through GitHub and do not publish details in a public issue.
 CloudLockFixer performs destructive file system operations and controls sync
 clients. Security-relevant areas include:
 
-- File system operations (rename / move / delete via copy+delete)
-- Sync-client control (terminating/starting processes, e.g. `OneDrive.exe`)
-- Windows registry entries (autostart `HKCU\...\Run`, Explorer context menu)
-- Processing of queue input (`queue.txt` / `queue.json`, CLI arguments)
+- File system operations (rename / move / delete via copy+delete with SHA-256 payload digest verification before source deletion)
+- Sync-client control (terminating/starting processes, e.g. `OneDrive.exe`, `SynologyDrive.exe`, `pCloud.exe`)
+- Autostart mechanisms & system integration (Windows Registry `HKCU\...\Run`, Linux XDG `.config/autostart`, macOS LaunchAgent `~/Library/LaunchAgents`, Explorer context menu)
+- Processing of queue input (`queue.txt` / `queue.json`, CLI arguments and `&&` chains)
+- Retry/error state: default cap 5; after the cap a task is marked `failed` and
+  leaves the pending set. This is not a security approval for native process or
+  packaging integration.
 
 ### Response Time
 

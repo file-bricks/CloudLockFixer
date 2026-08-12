@@ -70,4 +70,4 @@ ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
 a local-first delayed action queue for rename, move and delete operations that
 fail because Windows Cloud Files providers temporarily lock paths.
 
-## Last-checked: 2026-07-26
+## Last-checked: 2026-07-28
