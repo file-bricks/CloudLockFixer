@@ -19,7 +19,7 @@ import stat
 import sys
 from pathlib import Path
 
-from .models import Step, Task
+from .models import Outcome, Step, Task
 
 # Fehlercodes, die auf einen temporären Lock hinweisen und einen Retry erlauben.
 # EBUSY (16): Datei von anderem Prozess gehalten (Cloud-Sync, Antivirus, …)
@@ -260,6 +260,16 @@ def execute_step(step: Step) -> tuple[bool, str]:
     return False, f"Unbekannte Operation: {step.op}"
 
 
+def _outcome_for_error(message: str) -> Outcome:
+    """Ordnet deterministische Eingabekonflikte von später retrybaren Fehlern ab."""
+    blocked_prefixes = (
+        "Ziel existiert bereits (Konflikt):",
+        "Neuer Name darf keinen Pfad enthalten",
+        "Unbekannte Operation:",
+    )
+    return "blocked" if message.startswith(blocked_prefixes) else "retryable"
+
+
 def execute_chain(task: Task) -> bool:
     """Führt die Kette ab task.step_index aus. Schritt N nur nach Erfolg N-1."""
     for i in range(task.step_index, len(task.chain)):
@@ -268,7 +278,9 @@ def execute_chain(task: Task) -> bool:
             task.step_index = i + 1
             continue
         task.last_error = f"Schritt {i + 1} ({task.chain[i].describe()}): {msg}"
+        task.last_outcome = _outcome_for_error(msg)
         return False
     task.status = "done"
     task.last_error = ""
+    task.last_outcome = "done"
     return True

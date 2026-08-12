@@ -56,7 +56,7 @@ def run_once(queue: Queue, force_pause: bool = False,
     queue.load()
     pending = queue.pending
     summary = {"pending_start": len(pending), "done": 0, "failed_again": 0,
-               "failed_permanent": 0, "paused_providers": []}
+               "failed_permanent": 0, "blocked": 0, "paused_providers": []}
     if not pending:
         return summary
 
@@ -77,8 +77,13 @@ def run_once(queue: Queue, force_pause: bool = False,
             if execute_chain(t):
                 summary["done"] += 1
                 log.info("Task %s completed.", t.id)
+            elif t.last_outcome == "blocked":
+                t.status = "blocked"
+                summary["blocked"] += 1
+                log.error("Task %s blocked: %s", t.id, t.last_error)
             elif max_retries is not None and t.retry_count >= max_retries:
                 t.status = "failed"
+                t.last_outcome = "permanent"
                 t.last_error = tr("task_failed_max_retries",
                                   n=t.retry_count,
                                   err=t.last_error or tr("task_failed_unknown_error"))
@@ -87,6 +92,7 @@ def run_once(queue: Queue, force_pause: bool = False,
                           t.id, t.retry_count, t.last_error)
             else:
                 t.status = "pending"  # bleibt für nächsten Lauf
+                t.last_outcome = "retryable"
                 summary["failed_again"] += 1
                 log.warning("Task %s still open: %s", t.id, t.last_error)
         queue.save()

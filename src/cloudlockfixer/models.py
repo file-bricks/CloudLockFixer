@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Literal
 
 StepType = Literal["rename", "move", "delete"]
-Status = Literal["pending", "running", "done", "failed"]
+Status = Literal["pending", "running", "done", "failed", "blocked"]
+Outcome = Literal["done", "retryable", "blocked", "permanent"]
 
 _VALID_OPS = ("rename", "move", "delete")
 
@@ -46,6 +47,7 @@ class Task:
     created_at: str = ""
     last_try: str = ""
     last_error: str = ""
+    last_outcome: Outcome = "retryable"
     step_index: int = 0  # nächster auszuführender Schritt (für Wiederaufnahme)
 
     def describe(self) -> str:
@@ -199,7 +201,7 @@ class Queue:
                 if t.status in ("pending", "running") and t.retry_count > 0
             )
             n_failed = sum(
-                1 for t in self.tasks if t.status == "failed"
+                1 for t in self.tasks if t.status in ("failed", "blocked")
             )
             return n_pending, n_retrying, n_failed
 

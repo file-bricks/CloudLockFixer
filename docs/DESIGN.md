@@ -26,7 +26,7 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 
 **1. Core (provider-agnostisch, headless testbar)**
 - **Queue-Store:** `queue.json` (Programm) + `queue.txt` (Mensch/LLM tippt Zeilen, einfache Syntax) → werden gemerged.
-- **Task = Kette aus mindestens einem Schritt.** `queue.txt` und CLI trennen Schritte mit `&&`; der aktuelle Parser akzeptiert `rename`, `move` und `delete`. Status: pending→running→done/failed; retry_count; created/last_try.
+- **Task = Kette aus mindestens einem Schritt.** `queue.txt` und CLI trennen Schritte mit `&&`; der aktuelle Parser akzeptiert `rename`, `move` und `delete`. Status: pending→running→done/blocked/failed; `last_outcome` hält `done`, `retryable`, `blocked` oder `permanent`; dazu retry_count, created/last_try.
 - **Sichere Ausführung:** Schritt N folgt erst auf den Erfolg von N-1. Bei `move`/`rename` wird die copy+delete-Fallback-Kopie vor dem Quell-Löschen per SHA-256-Inhaltsdigest verifiziert; ein Fehlschlag bleibt für einen späteren Versuch offen.
 - **Universelle Primitive = copy+delete** (`ops.py`): rename/move werden als copy→verify→delete umgesetzt (umgeht `cldflt`). Reiner in-place-Versuch zuerst (schnell), bei „Zugriff verweigert"/EXDEV automatisch copy+delete-Fallback.
 - **Worker:** bei Start + periodisch (Default **2 h**, einstellbar in 30-min-Schritten) + „Jetzt". Retryfähige Tasks bleiben standardmäßig bis zum Erfolg `pending`; nur ein expliziter endlicher `max_retries`-Aufruf setzt nach dem Limit dauerhaft `failed`.
@@ -52,10 +52,11 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 
 ## Fehlerbehandlung
 - `max_retries` ist standardmäßig `None`: retryfähige Tasks bleiben pending und werden weiter aufgegriffen. Ein Aufrufer kann ein endliches Limit setzen; ein persistierbares Backoff-/Retry-Profil bleibt offen.
+- Deterministische Ziel- oder Eingabekonflikte werden als `blocked` persistiert und nicht endlos erneut versucht. Ein explizites Retry-Limit markiert weiterhin `permanent`/`failed`.
 - Nichts Destruktives ohne erfüllte Vorbedingung. Jede Aktion geloggt (`clf.log`).
 
 ## Tests
-- `PYTHONPATH=src python -m pytest -q`: aktuell **166 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
+- `PYTHONPATH=src python -m pytest -q`: aktuell **167 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
 
 ## Phasen
 - **P1 (MVP):** Core + `ops` (copy+delete) + OneDriveProvider + Worker + CLI + Tray + Autostart + Tests.
@@ -63,4 +64,4 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 - **P3:** Präventiv-Wächter; weitere Provider-Adapter bleiben optionaler Ausbau.
 
 ## Datenfluss (kurz)
-`CLI/queue.txt/Tray` → Task in `queue.json` → Worker (Start/Timer/Jetzt) → pro Task: (optional Provider.pause, nicht bei Virtual Mounts) → Kette Schritt-für-Schritt via `ops` (in-place try → copy+delete-Fallback mit Verify) → Erfolg: done/Log; retryfähiger Fehler: pending für späteren Lauf; explizites Limit erreicht: `failed` → (Provider.resume).
+`CLI/queue.txt/Tray` → Task in `queue.json` → Worker (Start/Timer/Jetzt) → pro Task: (optional Provider.pause, nicht bei Virtual Mounts) → Kette Schritt-für-Schritt via `ops` (in-place try → copy+delete-Fallback mit Verify) → Erfolg: done/Log; retryfähiger Fehler: pending für späteren Lauf; deterministischer Zielkonflikt: blocked; explizites Limit erreicht: permanent/failed → (Provider.resume).

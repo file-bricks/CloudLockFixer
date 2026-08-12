@@ -10,8 +10,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Shields.io Badges (Tests, Python-Versionen, Lizenz, LLM-Ready) und LLM-Integrationshinweis in `README.md`.
 
 ### Geändert / Changed
+- Worker-Ausgänge sind jetzt persistiert als `done`, `retryable`, `blocked`
+  oder `permanent`. Ein bestehendes Ziel wird als sichtbarer `blocked`-Konflikt
+  behandelt, temporär fehlende Quellen bleiben retryfähig.
 - ROADMAP und TASKPLAN-Readback auf den verifizierten Retry-Vertrag (unbegrenzter
-  Standard, 166 Tests) korrigiert.
+  Standard, 167 Tests) korrigiert.
 - Retryfähige Aufgaben bleiben standardmäßig unbegrenzt `pending`, statt nach
   fünf Versuchen als dauerhaft fehlgeschlagen verworfen zu werden. Ein
   endliches Limit bleibt als expliziter Worker-Parameter verfügbar; eine
@@ -26,7 +29,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 166 passing
+- `llms.txt` now reflects the current unreleased source state: 167 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.

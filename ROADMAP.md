@@ -60,7 +60,7 @@
   „Open data folder“ statt eines behaupteten Queue-/Log-Viewers.
 - **Retry-Vertrag:** Default unbegrenzt: retryfähige Tasks bleiben pending.
   Ein endliches Limit ist nur ein expliziter Aufruferparameter.
-- **Nachweis:** 166 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
+- **Nachweis:** 167 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
   Paketierung, echte Client-Prozess-Smokes und Security-Freigabe bleiben offen.
 
 ## Langfristig
@@ -73,6 +73,9 @@
 - [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit).
   Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
   endliches Limit übergeben.
+- [x] Strukturierte Ausgänge für Worker-Fehler: retryfähige Fehler bleiben
+  `pending`; deterministische Zielkonflikte werden als `blocked` gespeichert;
+  ein explizites Limit bleibt `permanent`/`failed`.
 - [ ] Benachrichtigungen (System-Toast bei Dauerfehler)
 - [ ] Web-Dashboard / Remote-Status
 - [ ] Plugin-System für Community-Provider

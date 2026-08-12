@@ -74,6 +74,11 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 ## Nächste Schritte (aus ROADMAP.md)
 
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
+- [x] P1: Fehlerausgänge bis zum Worker klassifizieren — DONE 2026-08-12:
+      `last_outcome` unterscheidet `done`, `retryable`, `blocked` und
+      `permanent`; bestehende Zielkonflikte werden sichtbar `blocked`, während
+      temporär fehlende Quellen retryfähig bleiben. Regression:
+      `test_worker_blocks_deterministic_target_conflict`.
 - [x] Projekt-Testzahl und Cross-Platform-Status in README/`llms.txt`/Roadmap
       auf den echten lokalen Stand ziehen. -- DONE 2026-07-17
       `PYTHONPATH=src python -m pytest -q` lieferte am 2026-07-17 noch 157/157 grün; README,

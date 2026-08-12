@@ -270,6 +270,27 @@ def test_failed_task_excluded_from_pending_property(tmp_path):
     assert t not in q.pending
 
 
+def test_worker_blocks_deterministic_target_conflict(tmp_path):
+    """Ein existierendes Ziel ist ein sichtbarer Konflikt, kein Endlos-Retry."""
+    from cloudlockfixer.worker import run_once
+
+    src = tmp_path / "source.txt"
+    dst = tmp_path / "target.txt"
+    src.write_text("source", encoding="utf-8")
+    dst.write_text("target", encoding="utf-8")
+    q = Queue(tmp_path / "queue")
+    q.add(Task(chain=[Step(op="move", src=str(src), arg=str(dst))]))
+
+    summary = run_once(q)
+
+    task = q.tasks[0]
+    assert summary["blocked"] == 1
+    assert task.status == "blocked"
+    assert task.last_outcome == "blocked"
+    assert task.retry_count == 1
+    assert task not in q.pending
+
+
 # ── FIX 4: Provider-Lock serialisiert pause()/resume() ─────────────────
 
 def test_provider_has_instance_lock():
