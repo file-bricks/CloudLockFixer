@@ -46,12 +46,13 @@ def _providers_to_pause(tasks: list[Task], force_pause: bool) -> set[SyncProvide
 
 
 def run_once(queue: Queue, force_pause: bool = False,
-             max_retries: int = DEFAULT_MAX_RETRIES) -> dict:
+             max_retries: int | None = DEFAULT_MAX_RETRIES) -> dict:
     """Versucht alle offenen Tasks einmal. Gibt eine Ergebnis-Zusammenfassung.
 
-    Tasks, die dauerhaft scheitern (z.B. weil die Quelle endgültig fehlt),
-    werden nach `max_retries` Versuchen auf status="failed" gesetzt und nicht
-    mehr aufgegriffen — verhindert Endlos-Retry."""
+    Ohne explizites Limit bleiben fehlgeschlagene Tasks pending und werden bei
+    späteren Läufen erneut versucht. Ein positiver, endlicher ``max_retries``
+    kann für aufruferspezifische Sicherheitsgrenzen weiterhin gesetzt werden.
+    """
     queue.load()
     pending = queue.pending
     summary = {"pending_start": len(pending), "done": 0, "failed_again": 0,
@@ -76,7 +77,7 @@ def run_once(queue: Queue, force_pause: bool = False,
             if execute_chain(t):
                 summary["done"] += 1
                 log.info("Task %s completed.", t.id)
-            elif t.retry_count >= max_retries:
+            elif max_retries is not None and t.retry_count >= max_retries:
                 t.status = "failed"
                 t.last_error = tr("task_failed_max_retries",
                                   n=t.retry_count,

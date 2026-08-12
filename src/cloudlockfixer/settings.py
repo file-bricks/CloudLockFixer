@@ -6,7 +6,9 @@ import json
 from .paths import data_dir
 
 DEFAULT_INTERVAL_MIN = 120  # 2 h
-DEFAULT_MAX_RETRIES = 5  # danach wird ein Task als "failed" markiert (kein Endlos-Retry)
+# Cloud locks are normally temporary.  Keep the product's fire-and-forget
+# contract unless a caller deliberately supplies a finite safety limit.
+DEFAULT_MAX_RETRIES: int | None = None
 
 
 def _path():

@@ -58,7 +58,8 @@
   pCloud sind Virtual Mounts und werden nicht pausiert.
 - **Queue-/Tray-Vertrag:** `rename`/`move`/`delete`, Ketten mit `&&`, Menüaktion
   „Open data folder“ statt eines behaupteten Queue-/Log-Viewers.
-- **Retry-Vertrag:** Default-Cap 5; danach `failed` und nicht mehr pending.
+- **Retry-Vertrag:** Default unbegrenzt: retryfähige Tasks bleiben pending.
+  Ein endliches Limit ist nur ein expliziter Aufruferparameter.
 - **Nachweis:** 165 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
   Paketierung, echte Client-Prozess-Smokes und Security-Freigabe bleiben offen.
 
@@ -69,8 +70,9 @@
   - Nextcloud erledigt 2026-06-16
   - pCloud erledigt 2026-06-28
   - Synology Drive erledigt 2026-06-30
-- [ ] Konfigurierbares Retry-Verhalten (Backoff und Cap); der aktuelle Default-Cap
-  beträgt 5 Versuche und ist kein unbegrenzter Retry.
+- [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit).
+  Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
+  endliches Limit übergeben.
 - [ ] Benachrichtigungen (System-Toast bei Dauerfehler)
 - [ ] Web-Dashboard / Remote-Status
 - [ ] Plugin-System für Community-Provider

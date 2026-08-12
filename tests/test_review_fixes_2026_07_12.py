@@ -4,7 +4,7 @@ Abgedeckt:
   FIX 1  Virtual-Mount-Guard im Praeventiv-Waechter (tick + Watcher-Bau)
   FIX 2  Robuster Laufwerks-Scan (_get_volume_label: SetThreadErrorMode +
          GetDriveTypeW-Filter)
-  FIX 3  Retry-Cap + failed-Status im Worker
+  FIX 3  Optionales Retry-Limit; Default bleibt fire-and-forget pending
   FIX 4  Watcher/Worker-Race: RLock je Provider-Instanz serialisiert
          pause()/resume()
 """
@@ -195,7 +195,7 @@ def test_get_volume_label_accepts_remote_drive(monkeypatch):
     assert fake.get_volume_calls == 1
 
 
-# ── FIX 3: Retry-Cap + failed-Status ───────────────────────────────────
+# ── FIX 3: Optionales Retry-Limit, unbegrenzter Default ────────────────
 
 def _failing_queue(tmp_path) -> Queue:
     q = Queue(tmp_path)
@@ -207,8 +207,7 @@ def _failing_queue(tmp_path) -> Queue:
 
 
 def test_worker_marks_task_failed_after_cap(tmp_path):
-    """FIX 3: ein dauerhaft scheiternder Task wird nach max_retries auf 'failed'
-    gesetzt und danach nicht mehr aufgegriffen.
+    """Ein explizites Limit setzt dauerhaft scheiternde Tasks auf 'failed'.
 
     Hinweis: run_once() ruft queue.load() auf und ersetzt die Task-Objekte —
     der aktuelle Zustand wird darum nach jedem Lauf frisch aus q.tasks gelesen."""
@@ -230,6 +229,20 @@ def test_worker_marks_task_failed_after_cap(tmp_path):
     assert task.status == "failed"
     assert task.retry_count == 3
     assert "3" in task.last_error  # aussagekraeftige Meldung mit Versuchszahl
+
+
+def test_worker_default_keeps_retryable_task_pending_past_six_attempts(tmp_path):
+    """Der Default darf temporäre Cloud-Locks nicht nach fünf Läufen aufgeben."""
+    from cloudlockfixer.worker import run_once
+
+    q = _failing_queue(tmp_path)
+    for expected in range(1, 7):
+        summary = run_once(q)
+        task = q.tasks[0]
+        assert summary["failed_again"] == 1
+        assert summary["failed_permanent"] == 0
+        assert task.status == "pending"
+        assert task.retry_count == expected
 
 
 def test_failed_task_not_picked_up_again(tmp_path):
