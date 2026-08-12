@@ -1,8 +1,8 @@
 # CloudLockFixer — Windows-Release-Gate
 
-**Status:** nicht als Release freigegeben  
-**Kanonische Source-Version:** `0.2.2`  
-**Baseline-Tag:** `v0.2.2`  
+**Status:** nicht als Release freigegeben
+**Kanonische Source-Version:** `0.2.2`
+**Baseline-Tag:** `v0.2.2`
 **Historischer Initial-Tag:** `v1.0.0`
 
 ## Versions- und Release-Vertrag
