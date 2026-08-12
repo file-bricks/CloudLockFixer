@@ -10,6 +10,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Shields.io Badges (Tests, Python-Versionen, Lizenz, LLM-Ready) und LLM-Integrationshinweis in `README.md`.
 
 ### Geändert / Changed
+- ROADMAP und TASKPLAN-Readback auf den verifizierten Retry-Vertrag (unbegrenzter
+  Standard, 166 Tests) korrigiert.
 - Retryfähige Aufgaben bleiben standardmäßig unbegrenzt `pending`, statt nach
   fünf Versuchen als dauerhaft fehlgeschlagen verworfen zu werden. Ein
   endliches Limit bleibt als expliziter Worker-Parameter verfügbar; eine

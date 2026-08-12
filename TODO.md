@@ -117,7 +117,7 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 
 - [x] TASKPLAN #852 / TW-CLF-01 — Versions- und Release-Stand konsolidieren — DONE 2026-07-28 (Git-Arbeitskopie mit origin/main synchronisiert, fast-forwarded & 165 Tests grün)
 - [x] TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren — DONE 2026-07-22 (165 lokale Python-Tests; Linux/macOS nur Source-/CI-Nachweis, kein nativer Release)
-- [x] TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen — DONE 2026-08-11 (TASKSOLVER-Readback gegen Source-/CI-Stand: 8 Provider, `&&`-Ketten, Datenordner-Aktion, Retry-Cap 5; native/integrative Gatter bleiben offen)
+- [x] TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen — DONE 2026-08-11, Retry-Vertrag am 2026-08-12 korrigiert: 8 Provider, `&&`-Ketten, Datenordner-Aktion und unbegrenzter Default für retryfähige Tasks; native/integrative Gatter bleiben offen.
 - TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren
 - TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten
 - [x] TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern.

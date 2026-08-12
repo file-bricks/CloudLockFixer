@@ -60,7 +60,7 @@
   „Open data folder“ statt eines behaupteten Queue-/Log-Viewers.
 - **Retry-Vertrag:** Default unbegrenzt: retryfähige Tasks bleiben pending.
   Ein endliches Limit ist nur ein expliziter Aufruferparameter.
-- **Nachweis:** 165 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
+- **Nachweis:** 166 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
   Paketierung, echte Client-Prozess-Smokes und Security-Freigabe bleiben offen.
 
 ## Langfristig
