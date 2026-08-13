@@ -183,6 +183,16 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
     if not src.exists():
         return False, f"Quelle fehlt: {src}", False
     if dst.exists():
+        try:
+            if src.samefile(dst):
+                return True, "bereits am Ziel", False
+        except OSError:
+            pass
+        if _verify_copy(src, dst):
+            ok, msg = _delete_path(src)
+            if ok:
+                return True, "bereits kopiert; Quelle entfernt", True
+            return False, f"Kopiert, aber Quelle noch gesperrt — Retry später ({msg})", True
         return False, f"Ziel existiert bereits (Konflikt): {dst}", False
     try:
         dst.parent.mkdir(parents=True, exist_ok=True)

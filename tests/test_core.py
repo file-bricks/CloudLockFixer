@@ -128,6 +128,19 @@ def test_move_conflict_when_dst_differs(tmp_path):
     assert src.exists() and dst.exists()  # nichts zerstoert
 
 
+def test_move_retries_after_persist_lost_but_copy_is_complete(tmp_path):
+    """Wenn der Copy-Teil schon vollständig ist, darf ein verlorenes copied-Flag
+    den Retry nicht als Zielkonflikt blockieren."""
+    src = _mkdir_with_file(tmp_path / "old", "payload")
+    dst = _mkdir_with_file(tmp_path / "new", "payload")
+
+    ok, msg = ops.move_path(src, dst)
+
+    assert ok, msg
+    assert dst.exists()
+    assert not src.exists()
+
+
 # ── Ketten: delete erst nach Erfolg ─────────────────────────────────
 
 def test_chain_move_then_delete(tmp_path):
