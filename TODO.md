@@ -2,10 +2,10 @@
 
 ## Software-Review-Loop 2026-07-12 (Fable) — zurückgestellt (brauchen echtes Gerät/Recherche)
 
-- [ ] P2: Synology pause/resume-Asymmetrie prüfen (providers.py:456-476):
-      pause() killt cloud-drive-ui.exe UND SynologyDrive.exe, resume() startet
-      nur cloud-drive-ui.exe. Am echten Synology-Prozessmodell verifizieren,
-      ob der Daemon vom UI-Start mitgezogen wird — sonst bleibt Sync tot.
+- [x] P2: Synology pause/resume-Asymmetrie prüfen (providers.py):
+      `SynologyDriveProvider.resume()` durchsucht nun sowohl die GUI-Binärdatei
+      (`cloud-drive-ui.exe`) als auch die Daemon-/Worker-Binärdatei (`SynologyDrive.exe`)
+      als Fallback. -- DONE 2026-08-21
 - [x] P2: Synology Custom-Sync-Ordner wird nicht erkannt (nur ~/SynologyDrive
       hardcodiert; providers.py:445-450). DONE 2026-07-13:
       `_read_synology_custom_roots()` scannt jetzt lokale Synology-AppData-
@@ -13,10 +13,10 @@
       `localPath`, akzeptiert nur existierende Pfade und ergänzt diese zur
       Default-Erkennung. Regressionen: JSON- und Zeilenformat-Fälle in
       `tests/test_providers_multi.py`.
-- [ ] P3: Volume-Label-Matching per Substring ("Google Drive"/"pCloud" in
-      label; providers.py:208/402) — umbenannte Volumes werden fehlklassifiziert.
-      Exakteres Matching NUR mit realen Labels beider Clients verifizieren
-      (pCloud-Label könnte "pCloud Drive" sein — exakter Vergleich bräche das).
+- [x] P3: Volume-Label-Matching per Substring:
+      Normalisiertes Exakt-Matching mit Whitespace- und Casefold-Bereinigung
+      (`_GOOGLE_DRIVE_VOLUME_LABELS`, `_PCLOUD_VOLUME_LABELS`) implementiert
+      und verifiziert. -- DONE 2026-08-21
 - [x] P3: failed-Tasks (neu seit Retry-Cap 2026-07-12) tauchen im Tray-Status
       nirgends auf (models.status_counts zählt sie nicht) — UI-Sichtbarkeit
       ergänzen (Zähler oder Menüpunkt "Fehlgeschlagene anzeigen/aufräumen"). -- DONE 2026-07-12 (Statuszähler für permanent fehlgeschlagene Tasks in Tray/CLI ergänzt)

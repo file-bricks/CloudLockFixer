@@ -1,6 +1,5 @@
 """Tests fuer P2 (Kontextmenue-Command) und P3 (Praeventiv-Waechter-Logik)."""
 import subprocess
-from pathlib import Path
 
 from cloudlockfixer import contextmenu
 from cloudlockfixer.providers import OneDriveProvider, SyncProvider
@@ -53,7 +52,7 @@ def test_contextmenu_is_installed_checks_all_bases(monkeypatch):
     if sys.platform != "win32":
         return  # nur auf Windows ausfuehrbar (winreg existiert nicht auf Linux/Mac)
     import winreg
-    from cloudlockfixer.contextmenu import _BASES, is_installed
+    from cloudlockfixer.contextmenu import is_installed
 
     call_count = {"n": 0}
 

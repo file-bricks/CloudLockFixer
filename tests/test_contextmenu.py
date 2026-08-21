@@ -1,9 +1,7 @@
 """Tests fuer contextmenu._command() — insbesondere PyInstaller-frozen-Erkennung."""
 import sys
-import types
 import unittest.mock as mock
 
-import pytest
 
 
 def _get_command(op: str, frozen: bool, exe: str = r"C:\App\clf.exe"):

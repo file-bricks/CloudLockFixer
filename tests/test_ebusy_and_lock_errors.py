@@ -9,15 +9,12 @@ Bug 3: Verzeichnis-Rename mit gesperrter Innendatei
 
 import errno
 import os
-import stat
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
-import pytest
 
 from cloudlockfixer import ops
 from cloudlockfixer.ops import _is_lock_error, _LOCK_ERRNOS, _delete_dir_skip_locked
-from cloudlockfixer.models import Queue, Step, Task
+from cloudlockfixer.models import Step, Task
 
 
 # ── Bug 1: _is_lock_error() erkennt EBUSY und verwandte Codes ──────────

@@ -13,7 +13,6 @@ from __future__ import annotations
 import threading
 import time
 
-import pytest
 
 from cloudlockfixer.models import Queue, Step, Task
 from cloudlockfixer.providers import SyncProvider

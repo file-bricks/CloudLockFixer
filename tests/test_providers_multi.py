@@ -7,7 +7,7 @@ from cloudlockfixer.providers import (
     BoxProvider, DropboxProvider, GoogleDriveProvider, ICloudProvider, NextcloudProvider,
     OneDriveProvider, PCloudProvider, SynologyDriveProvider,
     SyncProvider, _GOOGLE_DRIVE_VOLUME_LABELS, _PCLOUD_VOLUME_LABELS,
-    _discover_providers, _get_providers, _is_subpath, _volume_label_matches,
+    _discover_providers, _is_subpath, _volume_label_matches,
     available_providers, provider_for,
 )
 from cloudlockfixer.worker import _providers_to_pause
@@ -438,7 +438,6 @@ def test_pcloud_resume_tries_known_paths(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "platform", "win32")
 
     # Patch die candidates-Liste via _LOCALAPPDATA-Pfad im Provider
-    import os
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
 
     # Zieldatei muss exakt am erwarteten Pfad liegen
@@ -625,3 +624,47 @@ def test_provider_for_resolves_synology_drive_root(monkeypatch, tmp_path):
         assert p is not None and p.name == "Synology Drive"
     finally:
         pmod._PROVIDERS = old
+
+
+def test_synology_drive_resume_falls_back_to_daemon_exe(monkeypatch, tmp_path):
+    """resume() muss SynologyDrive.exe starten, falls cloud-drive-ui.exe fehlt."""
+    import subprocess as sp
+    import sys
+
+    started: list[str] = []
+
+    def fake_popen(cmd):
+        started.append(cmd[0])
+
+    monkeypatch.setattr(sp, "Popen", fake_popen)
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+
+    synology_dir = tmp_path / "SynologyDrive" / "SynologyDrive.app" / "bin"
+    synology_dir.mkdir(parents=True)
+    daemon_exe = synology_dir / "SynologyDrive.exe"
+    daemon_exe.write_text("x", encoding="utf-8")
+
+    result = SynologyDriveProvider().resume()
+    assert result is True
+    assert len(started) == 1
+    assert Path(started[0]).name == "SynologyDrive.exe"
+
+
+def test_volume_label_matching_variants():
+    from cloudlockfixer.providers import (
+        _GOOGLE_DRIVE_VOLUME_LABELS,
+        _PCLOUD_VOLUME_LABELS,
+        _volume_label_matches,
+    )
+    # Google Drive exact label matching with whitespace/case normalization
+    assert _volume_label_matches("Google Drive", _GOOGLE_DRIVE_VOLUME_LABELS)
+    assert _volume_label_matches("  GOOGLE   DRIVE  ", _GOOGLE_DRIVE_VOLUME_LABELS)
+    assert not _volume_label_matches("Google Drive Backup", _GOOGLE_DRIVE_VOLUME_LABELS)
+    assert not _volume_label_matches("My Google Drive", _GOOGLE_DRIVE_VOLUME_LABELS)
+
+    # pCloud exact label matching with whitespace/case normalization
+    assert _volume_label_matches("pCloud Drive", _PCLOUD_VOLUME_LABELS)
+    assert _volume_label_matches("  PCLOUD   DRIVE  ", _PCLOUD_VOLUME_LABELS)
+    assert not _volume_label_matches("pCloud", _PCLOUD_VOLUME_LABELS)
+    assert not _volume_label_matches("pCloud Archive Disk", _PCLOUD_VOLUME_LABELS)

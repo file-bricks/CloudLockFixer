@@ -390,7 +390,7 @@ def test_refresh_status_skips_load_when_running(tmp_path):
     und erledigte Tasks erscheinen nach dem Lauf wieder als pending."""
     import os
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-    from unittest.mock import MagicMock, patch
+    from unittest.mock import MagicMock
 
     from cloudlockfixer.models import Queue
     from cloudlockfixer.tray import TrayApp

@@ -6,6 +6,20 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **Tier-2 I18N-Expansion (Policy P-006):** Vollständige Unterstützung für 6 Sprachen
+  (Deutsch `de`, Englisch `en`, Spanisch `es`, Chinesisch `zh`, Japanisch `ja`,
+  Russisch `ru`) über alle 68 Übersetzungsschlüssel im strukturierten Dict-Katalog
+  in `src/cloudlockfixer/i18n.py`.
+- Erweiterte Spracherkennung in `i18n.detect_language()` und `settings.resolve_language()`
+  für `es`, `zh`, `ja` und `ru`.
+- Neues Sprachauswahl-Menü in `src/cloudlockfixer/tray.py` mit direkter Umschaltung
+  aller 6 Sprachen inklusive Neustart-Hinweis.
+- **Synology Drive & Daemon-Fallback:** `SynologyDriveProvider.resume()` startet nun
+  auch `SynologyDrive.exe` als Fallback, falls die `cloud-drive-ui.exe`-GUI nicht
+  vorhanden ist.
+- 173/173 verifizierte Pytest-Tests (100% grün).
+
+### Hinzugefügt / Added
 - PEP 621 `pyproject.toml` mit Paketmetadaten, Pytest-Konfiguration und CLI-Entrypoint.
 - Shields.io Badges (Tests, Python-Versionen, Lizenz, LLM-Ready) und LLM-Integrationshinweis in `README.md`.
 
@@ -32,7 +46,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 168 passing
+- `llms.txt` now reflects the current unreleased source state: 173 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.

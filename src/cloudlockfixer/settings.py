@@ -41,9 +41,9 @@ def save(settings: dict) -> None:
 
 
 def resolve_language(cfg: dict) -> str:
-    """Map stored "auto"/"de"/"en" -> concrete "de"/"en"."""
+    """Map stored "auto"/"de"/"en"/"es"/"zh"/"ja"/"ru" -> concrete language."""
     lang = cfg.get("language", "auto")
-    if lang in ("de", "en"):
+    if lang in ("de", "en", "es", "zh", "ja", "ru"):
         return lang
     from .i18n import detect_language
     return detect_language()

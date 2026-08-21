@@ -164,8 +164,15 @@ class TrayApp:
         lang_grp = QActionGroup(self.menu)
         lang_grp.setExclusive(True)
         cur_lang = self.settings.get("language", "auto")
-        for code, label in [("auto", t("language_auto")),
-                            ("de", "Deutsch"), ("en", "English")]:
+        for code, label in [
+            ("auto", t("language_auto")),
+            ("de", "Deutsch"),
+            ("en", "English"),
+            ("es", "Español"),
+            ("zh", "中文 (简体)"),
+            ("ja", "日本語"),
+            ("ru", "Русский"),
+        ]:
             a = QAction(label, self.menu, checkable=True)
             a.setChecked(code == cur_lang)
             a.triggered.connect(lambda _=False, c=code: self._set_language(c))

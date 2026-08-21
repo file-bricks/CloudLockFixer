@@ -604,6 +604,9 @@ class SynologyDriveProvider(SyncProvider):
             Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
             Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
             Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
+            Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "SynologyDrive.exe",
+            Path(r"C:\Program Files\Synology\Synology Drive Client\SynologyDrive.exe"),
+            Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\SynologyDrive.exe"),
         ]
         with self._lock:
             for exe in candidates:
