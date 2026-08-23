@@ -596,6 +596,14 @@ _CATALOG: dict[str, dict[Language, str]] = {
         'ja': "ID '{id}' のタスクが見つかりません。",
         'ru': "Задача с ID '{id}' не найдена.",
     },
+    'task_not_retryable': {
+        'de': "Task {id} kann mit Status „{status}“ nicht wiederholt werden.",
+        'en': "Task {id} cannot be retried while its status is '{status}'.",
+        'es': "La tarea {id} no se puede reintentar mientras tenga el estado '{status}'.",
+        'zh': "状态为“{status}”的任务 {id} 无法重试。",
+        'ja': "ステータスが「{status}」のタスク {id} は再試行できません。",
+        'ru': "Задачу {id} со статусом «{status}» нельзя повторить.",
+    },
     'tasks_retried_summary': {
         'de': '{count} fehlgeschlagene/blockierte Aufgabe(n) zur Wiederaufnahme vorgemerkt.',
         'en': '{count} failed/blocked task(s) queued for retry.',

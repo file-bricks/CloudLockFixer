@@ -113,7 +113,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "retry":
         task = queue.retry_task(args.task_id)
         if task is None:
-            print(t("task_not_found", id=args.task_id), file=sys.stderr)
+            existing = queue.get_task(args.task_id)
+            if existing is None:
+                print(t("task_not_found", id=args.task_id), file=sys.stderr)
+            else:
+                print(t("task_not_retryable", id=existing.id, status=existing.status),
+                      file=sys.stderr)
             return 1
         print(t("task_retried", id=task.id, desc=task.describe()))
         return 0

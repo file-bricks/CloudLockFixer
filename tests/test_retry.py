@@ -65,6 +65,16 @@ def test_queue_retry_task_handles_blocked_task(tmp_path: Path):
     assert ret.last_outcome == "retryable"
 
 
+def test_queue_retry_task_rejects_completed_task(tmp_path: Path):
+    q = Queue(tmp_path)
+    q.add(Task(chain=[Step(op="delete", src="done.txt")], id="done001", status="done"))
+
+    assert q.retry_task("done001") is None
+
+    reloaded = Queue(tmp_path)
+    assert reloaded.tasks[0].status == "done"
+
+
 def test_queue_retry_task_unknown_id_returns_none(tmp_path: Path):
     q = Queue(tmp_path)
     t = Task(chain=[Step(op="delete", src="file.txt")], id="task003", status="failed")
@@ -131,6 +141,20 @@ def test_cli_retry_nonexistent_task(tmp_path: Path, monkeypatch, capsys):
     assert code == 1
     captured = capsys.readouterr()
     assert "not_there" in captured.err
+
+
+def test_cli_retry_completed_task_reports_ineligible_status(tmp_path: Path, monkeypatch, capsys):
+    monkeypatch.setattr(cli, "data_dir", lambda: tmp_path)
+    q = Queue(tmp_path)
+    q.add(Task(chain=[Step(op="delete", src="done.txt")], id="done001", status="done"))
+
+    code = cli.main(["retry", "done001"])
+    assert code == 1
+    captured = capsys.readouterr()
+    assert "done001" in captured.err
+    assert "done" in captured.err
+
+    assert Queue(tmp_path).tasks[0].status == "done"
 
 
 def test_cli_retry_all_with_failed_tasks(tmp_path: Path, monkeypatch, capsys):

@@ -121,7 +121,7 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **183 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **185 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + dauerhafter Retry-Default + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und

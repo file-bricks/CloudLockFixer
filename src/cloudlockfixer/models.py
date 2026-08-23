@@ -205,15 +205,20 @@ class Queue:
             )
             return n_pending, n_retrying, n_failed
 
+    def get_task(self, task_id: str) -> Task | None:
+        """Gibt einen Task per ID thread-sicher zurück."""
+        with self._lock:
+            return next((t for t in self.tasks if t.id == task_id), None)
+
     def retry_task(self, task_id: str) -> Task | None:
-        """Setzt einen Task (insbesondere fehlgeschlagen oder blockiert) atomar auf 'pending' zurück.
+        """Setzt nur fehlgeschlagene oder blockierte Tasks atomar auf 'pending' zurück.
 
         Fortschritt (step_index, Step.copied) und letzte Fehlermeldung bleiben erhalten,
         aber retry_count wird auf 0 und last_outcome auf 'retryable' zurückgesetzt.
         """
         with self._lock:
             for t in self.tasks:
-                if t.id == task_id:
+                if t.id == task_id and t.status in ("failed", "blocked"):
                     t.status = "pending"
                     t.retry_count = 0
                     t.last_outcome = "retryable"

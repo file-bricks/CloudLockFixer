@@ -27,7 +27,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Synology Drive & Daemon-Fallback:** `SynologyDriveProvider.resume()` startet nun
   auch `SynologyDrive.exe` als Fallback, falls die `cloud-drive-ui.exe`-GUI nicht
   vorhanden ist.
-- 183/183 verifizierte Pytest-Tests (100% grün).
+- 185/185 verifizierte Pytest-Tests (100% grün).
 
 ### Hinzugefügt / Added
 - PEP 621 `pyproject.toml` mit Paketmetadaten, Pytest-Konfiguration und CLI-Entrypoint.
@@ -56,7 +56,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 183 passing
+- `llms.txt` now reflects the current unreleased source state: 185 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
@@ -118,6 +118,10 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   `0x8007016A`, and cloud-sync locked-folder retry workflows.
 
 ### Behoben / Fixed
+- **Sichere Einzelwiederholung:** `clf retry <id>` lehnt nun erledigte und bereits
+  laufende Aufgaben ab, statt sie still wieder in die Queue zu stellen. Die CLI
+  nennt den aktuellen Status, sodass ausschließlich fehlgeschlagene oder blockierte
+  Aufgaben wiederholt werden können.
 - **Tray-Einstellungsfehler sind erklärt:** Wenn Windows Autostart oder das
   Explorer-Kontextmenü nicht anlegen beziehungsweise entfernen kann, setzt die
   App das Häkchen weiterhin auf den tatsächlichen Zustand zurück und zeigt nun
