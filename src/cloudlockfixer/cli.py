@@ -50,6 +50,11 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--pause", action="store_true",
                        help=t("cli_pause_help"))
 
+    p_retry = sub.add_parser("retry", help=t("cli_retry_help"))
+    p_retry.add_argument("task_id", metavar="ID", help=t("cli_retry_id_help"))
+
+    sub.add_parser("retry-all", help=t("cli_retry_all_help"))
+
     p_ctx = sub.add_parser("context", help=t("cli_context_help"))
     gc = p_ctx.add_mutually_exclusive_group(required=True)
     gc.add_argument("--install", action="store_true")
@@ -103,6 +108,22 @@ def main(argv: list[str] | None = None) -> int:
                 failed=summary["failed_again"],
                 permanent=summary["failed_permanent"],
                 start=summary["pending_start"], paused=paused))
+        return 0
+
+    if args.cmd == "retry":
+        task = queue.retry_task(args.task_id)
+        if task is None:
+            print(t("task_not_found", id=args.task_id), file=sys.stderr)
+            return 1
+        print(t("task_retried", id=task.id, desc=task.describe()))
+        return 0
+
+    if args.cmd == "retry-all":
+        retried = queue.retry_all()
+        if not retried:
+            print(t("no_failed_tasks"))
+            return 0
+        print(t("tasks_retried_summary", count=len(retried)))
         return 0
 
     if args.cmd == "context":

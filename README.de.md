@@ -78,6 +78,8 @@ clf add --move   "C:\local\x"        "C:\onedrive\x"
 clf add --delete "C:\onedrive\alt"
 clf add --chain  'move "C:\local\x" "C:\onedrive\x" && delete "C:\onedrive\alt"'
 clf list
+clf retry <id>
+clf retry-all
 clf run-now [--pause]
 ```
 (Aufruf in dev: `PYTHONPATH=src python -m cloudlockfixer.cli ...`)
@@ -112,14 +114,14 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 
 ## Status / Roadmap
 
-- **P1 (fertig):** Core (copy+delete, Ketten, Retry) · CLI · `queue.txt` · Tray ·
-  Autostart · OneDrive-Provider.
+- **P1 (fertig):** Core (copy+delete, Ketten, Retry) · CLI (`add`, `list`, `retry`, `retry-all`, `run-now`) ·
+  `queue.txt` · Tray (mit Wiederaufnahme-Aktion) · Autostart · OneDrive-Provider.
 - **P2 (fertig):** Explorer-Rechtsklick-Kontextmenü (HKCU-Kaskade, opt-in via
   Tray-Toggle).
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **173 grün** (Core + P2/P3 + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **183 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + dauerhafter Retry-Default + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und

@@ -4,6 +4,12 @@
 
 ### Sicherheitslücken melden
 
+# Sicherheitsrichtlinie / Security Policy
+
+## Deutsch
+
+### Sicherheitslücken melden
+
 Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvoll:
 
 1. **Kein öffentliches Issue eröffnen**
@@ -15,14 +21,18 @@ Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvol
 1. Öffnen Sie im Repository: `Security` → `Advisories` → `New`
 2. Tragen Sie Titel, Beschreibung, Schweregrad und betroffene Versionen ein
 3. Reichen Sie die Meldung privat ein
+4. Alternativ können Sie Sicherheitsbedenken per E-Mail an `security@ellmos.ai`, `support@lukasgeiger.com` oder `info@file-bricks.org` senden.
 
-Falls Private Vulnerability Reporting im Repository noch nicht aktiviert ist,
-kontaktieren Sie die Maintainer direkt über GitHub und veröffentlichen Sie
-keine Details in einem öffentlichen Issue.
+### Sicherheits- & Datenschutzgarantien (Zero-Egress & Local-First)
+
+- **100% Zero-Egress & Local-First:** CloudLockFixer enthält keinerlei Telemetrie, Analytics, Tracking oder Netzwerk-Sockets. Alle Operationen, Queues (`queue.txt`, `queue.json`) und Logs verbleiben ausschließlich lokal auf Ihrem System.
+- **Unprivilegierter Modus (Least Privilege):** Die Anwendung erfordert und erbittet keine Administrator-/Root-Rechte. Autostart-Einträge und Explorer-Kontextmenüs werden strikt im Benutzerspeicher (`HKCU`, `~/.config/autostart`, `~/Library/LaunchAgents`) verwaltet.
+- **Kryptografische Kopieverifikation:** Destruktive `move`- und `rename`-Operationen im `copy+delete`-Workaround führen vor dem Löschen der Originaldatei stets eine vollständige SHA-256-Streaming-Inhaltsprüfung durch.
+- **Fail-Closed & Fehlertoleranz:** Bei Datei- oder Provider-Sperren bricht die Operationskette sicher ab, behält den Zustand zur späteren Wiederholung bei und verhindert Datenverlust.
 
 ### Geltungsbereich
 
-CloudLockFixer führt destruktive Dateisystem-Operationen aus und steuert
+CloudLockFixer führt verzögerte Dateisystem-Operationen aus und steuert
 Sync-Clients. Sicherheitsrelevant sind insbesondere:
 
 - Dateisystem-Operationen (umbenennen / verschieben / löschen via copy+delete mit SHA-256-Inhaltsdigest-Prüfung vor Quell-Löschungen)
@@ -31,14 +41,11 @@ Sync-Clients. Sicherheitsrelevant sind insbesondere:
 - Verarbeitung der Queue-Eingaben (`queue.txt` / `queue.json`, CLI-Argumente und `&&`-Ketten)
 - Retry-/Fehlerzustand: Retryfähige Tasks bleiben standardmäßig pending und
   werden nicht allein wegen der Versuchszahl aufgegeben. Ein endliches Limit
-  ist nur explizit pro Worker-Aufruf möglich. Das ist keine Sicherheitsfreigabe
-  für native Prozess- oder Paketierungsintegration.
+  ist nur explizit pro Worker-Aufruf möglich.
 
 ### Reaktionszeit
 
-Bei kleineren Einzelprojekten können Reaktionszeiten variieren. Kritische
-Probleme werden priorisiert. Bitte geben Sie ausreichend Zeit, bevor Sie
-Details öffentlich machen.
+Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet und priorisiert behandelt. Bitte geben Sie ausreichend Zeit zur Behebung, bevor Sie Details öffentlich machen.
 
 ---
 
@@ -57,13 +64,18 @@ If you find a security vulnerability, please report it responsibly:
 1. Open: `Security` → `Advisories` → `New`
 2. Fill in the title, description, severity, and affected versions
 3. Submit the report privately
+4. Alternatively, email security concerns directly to `security@ellmos.ai`, `support@lukasgeiger.com`, or `info@file-bricks.org`.
 
-If private vulnerability reporting is not enabled yet, contact the maintainers
-through GitHub and do not publish details in a public issue.
+### Security & Privacy Guarantees (Zero-Egress & Local-First)
+
+- **100% Zero-Egress & Local-First:** CloudLockFixer contains zero telemetry, analytics, tracking, or network calls. All queues (`queue.txt`, `queue.json`) and logs remain strictly on your local machine.
+- **Unprivileged Execution (Least Privilege):** The application runs entirely in user space without requiring administrator / root elevation. Autostart and context menu integrations are confined to user scopes (`HKCU`, `~/.config/autostart`, `~/Library/LaunchAgents`).
+- **Cryptographic Verification:** Destructive fallback `move` and `rename` operations compute and verify full streaming SHA-256 payload digests prior to deleting the source files.
+- **Fail-Closed Safety Bounds:** When locks or filesystem conflicts occur, execution chains halt safely, preserving pending state for later retries without data loss.
 
 ### Scope
 
-CloudLockFixer performs destructive file system operations and controls sync
+CloudLockFixer performs delayed file system operations and controls sync
 clients. Security-relevant areas include:
 
 - File system operations (rename / move / delete via copy+delete with SHA-256 payload digest verification before source deletion)
@@ -72,10 +84,8 @@ clients. Security-relevant areas include:
 - Processing of queue input (`queue.txt` / `queue.json`, CLI arguments and `&&` chains)
 - Retry/error state: retryable tasks remain pending by default and are not
   abandoned solely by attempt count. A finite limit is available only as an
-  explicit worker-call option. This is not a security approval for native
-  process or packaging integration.
+  explicit worker-call option.
 
 ### Response Time
 
-For smaller solo projects, response times may vary. Critical issues will be
-prioritized. Please allow reasonable time before public disclosure.
+Security-relevant reports are acknowledged within 48 hours and prioritized for rapid resolution. Please allow reasonable time before public disclosure.

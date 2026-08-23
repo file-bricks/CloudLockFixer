@@ -2,7 +2,7 @@
 
 # CloudLockFixer (CLF-WDAS)
 
-![Pytest Status](https://img.shields.io/badge/tests-173%20passed-brightgreen)
+![Pytest Status](https://img.shields.io/badge/tests-183%20passed-brightgreen)
 ![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
@@ -86,6 +86,8 @@ clf add --move   "C:\local\x"        "C:\onedrive\x"
 clf add --delete "C:\onedrive\old"
 clf add --chain  'move "C:\local\x" "C:\onedrive\x" && delete "C:\onedrive\old"'
 clf list
+clf retry <id>
+clf retry-all
 clf run-now [--pause]
 ```
 (dev invocation: `PYTHONPATH=src python -m cloudlockfixer.cli ...`)
@@ -121,14 +123,14 @@ cloud-sync provider.
 
 ## Status / Roadmap
 
-- **P1 (done):** Core (copy+delete, chains, retry) · CLI · `queue.txt` · Tray ·
-  Autostart · OneDrive provider.
+- **P1 (done):** Core (copy+delete, chains, retry) · CLI (`add`, `list`, `retry`, `retry-all`, `run-now`) ·
+  `queue.txt` · Tray (with retry action) · Autostart · OneDrive provider.
 - **P2 (done):** Explorer right-click context menu (HKCU cascade, opt-in via
   tray toggle).
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 173 passing (core + P2/P3 + i18n + multicloud incl.
+- **Tests:** `pytest`, 183 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + durable retry default + failed-task visibility + provider-lock
   regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent

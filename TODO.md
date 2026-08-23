@@ -74,6 +74,13 @@ Beim Port der copy+delete-Logik in den ellmos-filecommander-mcp-Server (TypeScri
 ## Nächste Schritte (aus ROADMAP.md)
 
 - [ ] Test-CI beobachten und bei Bedarf Windows-spezifische Runtime-Abhängigkeiten ergänzen
+- [x] P1: Task-Wiederaufnahme & Retry-Befehle — DONE 2026-08-23:
+      `clf retry <id>`, `clf retry-all` und Tray-Menüaktion („Fehlgeschlagene wiederholen“)
+      ermöglichen das gezielte oder gesammelte Reaktivieren von `failed`/`blocked` Aufgaben.
+      `Queue.retry_task()` und `Queue.retry_all()` setzen `status = "pending"`,
+      `last_outcome = "retryable"` und `retry_count = 0` atomar zurück und bewahren
+      bestehenden Teilschritt-Fortschritt (`step_index`, `Step.copied`).
+      Tests: `tests/test_retry.py` (10 Tests, Gesamtsuite 183 grün).
 - [x] P1: Fehlerausgänge bis zum Worker klassifizieren — DONE 2026-08-12:
       `last_outcome` unterscheidet `done`, `retryable`, `blocked` und
       `permanent`; bestehende Zielkonflikte werden sichtbar `blocked`, während

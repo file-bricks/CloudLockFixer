@@ -6,9 +6,19 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Hinzugefügt / Added
+- **Task-Wiederaufnahme & Retry-Steuerung (P1):** Neue CLI-Befehle `clf retry <id>`
+  und `clf retry-all` zur atomaren Wiederaufnahme fehlgeschlagener (`failed`) oder
+  blockierter (`blocked`) Aufgaben zurück in den `pending`-Zustand (`retry_count = 0`,
+  `last_outcome = "retryable"`). Partieller Fortschritt (`step_index`, `Step.copied`)
+  und Fehlerprotokolle bleiben erhalten.
+- **Wiederaufnahme-Aktion im Tray:** Kontextsensitive Menüaktion („Fehlgeschlagene wiederholen“ /
+  „Retry failed tasks“) mit Zähler-Anzeige im Tray-Menü, die bei fehlgeschlagenen Tasks
+  aktiviert wird und per Klick die Queue reaktiviert und sofort ausführt.
+- **Queue-Methoden `retry_task()` und `retry_all()`:** Atomare, thread-sichere Methoden in
+  `src/cloudlockfixer/models.py` für die gezielte und gesammelte Wiederaufnahme.
 - **Tier-2 I18N-Expansion (Policy P-006):** Vollständige Unterstützung für 6 Sprachen
   (Deutsch `de`, Englisch `en`, Spanisch `es`, Chinesisch `zh`, Japanisch `ja`,
-  Russisch `ru`) über alle 68 Übersetzungsschlüssel im strukturierten Dict-Katalog
+  Russisch `ru`) über alle 78 Übersetzungsschlüssel im strukturierten Dict-Katalog
   in `src/cloudlockfixer/i18n.py`.
 - Erweiterte Spracherkennung in `i18n.detect_language()` und `settings.resolve_language()`
   für `es`, `zh`, `ja` und `ru`.
@@ -17,7 +27,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Synology Drive & Daemon-Fallback:** `SynologyDriveProvider.resume()` startet nun
   auch `SynologyDrive.exe` als Fallback, falls die `cloud-drive-ui.exe`-GUI nicht
   vorhanden ist.
-- 173/173 verifizierte Pytest-Tests (100% grün).
+- 183/183 verifizierte Pytest-Tests (100% grün).
 
 ### Hinzugefügt / Added
 - PEP 621 `pyproject.toml` mit Paketmetadaten, Pytest-Konfiguration und CLI-Entrypoint.
@@ -46,7 +56,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 173 passing
+- `llms.txt` now reflects the current unreleased source state: 183 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.

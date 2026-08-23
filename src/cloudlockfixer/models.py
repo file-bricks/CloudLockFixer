@@ -205,6 +205,39 @@ class Queue:
             )
             return n_pending, n_retrying, n_failed
 
+    def retry_task(self, task_id: str) -> Task | None:
+        """Setzt einen Task (insbesondere fehlgeschlagen oder blockiert) atomar auf 'pending' zurück.
+
+        Fortschritt (step_index, Step.copied) und letzte Fehlermeldung bleiben erhalten,
+        aber retry_count wird auf 0 und last_outcome auf 'retryable' zurückgesetzt.
+        """
+        with self._lock:
+            for t in self.tasks:
+                if t.id == task_id:
+                    t.status = "pending"
+                    t.retry_count = 0
+                    t.last_outcome = "retryable"
+                    self._save_unlocked()
+                    return t
+            return None
+
+    def retry_all(self, failed_only: bool = True) -> list[Task]:
+        """Setzt fehlgeschlagene/blockierte Tasks (oder alle nicht-erledigten) atomar auf 'pending' zurück."""
+        with self._lock:
+            retried: list[Task] = []
+            for t in self.tasks:
+                if failed_only and t.status not in ("failed", "blocked"):
+                    continue
+                if not failed_only and t.status == "done":
+                    continue
+                t.status = "pending"
+                t.retry_count = 0
+                t.last_outcome = "retryable"
+                retried.append(t)
+            if retried:
+                self._save_unlocked()
+            return retried
+
     def save(self) -> None:
         with self._lock:
             self._save_unlocked()

@@ -123,6 +123,10 @@ class TrayApp:
                                     triggered=lambda: self.run_async(False)))
         self.menu.addAction(QAction(t("run_now_with_pause"), self.menu,
                                     triggered=lambda: self.run_async(True)))
+        self.retry_failed_action = QAction(t("retry_failed_tasks"), self.menu,
+                                           triggered=self._retry_failed_tasks)
+        self.retry_failed_action.setEnabled(False)
+        self.menu.addAction(self.retry_failed_action)
         self.menu.addAction(QAction(t("open_data_folder"), self.menu,
                                     triggered=self._open_data_dir))
 
@@ -316,6 +320,24 @@ class TrayApp:
         txt = (t("status_no_tasks") if n == 0 and failed == 0
                else t("status_open", n=n, retrying=retrying, failed=failed))
         self._set_status(txt)
+        if hasattr(self, "retry_failed_action"):
+            if failed > 0:
+                self.retry_failed_action.setEnabled(True)
+                self.retry_failed_action.setText(
+                    t("retry_failed_tasks_count", count=failed)
+                )
+            else:
+                self.retry_failed_action.setEnabled(False)
+                self.retry_failed_action.setText(t("retry_failed_tasks"))
+
+    def _retry_failed_tasks(self) -> None:
+        retried = self.queue.retry_all()
+        self._refresh_status()
+        if retried:
+            self.tray.showMessage("CloudLockFixer",
+                                  t("retried_notification", count=len(retried)),
+                                  _make_icon(), 4000)
+            self.run_async(False)
 
     # ── P2: Kontextmenü ─────────────────────────────────────────────
     def _toggle_context(self, checked: bool) -> None:
