@@ -115,3 +115,116 @@ def test_autostart_uses_frozen_executable(monkeypatch):
 
     assert cmd == r'"C:\_Local_DEV\CloudLockFixer\CloudLockFixer.exe"'
     assert "clf_launcher.pyw" not in cmd
+
+
+# ---------------------------------------------------------------------------
+# Bug #11-1: Case-Only Rename/Move fälschlich als 'bereits am Ziel' ignoriert
+# ---------------------------------------------------------------------------
+
+def test_case_only_rename_file(tmp_path):
+    """Reine Groß-/Kleinschreibungsänderung einer Datei muss auf Datenträger angewendet werden."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import rename_path
+
+    f = tmp_path / "hello.txt"
+    f.write_text("content", encoding="utf-8")
+    ok, msg = rename_path(f, "HELLO.TXT")
+
+    assert ok, msg
+    assert (tmp_path / "HELLO.TXT").resolve().name == "HELLO.TXT"
+    assert (tmp_path / "HELLO.TXT").read_text(encoding="utf-8") == "content"
+
+
+def test_case_only_rename_directory(tmp_path):
+    """Reine Groß-/Kleinschreibungsänderung eines Ordners muss auf Datenträger angewendet werden."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import rename_path
+
+    sub = tmp_path / "myFolder"
+    sub.mkdir()
+    (sub / "item.txt").write_text("nested_data", encoding="utf-8")
+
+    ok, msg = rename_path(sub, "MYFOLDER")
+
+    assert ok, msg
+    assert (tmp_path / "MYFOLDER").resolve().name == "MYFOLDER"
+    assert (tmp_path / "MYFOLDER" / "item.txt").read_text(encoding="utf-8") == "nested_data"
+
+
+def test_case_only_move_file(tmp_path):
+    """move_path mit reiner Case-Änderung muss auf Datenträger angewendet werden."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import move_path
+
+    f = tmp_path / "test_case.txt"
+    f.write_text("data", encoding="utf-8")
+    ok, msg = move_path(f, tmp_path / "TEST_CASE.TXT")
+
+    assert ok, msg
+    assert (tmp_path / "TEST_CASE.TXT").resolve().name == "TEST_CASE.TXT"
+
+
+def test_case_only_rename_two_stage_fallback(tmp_path, monkeypatch):
+    """Wenn direkter os.replace bei Case-Rename scheitert, greift der zweistufige Zwischenschritt."""
+    import os
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    import cloudlockfixer.ops as ops
+
+    f = tmp_path / "flaky.txt"
+    f.write_text("flaky_data", encoding="utf-8")
+
+    real_replace = os.replace
+    calls = {"count": 0}
+
+    def flaky_replace(src, dst):
+        calls["count"] += 1
+        # Ersten direkten In-Place-Versuch fehlschlagen lassen
+        if calls["count"] == 1:
+            raise PermissionError("Sharing violation (simuliert)")
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(ops.os, "replace", flaky_replace)
+
+    ok, msg = ops.rename_path(f, "FLAKY.TXT")
+    assert ok, msg
+    assert "Zwischenschritt" in msg
+    assert (tmp_path / "FLAKY.TXT").resolve().name == "FLAKY.TXT"
+    assert (tmp_path / "FLAKY.TXT").read_text(encoding="utf-8") == "flaky_data"
+
+
+def test_rename_identical_case_reports_already_at_target(tmp_path):
+    """Exakt identischer Name und Case meldet ohne Aktion 'bereits am Ziel'."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import rename_path
+
+    f = tmp_path / "same_case.txt"
+    f.write_text("data", encoding="utf-8")
+
+    ok, msg = rename_path(f, "same_case.txt")
+    assert ok
+    assert "bereits am Ziel" in msg
+
+
+def test_worker_executes_case_only_rename_task(tmp_path):
+    """Queue-Task mit Case-Only Rename wird vom Worker erfolgreich abgearbeitet."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import Queue, Step, Task
+    from cloudlockfixer.worker import run_once
+
+    f = tmp_path / "queue_file.txt"
+    f.write_text("queue_content", encoding="utf-8")
+
+    q = Queue(tmp_path / "data")
+    t = Task(chain=[Step(op="rename", src=str(f), arg="QUEUE_FILE.TXT")])
+    q.add(t)
+
+    summary = run_once(q)
+    assert summary["done"] == 1
+    assert q.tasks[0].status == "done"
+    assert (tmp_path / "QUEUE_FILE.TXT").resolve().name == "QUEUE_FILE.TXT"

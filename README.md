@@ -2,7 +2,7 @@
 
 # CloudLockFixer (CLF-WDAS)
 
-![Pytest Status](https://img.shields.io/badge/tests-193%20passed-brightgreen)
+![Pytest Status](https://img.shields.io/badge/tests-199%20passed-brightgreen)
 ![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 ![Security Policy](https://img.shields.io/badge/security-policy-blue)
 ![Zero-Egress](https://img.shields.io/badge/zero--egress-100%25-green)
@@ -132,11 +132,12 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 193 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
+- **Tests:** `pytest`, 199 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + durable retry default + failed-task visibility + provider-lock
   regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent
-  autostart contracts + automated PEP 621 metadata & zero-egress contract suite).
+  autostart contracts + automated PEP 621 metadata & zero-egress contract suite +
+  case-only rename filesystem regression tests).
 - **Open/future:** more provider adapters; optional suppression of sync-client
   relaunch during long operations.
 

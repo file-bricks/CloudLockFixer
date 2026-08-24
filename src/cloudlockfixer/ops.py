@@ -185,7 +185,30 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
     if dst.exists():
         try:
             if src.samefile(dst):
-                return True, "bereits am Ziel", False
+                # Prüfen, ob die Datei/der Ordner auf der Festplatte bereits exakt denselben Namen hat
+                # oder ob es sich um eine reine Groß-/Kleinschreibungsänderung (Case-Only Rename) handelt.
+                if src.resolve().name == dst.name:
+                    return True, "bereits am Ziel", False
+                # Case-Only Rename: src und dst verweisen auf dasselbe Dateisystem-Objekt,
+                # aber die Schreibweise auf dem Datenträger weicht vom gewünschten Ziel ab.
+                try:
+                    os.replace(src, dst)
+                    return True, "in-place umbenannt", False
+                except OSError:
+                    # Zweistufiger Fallback bei gesperrtem Direkt-Rename über temporären Namen
+                    tmp_suffix = hashlib.sha256(str(dst).encode("utf-8")).hexdigest()[:8]
+                    tmp = src.with_name(f"{src.name}.clf_tmp_{tmp_suffix}")
+                    try:
+                        os.replace(src, tmp)
+                        os.replace(tmp, dst)
+                        return True, "verschoben (Zwischenschritt)", False
+                    except OSError as e:
+                        if tmp.exists():
+                            try:
+                                os.replace(tmp, src)
+                            except OSError:
+                                pass
+                        return False, f"Case-Rename fehlgeschlagen: {e}", False
         except OSError:
             pass
         if _verify_copy(src, dst):

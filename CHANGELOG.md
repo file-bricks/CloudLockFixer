@@ -5,13 +5,18 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Behoben / Fixed (Bugsweep 2026-08-24)
+- **Case-Only Rename/Move auf case-insensitiven Dateisystemen (`ops.py`):** Behebung eines Fehlers, bei dem reine Groß-/Kleinschreibungsänderungen (z. B. `foo.txt` → `FOO.TXT` oder `dir` → `DIR`) auf NTFS/macOS fälschlich als `bereits am Ziel` bewertet wurden, ohne die Namensschreibweise auf dem Datenträger zu aktualisieren. `_do_move` unterscheidet nun echten Gleichstand von Case-Only-Umbenennungen und wendet die Umbenennung direkt via `os.replace` bzw. über einen zweistufigen Zwischenschritt an.
+- **Regressionstestsuite (`tests/test_bugsweep_regressions.py`):** 6 neue Testfälle für Datei- und Ordner-Case-Renames, Direkt-Rename, Zwischenschritt-Fallback bei Locks, `same_case`-Idempotenz und Worker-Task-Abarbeitung hinzugefügt.
+- Gesamte Testsuite auf **199 Tests** erweitert (100% grün).
+
 ### Technische Hygiene & CI-Härtung (Pfad A) (2026-08-24)
 - **CI-Matrix & Concurrency-Härtung:** GitHub Actions CI-Workflows (`.github/workflows/tests.yml` und `.github/workflows/source-platform-smoke.yml`) um Concurrency-Steuerung (`cancel-in-progress: true`), standardisierte Actions (`actions/checkout@v4`, `actions/setup-python@v5`), Python 3.10-3.13 Matrix und `ruff check .` Lint-Gate erweitert.
 - **PEP 621 Standard Classifiers & URLs:** `pyproject.toml` um standardisierte Keywords, `[tool.ruff.lint]` und vollständige `[project.urls]` (Homepage, Documentation, Repository, Bug Tracker, Changelog, Security Policy, Parent Org, Umbrella Ecosystem) gehärtet.
 - **Sicherheitsrichtlinie (SECURITY.md):** Doppelten Header-Block bereinigt, direkten Dachverband-Sicherheitskontakt `lukas@open-bricks.org` neben `security@ellmos.ai`, `support@lukasgeiger.com` und `info@file-bricks.org` verankert, direkten GitHub Security Advisories Link ergänzt und Zero-Egress-/Local-First-Invarianten bekräftigt.
 - **Automatisierte Metadaten- & Invarianten-Vertragstestsuite:** Neue Testsuite in `tests/test_metadata.py` mit 8 Contract-Tests implementiert (PEP 621 Metadaten, URLs, Sicherheitsrichtlinie, CI Matrix & Concurrency, Zero-Egress/Offline Standardbibliotheks-Hermetizität, zweisprachige README-Parität, llms.txt Integrität, Versions-Parität).
-- **Badges & Doku-Synchronisation:** `README.md`, `README.de.md` und `llms.txt` auf Python 3.10-3.13, CI-Status, Security-Policy und 193 verifizierte Tests synchronisiert.
-- 193/193 verifizierte Pytest-Tests (100% grün).
+- **Badges & Doku-Synchronisation:** `README.md`, `README.de.md` und `llms.txt` auf Python 3.10-3.13, CI-Status, Security-Policy und 199 verifizierte Tests synchronisiert.
+- 199/199 verifizierte Pytest-Tests (100% grün).
 
 ### Hinzugefügt / Added
 - **Task-Wiederaufnahme & Retry-Steuerung (P1):** Neue CLI-Befehle `clf retry <id>`
@@ -63,14 +68,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 193 passing
+- `llms.txt` now reflects the current unreleased source state: 199 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 193-test
+- README.md, README.de.md and the roadmap/TODO notes now use the live 199-test
   suite count and distinguish packaged Windows scope from Linux/macOS source
   support and the implemented Linux XDG/macOS LaunchAgent integrations.
 
