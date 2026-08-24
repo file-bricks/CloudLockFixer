@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -34,3 +38,4 @@ jobs:
           PYTHONPATH: src
           PYTHONIOENCODING: utf-8
         run: python -m pytest tests/source_platform_smoke.py -v
+

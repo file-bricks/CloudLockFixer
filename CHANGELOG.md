@@ -5,6 +5,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Technische Hygiene & CI-Härtung (Pfad A) (2026-08-24)
+- **CI-Matrix & Concurrency-Härtung:** GitHub Actions CI-Workflows (`.github/workflows/tests.yml` und `.github/workflows/source-platform-smoke.yml`) um Concurrency-Steuerung (`cancel-in-progress: true`), standardisierte Actions (`actions/checkout@v4`, `actions/setup-python@v5`), Python 3.10-3.13 Matrix und `ruff check .` Lint-Gate erweitert.
+- **PEP 621 Standard Classifiers & URLs:** `pyproject.toml` um standardisierte Keywords, `[tool.ruff.lint]` und vollständige `[project.urls]` (Homepage, Documentation, Repository, Bug Tracker, Changelog, Security Policy, Parent Org, Umbrella Ecosystem) gehärtet.
+- **Sicherheitsrichtlinie (SECURITY.md):** Doppelten Header-Block bereinigt, direkten Dachverband-Sicherheitskontakt `lukas@open-bricks.org` neben `security@ellmos.ai`, `support@lukasgeiger.com` und `info@file-bricks.org` verankert, direkten GitHub Security Advisories Link ergänzt und Zero-Egress-/Local-First-Invarianten bekräftigt.
+- **Automatisierte Metadaten- & Invarianten-Vertragstestsuite:** Neue Testsuite in `tests/test_metadata.py` mit 8 Contract-Tests implementiert (PEP 621 Metadaten, URLs, Sicherheitsrichtlinie, CI Matrix & Concurrency, Zero-Egress/Offline Standardbibliotheks-Hermetizität, zweisprachige README-Parität, llms.txt Integrität, Versions-Parität).
+- **Badges & Doku-Synchronisation:** `README.md`, `README.de.md` und `llms.txt` auf Python 3.10-3.13, CI-Status, Security-Policy und 193 verifizierte Tests synchronisiert.
+- 193/193 verifizierte Pytest-Tests (100% grün).
+
 ### Hinzugefügt / Added
 - **Task-Wiederaufnahme & Retry-Steuerung (P1):** Neue CLI-Befehle `clf retry <id>`
   und `clf retry-all` zur atomaren Wiederaufnahme fehlgeschlagener (`failed`) oder
@@ -27,7 +35,6 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Synology Drive & Daemon-Fallback:** `SynologyDriveProvider.resume()` startet nun
   auch `SynologyDrive.exe` als Fallback, falls die `cloud-drive-ui.exe`-GUI nicht
   vorhanden ist.
-- 185/185 verifizierte Pytest-Tests (100% grün).
 
 ### Hinzugefügt / Added
 - PEP 621 `pyproject.toml` mit Paketmetadaten, Pytest-Konfiguration und CLI-Entrypoint.
@@ -51,19 +58,19 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   umbenannte Laufwerke werden dadurch nicht als Cloud-Mount fehlklassifiziert.
 - `RELEASE_GATE.md` hält die kanonische Source-Version 0.2.2, den historischen
   v1.0.0-Tag und die offenen Windows-/Security-Gates getrennt fest.
-- `llms.txt` mit `Last-checked: 2026-07-26` Header versehen.
-- Technische Hygiene & Doku-Wartung (Pfad A): 165/165 Pytest-Tests verifiziert und `llms.txt` Verification Timestamp auf 2026-07-26 aktualisiert.
+- `llms.txt` mit `Last-checked: 2026-08-24` Header versehen.
+- Technische Hygiene & Doku-Wartung (Pfad A): 193/193 Pytest-Tests verifiziert und `llms.txt` Verification Timestamp auf 2026-08-24 aktualisiert.
 - Development now follows Plan D: the verified Git working tree lives outside
   OneDrive, while OneDrive keeps the project pointer and documentation. GitHub
   remains the canonical code and synchronization source.
-- `llms.txt` now reflects the current unreleased source state: 185 passing
+- `llms.txt` now reflects the current unreleased source state: 193 passing
   tests, the cross-platform data directory and Linux/macOS autostart contracts,
   the source-platform smoke test entry point, and the expanded provider set
   through Box, Nextcloud, pCloud and Synology Drive.
 - Tray wording now says `Open data folder` / `Datenordner öffnen` instead of
   `Open queue/log`, because the action opens the local app folder with
   `queue.txt` and log files rather than a dedicated queue/log view.
-- README.md, README.de.md and the roadmap/TODO notes now use the live 165-test
+- README.md, README.de.md and the roadmap/TODO notes now use the live 193-test
   suite count and distinguish packaged Windows scope from Linux/macOS source
   support and the implemented Linux XDG/macOS LaunchAgent integrations.
 

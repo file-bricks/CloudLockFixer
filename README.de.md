@@ -2,6 +2,13 @@
 
 # CloudLockFixer (CLF-WDAS)
 
+![Pytest Status](https://img.shields.io/badge/tests-193%20passed-brightgreen)
+![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
+![Security Policy](https://img.shields.io/badge/security-policy-blue)
+![Zero-Egress](https://img.shields.io/badge/zero--egress-100%25-green)
+![License](https://img.shields.io/badge/license-MIT-green)
+![LLM-Ready](https://img.shields.io/badge/LLM--Ready-llms.txt-blue)
+
 > 🇬🇧 **English version:** [README.md](README.md)
 
 **CloudLockFixer** *with Delayed Action Service* — ein Windows-Tray-Tool, das
@@ -121,11 +128,11 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **185 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **193 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + dauerhafter Retry-Default + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und
-  macOS-LaunchAgent-Autostart-Verträge).
+  macOS-LaunchAgent-Autostart-Verträge + automatisierte PEP 621 Metadaten- & Zero-Egress-Vertragssuite).
 - **Im Lifetest gehärtet (2026-05-29):** `is_running()/pause()` robust gegen
   nicht-UTF-8-`tasklist`-Ausgabe; `delete` entfernt read-only-Attribute statt an
   WinError 5 zu scheitern. Erster echter Einsatz: ein Ordner-Rename, den manuelle

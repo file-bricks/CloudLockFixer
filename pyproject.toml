@@ -11,6 +11,18 @@ authors = [
     { name = "file-bricks", email = "info@file-bricks.org" }
 ]
 license = { text = "MIT" }
+keywords = [
+    "windows",
+    "cloud-sync",
+    "onedrive",
+    "cldflt",
+    "file-lock",
+    "copy-delete",
+    "delayed-action",
+    "local-first",
+    "zero-egress",
+    "pyside6",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Win32 (MS Windows)",
@@ -59,3 +71,13 @@ historical_initial_tag = "v1.0.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-v"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501"]
+
+

@@ -4,16 +4,10 @@
 
 ### Sicherheitslücken melden
 
-# Sicherheitsrichtlinie / Security Policy
-
-## Deutsch
-
-### Sicherheitslücken melden
-
 Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvoll:
 
 1. **Kein öffentliches Issue eröffnen**
-2. **GitHub Private Vulnerability Reporting verwenden**
+2. **GitHub Private Vulnerability Reporting verwenden:** [GitHub Security Advisories](https://github.com/file-bricks/CloudLockFixer/security/advisories/new)
 3. Beschreibung, Reproduktionsschritte und potenzielle Auswirkungen angeben
 
 ### So melden Sie ein Problem
@@ -21,7 +15,7 @@ Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvol
 1. Öffnen Sie im Repository: `Security` → `Advisories` → `New`
 2. Tragen Sie Titel, Beschreibung, Schweregrad und betroffene Versionen ein
 3. Reichen Sie die Meldung privat ein
-4. Alternativ können Sie Sicherheitsbedenken per E-Mail an `security@ellmos.ai`, `support@lukasgeiger.com` oder `info@file-bricks.org` senden.
+4. Alternativ können Sie Sicherheitsbedenken per E-Mail an `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com` oder `info@file-bricks.org` senden.
 
 ### Sicherheits- & Datenschutzgarantien (Zero-Egress & Local-First)
 
@@ -56,7 +50,7 @@ Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet und pri
 If you find a security vulnerability, please report it responsibly:
 
 1. **Do not open a public issue**
-2. **Use GitHub Private Vulnerability Reporting**
+2. **Use GitHub Private Vulnerability Reporting:** [GitHub Security Advisories](https://github.com/file-bricks/CloudLockFixer/security/advisories/new)
 3. Include a description, reproduction steps, and potential impact
 
 ### How to Report
@@ -64,7 +58,7 @@ If you find a security vulnerability, please report it responsibly:
 1. Open: `Security` → `Advisories` → `New`
 2. Fill in the title, description, severity, and affected versions
 3. Submit the report privately
-4. Alternatively, email security concerns directly to `security@ellmos.ai`, `support@lukasgeiger.com`, or `info@file-bricks.org`.
+4. Alternatively, email security concerns directly to `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com`, or `info@file-bricks.org`.
 
 ### Security & Privacy Guarantees (Zero-Egress & Local-First)
 
