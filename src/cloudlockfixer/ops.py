@@ -296,6 +296,7 @@ def execute_step(step: Step) -> tuple[bool, str]:
 def _outcome_for_error(message: str) -> Outcome:
     """Ordnet deterministische Eingabekonflikte von später retrybaren Fehlern ab."""
     blocked_prefixes = (
+        "Quelle fehlt:",
         "Ziel existiert bereits (Konflikt):",
         "Neuer Name darf keinen Pfad enthalten",
         "Unbekannte Operation:",

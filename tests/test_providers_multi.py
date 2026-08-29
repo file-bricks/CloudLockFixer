@@ -224,6 +224,7 @@ def test_virtual_mount_provider_skipped_in_pause(tmp_path):
 def test_folder_mount_provider_included_in_pause(tmp_path):
     froot = tmp_path / "dropbox"
     froot.mkdir()
+    (froot / "x").write_text("locked candidate", encoding="utf-8")
     fprov = FakeProvider(roots=[froot], running=True)
     task = Task(chain=[Step(op="delete", src=str(froot / "x"))])
     task.retry_count = 10

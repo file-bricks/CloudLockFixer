@@ -5,6 +5,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Behoben / Fixed (2026-08-29)
+- **Terminal fehlende Move-/Rename-Quellen:** Sicher fehlende aktuelle Quellen werden aus der Provider-Eskalation ausgeschlossen. Die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und terminaler Blockierung. Bestehende v1-Queues werden beim nächsten Lauf ohne Schemawechsel idempotent aktualisiert.
+- **Provider-Eskalation:** Für die Pause werden nur noch Pfade des aktuell anstehenden Kettenschritts betrachtet. Erfolgreiche Move-/Delete-Abläufe und retryfähige Cloud-Sperren behalten ihr bisheriges Verhalten.
+- The verification contract reflects the current unreleased source state: 205 passing tests.
+
 ### Behoben / Fixed (Bugsweep 2026-08-24)
 - **Case-Only Rename/Move auf case-insensitiven Dateisystemen (`ops.py`):** Behebung eines Fehlers, bei dem reine Groß-/Kleinschreibungsänderungen (z. B. `foo.txt` → `FOO.TXT` oder `dir` → `DIR`) auf NTFS/macOS fälschlich als `bereits am Ziel` bewertet wurden, ohne die Namensschreibweise auf dem Datenträger zu aktualisieren. `_do_move` unterscheidet nun echten Gleichstand von Case-Only-Umbenennungen und wendet die Umbenennung direkt via `os.replace` bzw. über einen zweistufigen Zwischenschritt an.
 - **Regressionstestsuite (`tests/test_bugsweep_regressions.py`):** 6 neue Testfälle für Datei- und Ordner-Case-Renames, Direkt-Rename, Zwischenschritt-Fallback bei Locks, `same_case`-Idempotenz und Worker-Task-Abarbeitung hinzugefügt.
@@ -48,7 +53,8 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ### Geändert / Changed
 - Worker-Ausgänge sind jetzt persistiert als `done`, `retryable`, `blocked`
   oder `permanent`. Ein bestehendes Ziel wird als sichtbarer `blocked`-Konflikt
-  behandelt, temporär fehlende Quellen bleiben retryfähig.
+  behandelt; nachweislich fehlende Move-/Rename-Quellen ohne vorhandenes Ziel
+  werden terminal blockiert.
 - Copy+delete-Retries behandeln eine bereits vollständig vorhandene Zielkopie
   nicht mehr als Zielkonflikt, falls das `copied`-Flag vor der Persistenz
   verloren ging; die Quelle wird dann idempotent entfernt.

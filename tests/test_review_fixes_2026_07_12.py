@@ -198,9 +198,14 @@ def test_get_volume_label_accepts_remote_drive(monkeypatch):
 
 def _failing_queue(tmp_path) -> Queue:
     q = Queue(tmp_path)
-    # move mit fehlender Quelle scheitert deterministisch bei jedem Lauf
-    task = Task(chain=[Step(op="move", src=str(tmp_path / "missing"),
-                            arg=str(tmp_path / "dst"))])
+    # Ein Ziel-Elternpfad, der eine Datei ist, bleibt ein retryfähiger
+    # Dateisystemfehler und eignet sich zum Testen expliziter Retry-Limits.
+    src = tmp_path / "source.txt"
+    src.write_text("source", encoding="utf-8")
+    blocked_parent = tmp_path / "not-a-directory"
+    blocked_parent.write_text("blocker", encoding="utf-8")
+    task = Task(chain=[Step(op="move", src=str(src),
+                            arg=str(blocked_parent / "dst"))])
     q.add(task)
     return q
 

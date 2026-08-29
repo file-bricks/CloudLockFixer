@@ -52,11 +52,11 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 
 ## Fehlerbehandlung
 - `max_retries` ist standardmäßig `None`: retryfähige Tasks bleiben pending und werden weiter aufgegriffen. Ein Aufrufer kann ein endliches Limit setzen; ein persistierbares Backoff-/Retry-Profil bleibt offen.
-- Deterministische Ziel- oder Eingabekonflikte werden als `blocked` persistiert und nicht endlos erneut versucht. Ein explizites Retry-Limit markiert weiterhin `permanent`/`failed`.
+- Deterministische Ziel- oder Eingabekonflikte werden als `blocked` persistiert und nicht endlos erneut versucht. Das gilt insbesondere, wenn bei `move`/`rename` sowohl Quelle als auch Ziel fehlen. Die Provider-Eskalation ignoriert sicher fehlende aktuelle Quellen; die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und Blockierung. Vorhandene v1-Queue-Dateien werden ohne Schemawechsel beim nächsten Lauf idempotent aktualisiert. Ein explizites Retry-Limit markiert weiterhin `permanent`/`failed`.
 - Nichts Destruktives ohne erfüllte Vorbedingung. Jede Aktion geloggt (`clf.log`).
 
 ## Tests
-- `PYTHONPATH=src python -m pytest -q`: aktuell **167 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
+- `PYTHONPATH=src python -m pytest -q`: aktuell **205 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten und fehlenden Move-/Rename-Quellen, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
 
 ## Phasen
 - **P1 (MVP):** Core + `ops` (copy+delete) + OneDriveProvider + Worker + CLI + Tray + Autostart + Tests.
@@ -64,4 +64,4 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 - **P3:** Präventiv-Wächter; weitere Provider-Adapter bleiben optionaler Ausbau.
 
 ## Datenfluss (kurz)
-`CLI/queue.txt/Tray` → Task in `queue.json` → Worker (Start/Timer/Jetzt) → pro Task: (optional Provider.pause, nicht bei Virtual Mounts) → Kette Schritt-für-Schritt via `ops` (in-place try → copy+delete-Fallback mit Verify) → Erfolg: done/Log; retryfähiger Fehler: pending für späteren Lauf; deterministischer Zielkonflikt: blocked; explizites Limit erreicht: permanent/failed → (Provider.resume).
+`CLI/queue.txt/Tray` → Task in `queue.json` → Worker (Start/Timer/Jetzt) → Pause-Eignung des aktuellen Schritts vorprüfen → pro Task: (optional Provider.pause, nicht bei Virtual Mounts und nicht bei sicher fehlender Quelle) → Kette Schritt-für-Schritt via `ops` (in-place try → copy+delete-Fallback mit Verify) → Erfolg: done/Log; retryfähiger Fehler: pending für späteren Lauf; deterministischer Eingabe-/Zielkonflikt: blocked; explizites Limit erreicht: permanent/failed → (Provider.resume).

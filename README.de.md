@@ -2,7 +2,7 @@
 
 # CloudLockFixer (CLF-WDAS)
 
-![Pytest Status](https://img.shields.io/badge/tests-199%20passed-brightgreen)
+![Pytest Status](https://img.shields.io/badge/tests-205%20passed-brightgreen)
 ![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 ![Security Policy](https://img.shields.io/badge/security-policy-blue)
 ![Zero-Egress](https://img.shields.io/badge/zero--egress-100%25-green)
@@ -103,9 +103,13 @@ automatisch zu `#>` auskommentiert.
   Datenverlust.
 - **copy+delete als Primitive:** in-place wird zuerst versucht, bei Sperre
   automatisch copy → verify → delete. Idempotent (Retry sicher).
-- **Worker:** bei Start + alle 2 h (einstellbar) + manuell. Hängt ein Task
-  mehrfach, wird der zuständige Sync-Client für den Lauf pausiert und danach
-  neu gestartet.
+- **Worker:** bei Start + alle 2 h (einstellbar) + manuell. Nur ein wiederholt
+  fehlgeschlagener, weiterhin ausführbarer Task darf den zuständigen Sync-Client
+  für den Lauf pausieren. Eine fehlende aktuelle Quelle löst keine Provider-Pause
+  aus: Ein bereits abgeschlossenes Verschieben oder Löschen bleibt ein
+  idempotenter Erfolg; fehlen bei `move`/`rename` Quelle und Ziel, blockiert die
+  normale Ausführung den Task. Vorhandene v1-Queues werden beim nächsten Lauf
+  direkt und idempotent aktualisiert.
 
 ## Auffindbarkeit
 
@@ -128,7 +132,7 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **199 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
+- **Tests:** `pytest`, **205 grün** (Core + P2/P3 + Retry/Resume + i18n + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + dauerhafter Retry-Default + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und

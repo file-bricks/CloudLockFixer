@@ -2,7 +2,7 @@
 
 # CloudLockFixer (CLF-WDAS)
 
-![Pytest Status](https://img.shields.io/badge/tests-199%20passed-brightgreen)
+![Pytest Status](https://img.shields.io/badge/tests-205%20passed-brightgreen)
 ![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)
 ![Security Policy](https://img.shields.io/badge/security-policy-blue)
 ![Zero-Egress](https://img.shields.io/badge/zero--egress-100%25-green)
@@ -107,9 +107,12 @@ automatically commented out with `#>`.
 - **copy+delete primitive:** an in-place attempt is made first; on a lock it
   automatically falls back to copy → verify → delete. Idempotent (safe to
   retry).
-- **Worker:** runs on start + every 2 h (configurable) + on demand. If a task
-  is stuck repeatedly, the responsible sync client is paused for that run and
-  restarted afterwards.
+- **Worker:** runs on start + every 2 h (configurable) + on demand. Only a
+  repeatedly failing, still executable task may pause the responsible sync
+  client for that run. A missing current source never triggers a provider
+  pause: an already completed move or delete stays an idempotent success, while
+  a move/rename with no source or target is blocked by normal execution.
+  Existing v1 queue files are updated in place on their next run.
 
 ## Discovery context
 
@@ -132,7 +135,7 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 199 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
+- **Tests:** `pytest`, 205 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + durable retry default + failed-task visibility + provider-lock
   regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent

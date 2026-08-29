@@ -22,11 +22,30 @@ ESCALATE_AFTER = 3  # ab so vielen Fehlversuchen den Sync-Client pausieren
 
 
 def _task_paths(task: Task) -> list[Path]:
-    out: list[Path] = []
-    for s in task.chain:
-        out.append(Path(s.src))
-        if s.op == "move" and s.arg:
-            out.append(Path(s.arg))
+    if task.step_index >= len(task.chain):
+        return []
+
+    s = task.chain[task.step_index]
+    if s.op not in ("rename", "move", "delete"):
+        return []
+    if s.op == "rename" and ("/" in s.arg or "\\" in s.arg):
+        return []
+
+    src = Path(s.src)
+    try:
+        src.lstat()
+    except (FileNotFoundError, NotADirectoryError):
+        # Eine Provider-Pause kann einen fehlenden Quellpfad nicht reparieren.
+        # Der echte Ausführungspfad entscheidet danach race-sicher zwischen
+        # idempotentem Erfolg und terminaler Blockierung.
+        return []
+    except OSError:
+        # Bei unklarem Dateisystemzustand bleibt die bisherige Eskalation aktiv.
+        pass
+
+    out = [src]
+    if s.op == "move" and s.arg:
+        out.append(Path(s.arg))
     return out
 
 
