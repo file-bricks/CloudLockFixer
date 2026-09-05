@@ -148,11 +148,18 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 - [x] TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern — DONE 2026-07-22
 - TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren
 
-Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
-während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
-pytest -q` sammelt lokal 165 Tests und ist in README/`llms.txt`/CHANGELOG
-nachgezogen; Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart
-sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
-bleiben Synology-, Volume-Label-,
-Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
-sowie die separate Root-Release-Entscheidung.
+Belegte historische Ist-Stände dieser Formalisierung: Source und der damals
+neueste Release-Tag standen lokal auf 0.2.2, während Root-Registry/GitHub-Status
+noch 1.0.0 führten; `PYTHONPATH=src python -m pytest -q` sammelte damals 165
+Tests. Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart waren in
+der Roadmap als erledigte Source-/CI-Stände markiert. Offen blieben Synology-,
+Volume-Label-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates sowie die
+separate Root-Release-Entscheidung.
+
+Aktueller unveröffentlichter Kontrollstand vom 2026-09-05:
+`PYTHONPATH=src python -m pytest --collect-only -q` sammelt 205 Tests und
+`PYTHONPATH=src python -m pytest -q` besteht mit 205 Tests. Der verlinkte
+Vertragscheck [tests/test_docs_contract.py](tests/test_docs_contract.py) gleicht
+diese aktuelle Zahl mit README, README.de, `llms.txt` und dem Unreleased-Eintrag
+im Changelog ab. Historische Zählungen bleiben datiert erhalten; Versions- und
+Releaseaussagen ändern sich nicht.

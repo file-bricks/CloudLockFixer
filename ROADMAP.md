@@ -51,7 +51,7 @@
 - [x] macOS-LaunchAgent auf Source-Ebene
 - [ ] Linux-/macOS-Kontextmenüs
 
-## Verifizierter Source-Stand 2026-08-11
+## Historischer verifizierter Source-Stand — 2026-08-11
 
 - **Provider-Vertrag:** Auto-Discovery für acht Provider (OneDrive, Google Drive,
   Dropbox, Box, Nextcloud, pCloud, Synology Drive und iCloud); Google Drive und
@@ -60,8 +60,19 @@
   „Open data folder“ statt eines behaupteten Queue-/Log-Viewers.
 - **Retry-Vertrag:** Default unbegrenzt: retryfähige Tasks bleiben pending.
   Ein endliches Limit ist nur ein expliziter Aufruferparameter.
-- **Nachweis:** 167 Tests gesammelt; der Status ist Source-/CI-Evidenz. Native
-  Paketierung, echte Client-Prozess-Smokes und Security-Freigabe bleiben offen.
+- **Historischer Nachweis:** Damals wurden 167 Tests gesammelt; der Status ist
+  Source-/CI-Evidenz. Native Paketierung, echte Client-Prozess-Smokes und
+  Security-Freigabe bleiben offen.
+
+## Aktueller unveröffentlichter Kontrollstand — 2026-09-05
+
+- **Collect:** `PYTHONPATH=src python -m pytest --collect-only -q` sammelt 205 Tests.
+- **Lauf:** `PYTHONPATH=src python -m pytest -q` besteht mit 205 Tests.
+- **Vertrag:** [tests/test_docs_contract.py](tests/test_docs_contract.py) ermittelt
+  dieselbe Zahl über den Collect-Befehl und gleicht sie mit README, README.de,
+  `llms.txt` und dem aktuellen Unreleased-Eintrag im Changelog ab.
+- **Grenze:** Dieser Kontrollstand ändert weder Versions- noch Releaseaussagen;
+  die nativen und integrativen Gatter bleiben offen.
 
 ## Langfristig
 
