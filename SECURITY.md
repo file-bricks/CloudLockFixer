@@ -17,6 +17,13 @@ Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvol
 3. Reichen Sie die Meldung privat ein
 4. Alternativ können Sie Sicherheitsbedenken per E-Mail an `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com` oder `info@file-bricks.org` senden.
 
+### Unterstützte Versionen / Supported Versions
+
+| Version | Unterstützt | Anmerkung |
+|---------|-------------|-----------|
+| `0.2.x` | :white_check_mark: | Aktiver Entwicklungszweig / Active development |
+| `< 0.2.0` | :x: | Veraltet / Unsupported |
+
 ### Sicherheits- & Datenschutzgarantien (Zero-Egress & Local-First)
 
 - **100% Zero-Egress & Local-First:** CloudLockFixer enthält keinerlei Telemetrie, Analytics, Tracking oder Netzwerk-Sockets. Alle Operationen, Queues (`queue.txt`, `queue.json`) und Logs verbleiben ausschließlich lokal auf Ihrem System.
@@ -59,6 +66,13 @@ If you find a security vulnerability, please report it responsibly:
 2. Fill in the title, description, severity, and affected versions
 3. Submit the report privately
 4. Alternatively, email security concerns directly to `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com`, or `info@file-bricks.org`.
+
+### Supported Versions
+
+| Version | Supported | Notes |
+|---------|-----------|-------|
+| `0.2.x` | :white_check_mark: | Active development branch |
+| `< 0.2.0` | :x: | End of life / Unsupported |
 
 ### Security & Privacy Guarantees (Zero-Egress & Local-First)
 

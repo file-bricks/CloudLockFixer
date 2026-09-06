@@ -5,10 +5,17 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Marketing, Design & Auffindbarkeit (Pfad B) (2026-09-06)
+- **Interaktive Mermaid-Architektur- und Ablaufdiagramme:** Aufnahme zweier interaktiver Mermaid-Diagramme (`flowchart TD` für Ingestion-Kanäle, Queue-Orchestrierung, Cloud-Provider-Sensorik und Ausführung mit SHA-256-Kopieüberprüfung; `sequenceDiagram` für End-to-End-Tasklebenszyklus, Sperrerkennung und Fallback-Auflösung) in `README.md` und `README.de.md`.
+- **Zweisprachige Schnellnavigation & Kernfähigkeiten-Tabelle:** 14-Punkte-Schnellnavigation mit Direktankern sowie tabellarische Übersicht der Kernfähigkeiten und Governance-/Sicherheitsgarantien (`copy+delete`-Fallback, atomare Mehrschrittketten, Multi-Cloud-Provider-Sensorik, Zero-Egress, Least Privilege und idempotente Retry-Engine).
+- **Geschwister-Ökosystem-Matrix:** Verknüpfungsmatrix zu Partner-Repositories innerhalb von `file-bricks`, `open-bricks`, `ellmos-ai`, `dev-bricks` und `doc-bricks`.
+- **Sicherheitsrichtlinie & Unterstützte Versionen:** Aufnahme der formalen Versionstabelle (`0.2.x`, `< 0.2.0`) in `SECURITY.md` in Deutsch und Englisch.
+- **Metadaten- & Vertragstestsuite erweitert:** 4 neue Vertragstests in `tests/test_metadata.py` für Mermaid-Diagramme, Geschwister-Ökosystem, Schnellnavigation und Versionstabelle.
+- The verification contract reflects the current unreleased source state: 209 passing tests.
+
 ### Behoben / Fixed (2026-08-29)
 - **Terminal fehlende Move-/Rename-Quellen:** Sicher fehlende aktuelle Quellen werden aus der Provider-Eskalation ausgeschlossen. Die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und terminaler Blockierung. Bestehende v1-Queues werden beim nächsten Lauf ohne Schemawechsel idempotent aktualisiert.
 - **Provider-Eskalation:** Für die Pause werden nur noch Pfade des aktuell anstehenden Kettenschritts betrachtet. Erfolgreiche Move-/Delete-Abläufe und retryfähige Cloud-Sperren behalten ihr bisheriges Verhalten.
-- The verification contract reflects the current unreleased source state: 205 passing tests.
 
 ### Behoben / Fixed (Bugsweep 2026-08-24)
 - **Case-Only Rename/Move auf case-insensitiven Dateisystemen (`ops.py`):** Behebung eines Fehlers, bei dem reine Groß-/Kleinschreibungsänderungen (z. B. `foo.txt` → `FOO.TXT` oder `dir` → `DIR`) auf NTFS/macOS fälschlich als `bereits am Ziel` bewertet wurden, ohne die Namensschreibweise auf dem Datenträger zu aktualisieren. `_do_move` unterscheidet nun echten Gleichstand von Case-Only-Umbenennungen und wendet die Umbenennung direkt via `os.replace` bzw. über einen zweistufigen Zwischenschritt an.

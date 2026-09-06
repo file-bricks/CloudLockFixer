@@ -174,6 +174,57 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-08-24" in text
-    assert "## Last-checked: 2026-08-24" in text
+    assert "> Last-checked: 2026-09-06" in text
+    assert "## Last-checked: 2026-09-06" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
+
+
+def test_mermaid_diagrams_syntax() -> None:
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+
+    for text, name in [(readme_en, "README.md"), (readme_de, "README.de.md")]:
+        assert "```mermaid" in text, f"Missing mermaid diagrams in {name}"
+        assert "flowchart TD" in text, f"Missing flowchart diagram in {name}"
+        assert "sequenceDiagram" in text, f"Missing sequence diagram in {name}"
+        assert "cldflt" in text, f"Missing cldflt reference in {name}"
+        assert "SHA-256" in text, f"Missing SHA-256 reference in {name}"
+
+
+def test_sibling_ecosystem_and_urls() -> None:
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+
+    required_siblings = [
+        "file-bricks/SoftwareCenter",
+        "file-bricks/knowledgedigest",
+        "open-bricks",
+        "ellmos-ai/system-auditor",
+        "ellmos-ai/file-collect-sort-action",
+        "dev-bricks/automizer-for-claude-desktop",
+        "doc-bricks/USR_pic2pic",
+        "doc-bricks/USR_PDFunlock",
+    ]
+    for sibling in required_siblings:
+        assert sibling in readme_en, f"Missing sibling {sibling} in README.md"
+        assert sibling in readme_de, f"Missing sibling {sibling} in README.de.md"
+
+
+def test_quick_navigation_anchors() -> None:
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+
+    assert "## Quick Navigation" in readme_en
+    assert "## Schnellnavigation" in readme_de
+    assert "(#interactive-architecture--lifecycle)" in readme_en
+    assert "(#interaktive-architektur--lebenszyklus)" in readme_de
+    assert "(#sibling-ecosystem-matrix)" in readme_en
+    assert "(#geschwister-ökosystem-matrix)" in readme_de
+
+
+def test_security_policy_supported_versions() -> None:
+    sec_text = (PROJECT_ROOT / "SECURITY.md").read_text(encoding="utf-8")
+    assert "| `0.2.x` | :white_check_mark: |" in sec_text
+    assert "| `< 0.2.0` | :x: |" in sec_text
+    assert "### Unterstützte Versionen" in sec_text
+    assert "### Supported Versions" in sec_text

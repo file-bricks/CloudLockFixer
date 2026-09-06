@@ -56,7 +56,7 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 - Nichts Destruktives ohne erfüllte Vorbedingung. Jede Aktion geloggt (`clf.log`).
 
 ## Tests
-- `PYTHONPATH=src python -m pytest -q`: aktuell **205 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten und fehlenden Move-/Rename-Quellen, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
+- `PYTHONPATH=src python -m pytest -q`: aktuell **209 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten und fehlenden Move-/Rename-Quellen, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
 
 ## Phasen
 - **P1 (MVP):** Core + `ops` (copy+delete) + OneDriveProvider + Worker + CLI + Tray + Autostart + Tests.
