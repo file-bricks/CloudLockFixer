@@ -152,3 +152,14 @@ def test_macos_launch_agent_roundtrip(tmp_path, monkeypatch):
 
     assert autostart.disable()
     assert not launch_agent.exists()
+
+
+def test_providers_cross_platform_smoke():
+    """Smoke test ensuring provider discovery and abstraction initialize without error."""
+    from cloudlockfixer.providers import available_providers, provider_for
+    provs = available_providers()
+    assert isinstance(provs, list)
+    assert len(provs) >= 1
+    # Check that query methods work safely
+    p = provider_for(Path.home() / "nonexistent_cloud_test_file.txt")
+    assert p is None or hasattr(p, "is_running")

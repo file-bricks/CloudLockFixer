@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import string
 import subprocess
 import sys
@@ -88,31 +89,99 @@ def _gdrive_version_key(p: Path) -> tuple[int, ...]:
         return (0,)
 
 
+_PROCESS_ALIASES_POSIX: dict[str, list[str]] = {
+    "googledrivefs.exe": ["GoogleDriveFS", "Google Drive"],
+    "onedrive.exe": ["OneDrive", "onedrive"],
+    "dropbox.exe": ["Dropbox", "dropbox"],
+    "box.exe": ["Box", "box"],
+    "nextcloud.exe": ["nextcloud", "Nextcloud"],
+    "pcloud.exe": ["pCloud", "pcloud"],
+    "cloud-drive-ui.exe": ["cloud-drive-ui", "synology-drive", "Synology Drive"],
+    "synologydrive.exe": ["SynologyDrive", "synology-drive", "Synology Drive"],
+    "iclouddrive.exe": ["iCloudDrive", "bird", "cloudd"],
+    "icloud.exe": ["iCloud", "bird", "cloudd"],
+}
+
+
+def _get_posix_patterns(exe_name: str) -> list[str]:
+    key = exe_name.lower()
+    if key in _PROCESS_ALIASES_POSIX:
+        return _PROCESS_ALIASES_POSIX[key]
+    if key.endswith(".exe"):
+        return [exe_name[:-4]]
+    return [exe_name]
+
+
 def _check_process(exe_name: str) -> bool:
-    if sys.platform != "win32":
-        return False
-    try:
-        out = subprocess.run(
-            ["tasklist", "/FI", f"IMAGENAME eq {exe_name}", "/NH"],
-            capture_output=True, text=True, timeout=10,
-            encoding="utf-8", errors="ignore",
-        ).stdout or ""
-        return exe_name.lower() in out.lower()
-    except (OSError, subprocess.SubprocessError):
-        return False
+    if sys.platform == "win32":
+        try:
+            out = subprocess.run(
+                ["tasklist", "/FI", f"IMAGENAME eq {exe_name}", "/NH"],
+                capture_output=True, text=True, timeout=10,
+                encoding="utf-8", errors="ignore",
+            ).stdout or ""
+            return exe_name.lower() in out.lower()
+        except (OSError, subprocess.SubprocessError):
+            return False
+
+    # Linux / macOS (POSIX)
+    patterns = _get_posix_patterns(exe_name)
+    for pat in patterns:
+        try:
+            res = subprocess.run(
+                ["pgrep", "-f", pat],
+                capture_output=True, text=True, timeout=10,
+                encoding="utf-8", errors="ignore",
+            )
+            if res.returncode == 0 and res.stdout.strip():
+                return True
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    # Fallback: check /proc on Linux if accessible
+    if sys.platform.startswith("linux"):
+        proc_dir = Path("/proc")
+        if proc_dir.is_dir():
+            patterns_lower = [p.lower() for p in patterns]
+            try:
+                for entry in proc_dir.iterdir():
+                    if entry.is_dir() and entry.name.isdigit():
+                        try:
+                            cmdline = (entry / "cmdline").read_bytes().replace(b"\x00", b" ").decode("utf-8", errors="ignore").lower()
+                            if any(pat in cmdline for pat in patterns_lower):
+                                return True
+                        except (OSError, PermissionError):
+                            continue
+            except (OSError, PermissionError):
+                pass
+    return False
 
 
 def _kill_process(exe_name: str) -> bool:
-    if sys.platform != "win32":
-        return False
-    try:
-        subprocess.run(["taskkill", "/F", "/IM", exe_name, "/T"],
-                       capture_output=True, text=True, timeout=15,
-                       encoding="utf-8", errors="ignore")
-        time.sleep(1.5)
-        return not _check_process(exe_name)
-    except (OSError, subprocess.SubprocessError):
-        return False
+    if sys.platform == "win32":
+        try:
+            subprocess.run(["taskkill", "/F", "/IM", exe_name, "/T"],
+                           capture_output=True, text=True, timeout=15,
+                           encoding="utf-8", errors="ignore")
+            time.sleep(1.5)
+            return not _check_process(exe_name)
+        except (OSError, subprocess.SubprocessError):
+            return False
+
+    # Linux / macOS (POSIX)
+    patterns = _get_posix_patterns(exe_name)
+    for pat in patterns:
+        try:
+            subprocess.run(
+                ["pkill", "-f", pat],
+                capture_output=True, text=True, timeout=15,
+                encoding="utf-8", errors="ignore",
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    time.sleep(1.5)
+    return not _check_process(exe_name)
 
 
 # Win32-Konstanten für die robuste Laufwerks-Abfrage.
@@ -221,13 +290,15 @@ def _read_synology_custom_roots() -> list[Path]:
     base_dirs = [
         Path(os.environ.get("APPDATA", "")) / "SynologyDrive",
         Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive",
+        Path.home() / ".SynologyDrive",
+        Path.home() / "Library" / "Application Support" / "SynologyDrive",
     ]
     key_names = {"local_path", "localPath"}
     line_re = re.compile(
         r"""(?ix)
         ["']?local(?:_|)path["']?
         \s*[:=]\s*
-        ["'](?P<path>[a-z]:[\\/][^"']+)["']
+        ["'](?P<path>(?:[a-z]:[\\/]|/)[^"']+)["']
         """
     )
 
@@ -243,7 +314,7 @@ def _read_synology_custom_roots() -> list[Path]:
 
         seen_files: set[str] = set()
         for folder in probe_dirs:
-            for pattern in ("*.json", "*.conf", "*.cfg"):
+            for pattern in ("*.json", "*.conf", "*.cfg", "conf*"):
                 for cfg_path in folder.rglob(pattern):
                     if not cfg_path.is_file():
                         continue
@@ -293,6 +364,14 @@ class OneDriveProvider(SyncProvider):
         home_od = Path.home() / "OneDrive"
         if home_od.exists():
             roots.append(home_od)
+        cloud_storage = Path.home() / "Library" / "CloudStorage"
+        if cloud_storage.is_dir():
+            try:
+                for entry in cloud_storage.iterdir():
+                    if entry.is_dir() and entry.name.lower().startswith("onedrive"):
+                        roots.append(entry)
+            except OSError:
+                pass
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -303,17 +382,31 @@ class OneDriveProvider(SyncProvider):
             return _kill_process("OneDrive.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
         with self._lock:
-            for exe in self._exe_candidates:
-                if exe.exists():
+            if sys.platform == "win32":
+                for exe in self._exe_candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe), "/background"])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "OneDrive"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
+            else:
+                cmd = shutil.which("onedrive")
+                if cmd:
                     try:
-                        subprocess.Popen([str(exe), "/background"])
+                        subprocess.Popen([cmd, "--monitor"])
                         return True
                     except OSError:
-                        continue
-            return False
+                        return False
+                return False
 
 
 # ── Google Drive ───────────────────────────────────────────────────
@@ -325,15 +418,30 @@ class GoogleDriveProvider(SyncProvider):
     _RESUME_BASE: Path = Path(r"C:\Program Files\Google\Drive File Stream")
 
     def _detect_roots(self) -> list[Path]:
-        if sys.platform != "win32":
-            return []
         roots: list[Path] = []
-        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
-        for i, letter in enumerate(string.ascii_uppercase):
-            if bitmask & (1 << i):
-                label = _get_volume_label(letter)
-                if _volume_label_matches(label, _GOOGLE_DRIVE_VOLUME_LABELS):
-                    roots.append(Path(f"{letter}:\\"))
+        if sys.platform == "win32":
+            try:
+                bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+                for i, letter in enumerate(string.ascii_uppercase):
+                    if bitmask & (1 << i):
+                        label = _get_volume_label(letter)
+                        if _volume_label_matches(label, _GOOGLE_DRIVE_VOLUME_LABELS):
+                            roots.append(Path(f"{letter}:\\"))
+            except (OSError, AttributeError):
+                pass
+        else:
+            cloud_storage = Path.home() / "Library" / "CloudStorage"
+            if cloud_storage.is_dir():
+                try:
+                    for entry in cloud_storage.iterdir():
+                        if entry.is_dir() and "googledrive" in entry.name.lower().replace(" ", ""):
+                            roots.append(entry)
+                except OSError:
+                    pass
+            for name in ("Google Drive", "GoogleDrive"):
+                p = Path.home() / name
+                if p.is_dir():
+                    roots.append(p)
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -344,20 +452,26 @@ class GoogleDriveProvider(SyncProvider):
             return _kill_process("GoogleDriveFS.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        base = self._RESUME_BASE
-        if not base.exists():
-            return False
         with self._lock:
-            versions = sorted(base.glob("*/GoogleDriveFS.exe"),
-                              key=_gdrive_version_key, reverse=True)
-            for exe in versions:
+            if sys.platform == "win32":
+                base = self._RESUME_BASE
+                if not base.exists():
+                    return False
+                versions = sorted(base.glob("*/GoogleDriveFS.exe"),
+                                  key=_gdrive_version_key, reverse=True)
+                for exe in versions:
+                    try:
+                        subprocess.Popen([str(exe)])
+                        return True
+                    except OSError:
+                        continue
+                return False
+            elif sys.platform == "darwin":
                 try:
-                    subprocess.Popen([str(exe)])
+                    subprocess.Popen(["open", "-a", "Google Drive"])
                     return True
-                except OSError:
-                    continue
+                except (OSError, subprocess.SubprocessError):
+                    return False
             return False
 
 
@@ -373,19 +487,37 @@ class DropboxProvider(SyncProvider):
         home_db = Path.home() / "Dropbox"
         if home_db.exists():
             roots.append(home_db)
-        info_json = Path(os.environ.get("APPDATA", "")) / "Dropbox" / "info.json"
-        if info_json.exists():
+
+        # macOS CloudStorage
+        cloud_storage = Path.home() / "Library" / "CloudStorage"
+        if cloud_storage.is_dir():
             try:
-                data = json.loads(info_json.read_text(encoding="utf-8"))
-                if isinstance(data, dict):
-                    for section in ("personal", "business"):
-                        section_data = data.get(section)
-                        if isinstance(section_data, dict):
-                            path = section_data.get("path")
-                            if path:
-                                roots.append(Path(path))
-            except (json.JSONDecodeError, OSError):
+                for entry in cloud_storage.iterdir():
+                    if entry.is_dir() and entry.name.lower().startswith("dropbox"):
+                        roots.append(entry)
+            except OSError:
                 pass
+
+        info_candidates = [
+            Path(os.environ.get("APPDATA", "")) / "Dropbox" / "info.json",
+            Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "info.json",
+            Path.home() / ".dropbox" / "info.json",
+            Path.home() / ".config" / "dropbox" / "info.json",
+            Path.home() / "Library" / "Application Support" / "Dropbox" / "info.json",
+        ]
+        for info_json in info_candidates:
+            if info_json.exists():
+                try:
+                    data = json.loads(info_json.read_text(encoding="utf-8"))
+                    if isinstance(data, dict):
+                        for section in ("personal", "business"):
+                            section_data = data.get(section)
+                            if isinstance(section_data, dict):
+                                path = section_data.get("path")
+                                if path:
+                                    roots.append(Path(path))
+                except (json.JSONDecodeError, OSError):
+                    pass
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -396,23 +528,37 @@ class DropboxProvider(SyncProvider):
             return _kill_process("Dropbox.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "Dropbox.exe",
-            Path(os.environ.get("APPDATA", "")) / "Dropbox" / "bin" / "Dropbox.exe",
-            Path(r"C:\Program Files\Dropbox\Client\Dropbox.exe"),
-            Path(r"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe"),
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
+            if sys.platform == "win32":
+                candidates = [
+                    Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "Dropbox.exe",
+                    Path(os.environ.get("APPDATA", "")) / "Dropbox" / "bin" / "Dropbox.exe",
+                    Path(r"C:\Program Files\Dropbox\Client\Dropbox.exe"),
+                    Path(r"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe"),
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "Dropbox"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
+            else:
+                cmd = shutil.which("dropbox")
+                if cmd:
                     try:
-                        subprocess.Popen([str(exe)])
+                        subprocess.Popen([cmd, "start"])
                         return True
                     except OSError:
-                        continue
-            return False
+                        return False
+                return False
 
 
 # ── Box ────────────────────────────────────────────────────────────
@@ -424,9 +570,19 @@ class BoxProvider(SyncProvider):
 
     def _detect_roots(self) -> list[Path]:
         roots: list[Path] = []
-        default_root = Path.home() / "Box"
-        if default_root.exists():
-            roots.append(default_root)
+        for name in ("Box", "Box Sync"):
+            p = Path.home() / name
+            if p.exists():
+                roots.append(p)
+
+        cloud_storage = Path.home() / "Library" / "CloudStorage"
+        if cloud_storage.is_dir():
+            try:
+                for entry in cloud_storage.iterdir():
+                    if entry.is_dir() and entry.name.lower().startswith("box"):
+                        roots.append(entry)
+            except OSError:
+                pass
 
         custom_root = _read_box_custom_location()
         if custom_root and custom_root.exists():
@@ -441,20 +597,26 @@ class BoxProvider(SyncProvider):
             return _kill_process("Box.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(r"C:\Program Files\Box\Box\Box.exe"),
-            Path(r"C:\Program Files (x86)\Box\Box\Box.exe"),
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
-                    try:
-                        subprocess.Popen([str(exe)])
-                        return True
-                    except OSError:
-                        continue
+            if sys.platform == "win32":
+                candidates = [
+                    Path(r"C:\Program Files\Box\Box\Box.exe"),
+                    Path(r"C:\Program Files (x86)\Box\Box\Box.exe"),
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "Box"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
             return False
 
 
@@ -471,19 +633,26 @@ class NextcloudProvider(SyncProvider):
         if default_root.exists():
             roots.append(default_root)
 
-        cfg_path = Path(os.environ.get("APPDATA", "")) / "Nextcloud" / "nextcloud.cfg"
-        if cfg_path.exists():
-            try:
-                for raw_line in cfg_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-                    line = raw_line.strip()
-                    if not line or line.startswith(("#", ";")) or "localPath=" not in line:
-                        continue
-                    _, raw_path = line.split("localPath=", 1)
-                    normalized = raw_path.strip().strip('"').replace("/", os.sep)
-                    if normalized:
-                        roots.append(Path(normalized))
-            except OSError:
-                pass
+        cfg_candidates = [
+            Path(os.environ.get("APPDATA", "")) / "Nextcloud" / "nextcloud.cfg",
+            Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "Nextcloud" / "nextcloud.cfg",
+            Path.home() / ".config" / "Nextcloud" / "nextcloud.cfg",
+            Path.home() / "Library" / "Preferences" / "Nextcloud" / "nextcloud.cfg",
+            Path.home() / "Library" / "Application Support" / "Nextcloud" / "nextcloud.cfg",
+        ]
+        for cfg_path in cfg_candidates:
+            if cfg_path.exists():
+                try:
+                    for raw_line in cfg_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+                        line = raw_line.strip()
+                        if not line or line.startswith(("#", ";")) or "localPath=" not in line:
+                            continue
+                        _, raw_path = line.split("localPath=", 1)
+                        normalized = raw_path.strip().strip('"').replace("/", os.sep)
+                        if normalized:
+                            roots.append(Path(normalized))
+                except OSError:
+                    pass
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -494,48 +663,64 @@ class NextcloudProvider(SyncProvider):
             return _kill_process("nextcloud.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(r"C:\Program Files\Nextcloud\nextcloud.exe"),
-            Path(r"C:\Program Files (x86)\Nextcloud\nextcloud.exe"),
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Nextcloud" / "nextcloud.exe",
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
+            if sys.platform == "win32":
+                candidates = [
+                    Path(r"C:\Program Files\Nextcloud\nextcloud.exe"),
+                    Path(r"C:\Program Files (x86)\Nextcloud\nextcloud.exe"),
+                    Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Nextcloud" / "nextcloud.exe",
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "Nextcloud"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
+            else:
+                cmd = shutil.which("nextcloud")
+                if cmd:
                     try:
-                        subprocess.Popen([str(exe)])
+                        subprocess.Popen([cmd, "--background"])
                         return True
                     except OSError:
-                        continue
-            return False
+                        return False
+                return False
 
 
 # ── pCloud ─────────────────────────────────────────────────────────
 
 
 class PCloudProvider(SyncProvider):
-    """pCloud Drive for Windows — virtueller Laufwerks-Mount.
-
-    pCloud Drive erscheint unter Windows als Laufwerksbuchstabe, dessen
-    Volume-Label "pCloud Drive" enthält. Erkennung analog zu Google Drive
-    per GetVolumeInformationW (kein Subprocess nötig).
-    """
+    """pCloud Drive — virtueller Laufwerks-Mount bzw. lokaler Ordner auf POSIX."""
 
     name = "pCloud"
     mount_type = "virtual"
 
     def _detect_roots(self) -> list[Path]:
-        if sys.platform != "win32":
-            return []
         roots: list[Path] = []
-        bitmask = ctypes.windll.kernel32.GetLogicalDrives()
-        for i, letter in enumerate(string.ascii_uppercase):
-            if bitmask & (1 << i):
-                label = _get_volume_label(letter)
-                if _volume_label_matches(label, _PCLOUD_VOLUME_LABELS):
-                    roots.append(Path(f"{letter}:\\"))
+        if sys.platform == "win32":
+            try:
+                bitmask = ctypes.windll.kernel32.GetLogicalDrives()
+                for i, letter in enumerate(string.ascii_uppercase):
+                    if bitmask & (1 << i):
+                        label = _get_volume_label(letter)
+                        if _volume_label_matches(label, _PCLOUD_VOLUME_LABELS):
+                            roots.append(Path(f"{letter}:\\"))
+            except (OSError, AttributeError):
+                pass
+        else:
+            for name in ("pCloudDrive", "pCloud Drive"):
+                p = Path.home() / name
+                if p.is_dir():
+                    roots.append(p)
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -546,35 +731,43 @@ class PCloudProvider(SyncProvider):
             return _kill_process("pCloud.exe")
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "pCloud" / "pCloud.exe",
-            Path(r"C:\Program Files\pCloud\pCloud.exe"),
-            Path(r"C:\Program Files (x86)\pCloud\pCloud.exe"),
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
+            if sys.platform == "win32":
+                candidates = [
+                    Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "pCloud" / "pCloud.exe",
+                    Path(r"C:\Program Files\pCloud\pCloud.exe"),
+                    Path(r"C:\Program Files (x86)\pCloud\pCloud.exe"),
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "pCloud"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
+            else:
+                cmd = shutil.which("pcloud")
+                if cmd:
                     try:
-                        subprocess.Popen([str(exe)])
+                        subprocess.Popen([cmd])
                         return True
                     except OSError:
-                        continue
-            return False
+                        return False
+                return False
 
 
 # ── Synology Drive ─────────────────────────────────────────────────
 
 
 class SynologyDriveProvider(SyncProvider):
-    """Synology Drive Client for Windows.
-
-    Offizieller Default-Root laut Synology-Mass-Deployment-Doku ist
-    ``%USERPROFILE%\\SynologyDrive``. Resume startet die lokal installierte
-    GUI-Binärdatei, die Synology unter ``%LOCALAPPDATA%\\SynologyDrive\\
-    SynologyDrive.app\\bin\\cloud-drive-ui.exe`` ablegt.
-    """
+    """Synology Drive Client for Windows, Linux & macOS."""
 
     name = "Synology Drive"
     mount_type = "folder"
@@ -598,25 +791,40 @@ class SynologyDriveProvider(SyncProvider):
             return ok1 or ok2
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
-            Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
-            Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
-            Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "SynologyDrive.exe",
-            Path(r"C:\Program Files\Synology\Synology Drive Client\SynologyDrive.exe"),
-            Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\SynologyDrive.exe"),
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
-                    try:
-                        subprocess.Popen([str(exe)])
-                        return True
-                    except OSError:
-                        continue
-            return False
+            if sys.platform == "win32":
+                candidates = [
+                    Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
+                    Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
+                    Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
+                    Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "SynologyDrive.exe",
+                    Path(r"C:\Program Files\Synology\Synology Drive Client\SynologyDrive.exe"),
+                    Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\SynologyDrive.exe"),
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
+            elif sys.platform == "darwin":
+                try:
+                    subprocess.Popen(["open", "-a", "Synology Drive Client"])
+                    return True
+                except (OSError, subprocess.SubprocessError):
+                    return False
+            else:
+                for binary in ("synology-drive", "cloud-drive-ui"):
+                    cmd = shutil.which(binary)
+                    if cmd:
+                        try:
+                            subprocess.Popen([cmd])
+                            return True
+                        except OSError:
+                            continue
+                return False
 
 
 # ── iCloud ─────────────────────────────────────────────────────────
@@ -632,6 +840,9 @@ class ICloudProvider(SyncProvider):
             p = Path.home() / name
             if p.exists():
                 roots.append(p)
+        macos_icloud = Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs"
+        if macos_icloud.is_dir():
+            roots.append(macos_icloud)
         return _dedup_paths(roots)
 
     def is_running(self) -> bool:
@@ -645,21 +856,21 @@ class ICloudProvider(SyncProvider):
             return ok1 or ok2
 
     def resume(self) -> bool:
-        if sys.platform != "win32":
-            return False
-        candidates = [
-            Path(r"C:\Program Files\iCloud\iCloudDrive.exe"),
-            Path(r"C:\Program Files (x86)\iCloud\iCloudDrive.exe"),
-            Path(r"C:\Program Files\Common Files\Apple\Internet Services\iCloudDrive.exe"),
-        ]
         with self._lock:
-            for exe in candidates:
-                if exe.exists():
-                    try:
-                        subprocess.Popen([str(exe)])
-                        return True
-                    except OSError:
-                        continue
+            if sys.platform == "win32":
+                candidates = [
+                    Path(r"C:\Program Files\iCloud\iCloudDrive.exe"),
+                    Path(r"C:\Program Files (x86)\iCloud\iCloudDrive.exe"),
+                    Path(r"C:\Program Files\Common Files\Apple\Internet Services\iCloudDrive.exe"),
+                ]
+                for exe in candidates:
+                    if exe.exists():
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except OSError:
+                            continue
+                return False
             return False
 
 

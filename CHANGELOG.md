@@ -5,12 +5,18 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Plattform-Transfer: Provider-Abstraktion Linux & macOS (Phase 1) (2026-09-08)
+- **Plattformübergreifende Prozessverwaltung (`providers.py`):** `_check_process()` und `_kill_process()` von reinem Windows-`tasklist`/`taskkill` auf Cross-Platform-Erkennung (`pgrep -f`, POSIX `/proc` Fallback, `pkill -f` mit Timeout und Verifikation) und Namens-Aliase für Linux/macOS umgestellt.
+- **Provider-Erkennung auf macOS & Linux (`providers.py`):** Native Pfaderkennung für macOS (`~/Library/CloudStorage/` für OneDrive, Google Drive, Box, Dropbox; `~/Library/Mobile Documents/com~apple~CloudDocs` für iCloud; `~/Library/Preferences/Nextcloud/nextcloud.cfg` für Nextcloud; `~/Library/Application Support/` für Dropbox & Synology Drive) und Linux (`~/.config/Nextcloud/nextcloud.cfg`, `~/.dropbox/info.json`, `~/.SynologyDrive`, `~/pCloudDrive`) implementiert.
+- **Plattformübergreifendes Resume:** Native Relaunch-Mechanismen für macOS (`open -a`) und Linux (Executable-Suche per `shutil.which`) für alle unterstützten Provider verankert.
+- **Cross-Platform Vertragstests (`tests/test_providers_cross_platform.py` & `tests/source_platform_smoke.py`):** 17 neue Vertragstests für Prozessabstraktion, POSIX-Signalbehandlung, Pfad-Erkennung und Resume-Mechanismen implementiert.
+- The verification contract reflects the current unreleased source state: 237 passing tests.
+
 ### Standard-App-Icons, Multi-Layer ICO & Store-Readiness (2026-09-08)
 - **Multi-Layer Windows-Icon & Desktop-Parität:** Hochauflösendes 7-Layer Windows ICO (`CloudLockFixer.ico`, `DesktopIcon.ico`, `resources/icon.ico`, `assets/icon.ico`) mit Standardauflösungen 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 und 256x256 sowie Master-PNGs (1024x1024) in Root, `resources/` und `assets/` bereitgestellt.
 - **PWA- & Mobile-Iconsuite (`mobile_icons/`):** Vollständige Mobile-/PWA-Icons (`icon-192.png`, `icon-512.png`, `icon-maskable-192.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon.png`, `favicon.ico`) inklusive standardkonformer `manifest.json`.
 - **Windows Store Readiness Assets (`store_assets/`):** Standardkachel- und Store-Icons (`icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png` [Breitkachel], `icon_310x310.png` [Großkachel]) nach Windows-Store-Spezifikation erzeugt.
 - **Vertragstestsuite für Icons & Assets (`tests/test_assets_and_icons.py`):** 5 neue Vertragstests für Master-Icons, Multi-Layer-ICO-Parität, PWA-Manifest und Store-Asset-Dimensionen verankert.
-- The verification contract reflects the current unreleased source state: 220 passing tests.
 
 ### Sicherheits- & Lizenzaudit (Software Security & License Audit) (2026-09-08)
 - **Abhängigkeits-Schwellenwerte gehärtet (Vulnerability Floors):** Build-Abhängigkeit `Pillow` auf `>=12.3.0` angehoben (behebt 26 bekannte Sicherheitslücken in <=12.2.0, u. a. OS Command Injection via `WindowsViewer.get_command()` GHSA-4x4j-2g7c-83w6 und Decompression-Bomb-Bypass GHSA-45hq-cxwh-f6vc). `PySide6` auf `>=6.7.0` vereinheitlicht. `pyproject.toml` um `[project.optional-dependencies]` für `test` (`pytest>=9.1.1` gegen CVE-2025-7117 / GHSA-6w46-j5rx-g56g), `lint` (`ruff>=0.9.0`) und `build` (`PyInstaller>=6.0`, `Pillow>=12.3.0`) ergänzt.

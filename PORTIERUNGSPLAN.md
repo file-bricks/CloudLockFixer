@@ -8,56 +8,42 @@ ist seit 2026-07-18 auf Source-Ebene umgesetzt. Plattformspezifisch sind:
 
 | Modul | Windows | Linux | macOS |
 |-------|---------|-------|-------|
-| providers.py | tasklist/taskkill | `pgrep`/`kill` | `pgrep`/`kill`, `launchctl` |
+| providers.py | tasklist/taskkill | `pgrep`/`pkill` (umgesetzt) | `pgrep`/`pkill`, `open` (umgesetzt) |
 | autostart.py | Registry HKCU\Run | ~/.config/autostart/*.desktop | ~/Library/LaunchAgents/*.plist |
 | contextmenu.py | Registry Shell-Extension | Nautilus-Scripts / Nemo-Actions | Finder Quick Actions / Automator |
 | paths.py | %LOCALAPPDATA% | ~/.local/share/ (XDG) | ~/Library/Application Support/ |
 | tray.py | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon |
 
-## Phase 1: Provider-Abstraktion (Vorarbeit in v1.2.0)
+## Phase 1: Provider-Abstraktion (umgesetzt 2026-09-08)
 
-Die Provider-Klassen kapseln bereits die Prozesssteuerung. Für Cross-Platform:
+Die Provider-Klassen kapseln die plattformübergreifende Prozess- und Pfadsteuerung.
+Seit 2026-09-08 ist Phase 1 auf Source-Ebene vollständig umgesetzt:
 
-### Prozess-Erkennung
+### Prozess-Erkennung (`_check_process`)
+- **Windows:** `tasklist /FI IMAGENAME eq <exe> /NH`
+- **Linux / macOS:** `pgrep -f <pattern>` mit Fallback auf `/proc/<pid>/cmdline` auf Linux.
+- **Pattern-Mapping:** `_PROCESS_ALIASES_POSIX` mappt Windows-Executable-Namen (z. B. `GoogleDriveFS.exe`, `cloud-drive-ui.exe`, `OneDrive.exe`) auf die jeweiligen POSIX-Prozessmuster (`Google Drive`, `synology-drive`, `onedrive`, `bird`).
 
-```python
-# Windows (aktuell)
-subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {exe}", "/NH"])
-
-# Linux / macOS
-subprocess.run(["pgrep", "-f", exe_pattern])
-```
-
-### Prozess-Pause/Kill
-
-```python
-# Windows (aktuell)
-subprocess.run(["taskkill", "/F", "/IM", exe, "/T"])
-
-# Linux
-subprocess.run(["kill", "-SIGSTOP", pid])  # Pause (SIGSTOP)
-subprocess.run(["kill", "-SIGCONT", pid])  # Resume (SIGCONT)
-# Alternativ: kill -9 für Terminate
-
-# macOS
-subprocess.run(["kill", "-SIGSTOP", pid])  # Pause
-subprocess.run(["kill", "-SIGCONT", pid])  # Resume
-# Alternativ via launchctl:
-subprocess.run(["launchctl", "stop", service_label])
-subprocess.run(["launchctl", "start", service_label])
-```
-
-**Vorteil Linux/macOS:** SIGSTOP/SIGCONT pausiert den Prozess OHNE ihn zu beenden.
-Das ist sicherer als Windows taskkill (wo es keinen echten Pause-Mechanismus gibt).
+### Prozess-Pause / Beendigung (`_kill_process`)
+- **Windows:** `taskkill /F /IM <exe> /T`
+- **Linux / macOS:** `pkill -f <pattern>` mit Grace-Period und Verifikation.
 
 ### Provider-Roots
-
+Vollständige Erkennung nativer Cloud-Sync-Pfade unter Linux und macOS:
 | Provider | Linux | macOS |
 |----------|-------|-------|
-| OneDrive | ~/OneDrive (onedrive-Client/rclone) | ~/Library/CloudStorage/OneDrive-*/ |
-| Google Drive | Kein offizieller Client; rclone/Insync | ~/Library/CloudStorage/GoogleDrive-*/ |
-| Dropbox | ~/Dropbox | ~/Dropbox oder ~/Library/CloudStorage/Dropbox/ |
-| iCloud | Nicht verfügbar | ~/Library/Mobile Documents/com~apple~CloudDocs/ |
+| OneDrive | ~/OneDrive (onedrive Client) | ~/Library/CloudStorage/OneDrive-*/ |
+| Google Drive | Insync / rclone | ~/Library/CloudStorage/GoogleDrive-*/ |
+| Dropbox | ~/.dropbox/info.json, ~/Dropbox | ~/Library/Application Support/Dropbox/info.json, ~/Library/CloudStorage/Dropbox/ |
+| Box | ~/Box | ~/Library/CloudStorage/Box-*/ |
+| Nextcloud | ~/.config/Nextcloud/nextcloud.cfg | ~/Library/Preferences/Nextcloud/nextcloud.cfg |
+| pCloud | ~/pCloudDrive | ~/pCloudDrive |
+| Synology Drive | ~/.SynologyDrive | ~/Library/Application Support/SynologyDrive |
+| iCloud | N/A | ~/Library/Mobile Documents/com~apple~CloudDocs/ |
+
+### Provider-Resume
+- **macOS:** `open -a <App-Name>` für alle Desktop-Clients.
+- **Linux:** Executable-Erkennung per `shutil.which()` mit `--background` bzw. `start` Flags.
 
 ## Phase 2: Autostart-Abstraktion
 
