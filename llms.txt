@@ -8,7 +8,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.2
-Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, and cross-platform updates with 215 passing tests.
+Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, and cross-platform updates with 220 passing tests.
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
 Primary interfaces:

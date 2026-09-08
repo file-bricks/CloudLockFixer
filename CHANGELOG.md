@@ -5,12 +5,18 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Standard-App-Icons, Multi-Layer ICO & Store-Readiness (2026-09-08)
+- **Multi-Layer Windows-Icon & Desktop-Parität:** Hochauflösendes 7-Layer Windows ICO (`CloudLockFixer.ico`, `DesktopIcon.ico`, `resources/icon.ico`, `assets/icon.ico`) mit Standardauflösungen 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 und 256x256 sowie Master-PNGs (1024x1024) in Root, `resources/` und `assets/` bereitgestellt.
+- **PWA- & Mobile-Iconsuite (`mobile_icons/`):** Vollständige Mobile-/PWA-Icons (`icon-192.png`, `icon-512.png`, `icon-maskable-192.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon.png`, `favicon.ico`) inklusive standardkonformer `manifest.json`.
+- **Windows Store Readiness Assets (`store_assets/`):** Standardkachel- und Store-Icons (`icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png` [Breitkachel], `icon_310x310.png` [Großkachel]) nach Windows-Store-Spezifikation erzeugt.
+- **Vertragstestsuite für Icons & Assets (`tests/test_assets_and_icons.py`):** 5 neue Vertragstests für Master-Icons, Multi-Layer-ICO-Parität, PWA-Manifest und Store-Asset-Dimensionen verankert.
+- The verification contract reflects the current unreleased source state: 220 passing tests.
+
 ### Sicherheits- & Lizenzaudit (Software Security & License Audit) (2026-09-08)
 - **Abhängigkeits-Schwellenwerte gehärtet (Vulnerability Floors):** Build-Abhängigkeit `Pillow` auf `>=12.3.0` angehoben (behebt 26 bekannte Sicherheitslücken in <=12.2.0, u. a. OS Command Injection via `WindowsViewer.get_command()` GHSA-4x4j-2g7c-83w6 und Decompression-Bomb-Bypass GHSA-45hq-cxwh-f6vc). `PySide6` auf `>=6.7.0` vereinheitlicht. `pyproject.toml` um `[project.optional-dependencies]` für `test` (`pytest>=9.1.1` gegen CVE-2025-7117 / GHSA-6w46-j5rx-g56g), `lint` (`ruff>=0.9.0`) und `build` (`PyInstaller>=6.0`, `Pillow>=12.3.0`) ergänzt.
 - **Vollständiges Drittanbieter-Lizenzinventar (`THIRD_PARTY_LICENSES.txt`):** Drittanbieter-Inventar von 4 Zeilen auf alle direkten und transitiven Laufzeit-, Build-, Test- und Lint-Abhängigkeiten (`PySide6`, `shiboken6`, `PyInstaller`, `Pillow`, `altgraph`, `pyinstaller-hooks-contrib`, `packaging`, `pytest`, `pluggy`, `iniconfig`, `ruff`) erweitert, inklusive Upstream-URLs, Lizenztyp und MIT-Gültigkeitsgrenzen (LGPL-3.0 dynamische Bindung, PyInstaller Special Exception).
 - **Härtung der Versionskontrolle (`.gitignore`):** Cloud-Sync-Konfliktkopienmuster (`*-WORKSTATION-LG*`, `*-ASUS-GEI*`, `*.conflict`, `*.sync-conflict-*`) explizit in `.gitignore` verankert.
 - **Sicherheits- & Lizenzvertrags-Testsuite (`tests/test_security_license_contract.py`):** 6 neue Vertragstests für Schwachstellenschwellenwerte, Lizenzvollständigkeit, `.gitignore`-Muster, Ausschluss von Hardcoded-Entwicklerpfaden/Secrets, Zero-Egress-Offline-Hermetizität und zweisprachige 48h-SLA-Sicherheitsrichtlinie.
-- The verification contract reflects the current unreleased source state: 215 passing tests.
 
 ### Marketing, Design & Auffindbarkeit (Pfad B) (2026-09-06)
 - **Interaktive Mermaid-Architektur- und Ablaufdiagramme:** Aufnahme zweier interaktiver Mermaid-Diagramme (`flowchart TD` für Ingestion-Kanäle, Queue-Orchestrierung, Cloud-Provider-Sensorik und Ausführung mit SHA-256-Kopieüberprüfung; `sequenceDiagram` für End-to-End-Tasklebenszyklus, Sperrerkennung und Fallback-Auflösung) in `README.md` und `README.de.md`.
