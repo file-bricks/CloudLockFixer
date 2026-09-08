@@ -79,3 +79,8 @@ clf.log
 # Bugsweep-/Session-Backups
 *.bak
 _backups/
+# ---- Cloud-Sync Konfliktmuster ----
+*-WORKSTATION-LG*
+*-ASUS-GEI*
+*.conflict
+*.sync-conflict-*

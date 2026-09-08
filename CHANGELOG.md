@@ -5,13 +5,20 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Sicherheits- & Lizenzaudit (Software Security & License Audit) (2026-09-08)
+- **Abhängigkeits-Schwellenwerte gehärtet (Vulnerability Floors):** Build-Abhängigkeit `Pillow` auf `>=12.3.0` angehoben (behebt 26 bekannte Sicherheitslücken in <=12.2.0, u. a. OS Command Injection via `WindowsViewer.get_command()` GHSA-4x4j-2g7c-83w6 und Decompression-Bomb-Bypass GHSA-45hq-cxwh-f6vc). `PySide6` auf `>=6.7.0` vereinheitlicht. `pyproject.toml` um `[project.optional-dependencies]` für `test` (`pytest>=9.1.1` gegen CVE-2025-7117 / GHSA-6w46-j5rx-g56g), `lint` (`ruff>=0.9.0`) und `build` (`PyInstaller>=6.0`, `Pillow>=12.3.0`) ergänzt.
+- **Vollständiges Drittanbieter-Lizenzinventar (`THIRD_PARTY_LICENSES.txt`):** Drittanbieter-Inventar von 4 Zeilen auf alle direkten und transitiven Laufzeit-, Build-, Test- und Lint-Abhängigkeiten (`PySide6`, `shiboken6`, `PyInstaller`, `Pillow`, `altgraph`, `pyinstaller-hooks-contrib`, `packaging`, `pytest`, `pluggy`, `iniconfig`, `ruff`) erweitert, inklusive Upstream-URLs, Lizenztyp und MIT-Gültigkeitsgrenzen (LGPL-3.0 dynamische Bindung, PyInstaller Special Exception).
+- **Härtung der Versionskontrolle (`.gitignore`):** Cloud-Sync-Konfliktkopienmuster (`*-WORKSTATION-LG*`, `*-ASUS-GEI*`, `*.conflict`, `*.sync-conflict-*`) explizit in `.gitignore` verankert.
+- **Sicherheits- & Lizenzvertrags-Testsuite (`tests/test_security_license_contract.py`):** 6 neue Vertragstests für Schwachstellenschwellenwerte, Lizenzvollständigkeit, `.gitignore`-Muster, Ausschluss von Hardcoded-Entwicklerpfaden/Secrets, Zero-Egress-Offline-Hermetizität und zweisprachige 48h-SLA-Sicherheitsrichtlinie.
+- The verification contract reflects the current unreleased source state: 215 passing tests.
+
 ### Marketing, Design & Auffindbarkeit (Pfad B) (2026-09-06)
 - **Interaktive Mermaid-Architektur- und Ablaufdiagramme:** Aufnahme zweier interaktiver Mermaid-Diagramme (`flowchart TD` für Ingestion-Kanäle, Queue-Orchestrierung, Cloud-Provider-Sensorik und Ausführung mit SHA-256-Kopieüberprüfung; `sequenceDiagram` für End-to-End-Tasklebenszyklus, Sperrerkennung und Fallback-Auflösung) in `README.md` und `README.de.md`.
 - **Zweisprachige Schnellnavigation & Kernfähigkeiten-Tabelle:** 14-Punkte-Schnellnavigation mit Direktankern sowie tabellarische Übersicht der Kernfähigkeiten und Governance-/Sicherheitsgarantien (`copy+delete`-Fallback, atomare Mehrschrittketten, Multi-Cloud-Provider-Sensorik, Zero-Egress, Least Privilege und idempotente Retry-Engine).
 - **Geschwister-Ökosystem-Matrix:** Verknüpfungsmatrix zu Partner-Repositories innerhalb von `file-bricks`, `open-bricks`, `ellmos-ai`, `dev-bricks` und `doc-bricks`.
 - **Sicherheitsrichtlinie & Unterstützte Versionen:** Aufnahme der formalen Versionstabelle (`0.2.x`, `< 0.2.0`) in `SECURITY.md` in Deutsch und Englisch.
 - **Metadaten- & Vertragstestsuite erweitert:** 4 neue Vertragstests in `tests/test_metadata.py` für Mermaid-Diagramme, Geschwister-Ökosystem, Schnellnavigation und Versionstabelle.
-- The verification contract reflects the current unreleased source state: 209 passing tests.
+- The verification contract reflects the current unreleased source state: 215 passing tests.
 
 ### Behoben / Fixed (2026-08-29)
 - **Terminal fehlende Move-/Rename-Quellen:** Sicher fehlende aktuelle Quellen werden aus der Provider-Eskalation ausgeschlossen. Die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und terminaler Blockierung. Bestehende v1-Queues werden beim nächsten Lauf ohne Schemawechsel idempotent aktualisiert.

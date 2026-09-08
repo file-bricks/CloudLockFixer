@@ -1,3 +1,74 @@
+# =============================================================================
+# Third-Party Licenses - CloudLockFixer
+# =============================================================================
+# CloudLockFixer is licensed under the MIT License.
+# This document lists third-party dependencies used during runtime, build,
+# packaging, and testing, along with their respective licenses and upstream URLs.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Runtime Dependencies
+# -----------------------------------------------------------------------------
+
 PySide6
 License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 URL: https://pypi.org/project/PySide6/
+Description: Official Python bindings for Qt. Used dynamically via Python shared object bindings under LGPL-3.0-only, preserving MIT compatibility.
+
+shiboken6
+License: LGPL-3.0-only
+URL: https://pypi.org/project/shiboken6/
+Description: CPython binding generator runtime library companion to PySide6.
+
+# -----------------------------------------------------------------------------
+# 2. Build & Packaging Dependencies
+# -----------------------------------------------------------------------------
+
+PyInstaller
+License: GPL-2.0-or-later WITH PyInstaller-exception OR Apache-2.0
+URL: https://pypi.org/project/pyinstaller/
+Description: Freezes Python applications into stand-alone executables. Output binaries are covered by the PyInstaller Special Exception, permitting distribution without viral GPL obligations.
+
+Pillow
+License: HPND-sell-variant
+URL: https://pypi.org/project/pillow/
+Description: Python Imaging Library used for generating multi-resolution application icons and preview assets.
+
+altgraph
+License: MIT
+URL: https://pypi.org/project/altgraph/
+Description: Python graph construction and traversal module used internally by PyInstaller.
+
+pyinstaller-hooks-contrib
+License: Apache-2.0
+URL: https://pypi.org/project/pyinstaller-hooks-contrib/
+Description: Community maintained PyInstaller hooks for third-party packages.
+
+packaging
+License: Apache-2.0 OR BSD-2-Clause
+URL: https://pypi.org/project/packaging/
+Description: Core Python packaging interoperability and version parsing utilities.
+
+# -----------------------------------------------------------------------------
+# 3. Development, Linting & Test Dependencies
+# -----------------------------------------------------------------------------
+
+pytest
+License: MIT
+URL: https://pypi.org/project/pytest/
+Description: Testing framework used for unit, regression, and metadata contract suites.
+
+pluggy
+License: MIT
+URL: https://pypi.org/project/pluggy/
+Description: Plugin management and hook specification mechanism used by pytest.
+
+iniconfig
+License: MIT
+URL: https://pypi.org/project/iniconfig/
+Description: Lightweight INI file parser used by pytest for configuration.
+
+ruff
+License: MIT OR Apache-2.0
+URL: https://pypi.org/project/ruff/
+Description: Static analysis and code formatting engine for Python.

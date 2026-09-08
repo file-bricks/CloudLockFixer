@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-209%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-215%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacy](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
@@ -321,7 +321,7 @@ cloud-sync provider.
 - **P3 (done):** Preventive watcher (observes the change rate of *configured*
   folders → pauses/resumes the sync client; bounded, stat-only, does not
   hydrate online-only placeholders; opt-in).
-- **Tests:** `pytest`, 209 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
+- **Tests:** `pytest`, 215 passing (core + P2/P3 + retry/resume + i18n + multicloud incl.
   pCloud/Synology + Box + Nextcloud + empty-dir own-handle-lock + virtual-mount
   guard + drive-scan + durable retry default + failed-task visibility + provider-lock
   regressions + cross-platform data-dir, Linux XDG and macOS LaunchAgent

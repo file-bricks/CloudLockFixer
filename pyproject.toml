@@ -43,7 +43,20 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "PySide6>=6.5.0",
+    "PySide6>=6.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.9.0",
+]
+test = [
+    "pytest>=9.1.1",
+]
+build = [
+    "PyInstaller>=6.0",
+    "Pillow>=12.3.0",
 ]
 
 [project.urls]
