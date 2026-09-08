@@ -2,12 +2,7 @@
 from __future__ import annotations
 
 import json
-import os
-import subprocess
-import sys
 from pathlib import Path
-
-import pytest
 
 import cloudlockfixer.providers as providers
 from cloudlockfixer.providers import (
@@ -22,7 +17,6 @@ from cloudlockfixer.providers import (
     _check_process,
     _kill_process,
     _get_posix_patterns,
-    provider_for,
 )
 
 
