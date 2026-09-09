@@ -268,7 +268,9 @@ def _extract_json_paths(node: object, key_names: set[str]) -> list[Path]:
             if key in key_names and isinstance(value, str):
                 normalized = value.strip().strip('"').replace("/", os.sep)
                 if normalized:
-                    paths.append(Path(normalized))
+                    p = Path(normalized)
+                    if p.is_absolute():
+                        paths.append(p)
             else:
                 paths.extend(_extract_json_paths(value, key_names))
     elif isinstance(node, list):
@@ -287,12 +289,15 @@ def _read_synology_custom_roots() -> list[Path]:
     as fallback while allowing user-defined sync folders.
     """
     candidates: list[Path] = []
-    base_dirs = [
-        Path(os.environ.get("APPDATA", "")) / "SynologyDrive",
-        Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive",
+    base_dirs: list[Path] = []
+    if appdata := os.environ.get("APPDATA"):
+        base_dirs.append(Path(appdata) / "SynologyDrive")
+    if localappdata := os.environ.get("LOCALAPPDATA"):
+        base_dirs.append(Path(localappdata) / "SynologyDrive")
+    base_dirs.extend([
         Path.home() / ".SynologyDrive",
         Path.home() / "Library" / "Application Support" / "SynologyDrive",
-    ]
+    ])
     key_names = {"local_path", "localPath"}
     line_re = re.compile(
         r"""(?ix)
@@ -339,9 +344,11 @@ def _read_synology_custom_roots() -> list[Path]:
                     for match in line_re.finditer(raw):
                         normalized = match.group("path").strip().replace("/", os.sep)
                         if normalized:
-                            candidates.append(Path(normalized))
+                            p = Path(normalized)
+                            if p.is_absolute():
+                                candidates.append(p)
 
-    return _dedup_paths([p for p in candidates if p.exists()])
+    return _dedup_paths([p for p in candidates if p.is_absolute() and p.exists()])
 
 
 # ── OneDrive ───────────────────────────────────────────────────────
@@ -350,17 +357,21 @@ def _read_synology_custom_roots() -> list[Path]:
 class OneDriveProvider(SyncProvider):
     name = "OneDrive"
     mount_type = "folder"
-    _exe_candidates = [
-        Path(r"C:\Program Files\Microsoft OneDrive\OneDrive.exe"),
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "OneDrive" / "OneDrive.exe",
-    ]
+    @property
+    def _exe_candidates(self) -> list[Path]:
+        candidates = [Path(r"C:\Program Files\Microsoft OneDrive\OneDrive.exe")]
+        if localappdata := os.environ.get("LOCALAPPDATA"):
+            candidates.append(Path(localappdata) / "Microsoft" / "OneDrive" / "OneDrive.exe")
+        return candidates
 
     def _detect_roots(self) -> list[Path]:
         roots: list[Path] = []
         for key in ("OneDrive", "OneDriveConsumer", "OneDriveCommercial"):
             v = os.environ.get(key)
             if v:
-                roots.append(Path(v))
+                p = Path(v)
+                if p.is_absolute() and p.exists():
+                    roots.append(p)
         home_od = Path.home() / "OneDrive"
         if home_od.exists():
             roots.append(home_od)
@@ -498,13 +509,16 @@ class DropboxProvider(SyncProvider):
             except OSError:
                 pass
 
-        info_candidates = [
-            Path(os.environ.get("APPDATA", "")) / "Dropbox" / "info.json",
-            Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "info.json",
+        info_candidates: list[Path] = []
+        if appdata := os.environ.get("APPDATA"):
+            info_candidates.append(Path(appdata) / "Dropbox" / "info.json")
+        if localappdata := os.environ.get("LOCALAPPDATA"):
+            info_candidates.append(Path(localappdata) / "Dropbox" / "info.json")
+        info_candidates.extend([
             Path.home() / ".dropbox" / "info.json",
             Path.home() / ".config" / "dropbox" / "info.json",
             Path.home() / "Library" / "Application Support" / "Dropbox" / "info.json",
-        ]
+        ])
         for info_json in info_candidates:
             if info_json.exists():
                 try:
@@ -515,7 +529,9 @@ class DropboxProvider(SyncProvider):
                             if isinstance(section_data, dict):
                                 path = section_data.get("path")
                                 if path:
-                                    roots.append(Path(path))
+                                    p = Path(path)
+                                    if p.is_absolute() and p.exists():
+                                        roots.append(p)
                 except (json.JSONDecodeError, OSError):
                     pass
         return _dedup_paths(roots)
@@ -530,12 +546,15 @@ class DropboxProvider(SyncProvider):
     def resume(self) -> bool:
         with self._lock:
             if sys.platform == "win32":
-                candidates = [
-                    Path(os.environ.get("LOCALAPPDATA", "")) / "Dropbox" / "Dropbox.exe",
-                    Path(os.environ.get("APPDATA", "")) / "Dropbox" / "bin" / "Dropbox.exe",
+                candidates: list[Path] = []
+                if localappdata := os.environ.get("LOCALAPPDATA"):
+                    candidates.append(Path(localappdata) / "Dropbox" / "Dropbox.exe")
+                if appdata := os.environ.get("APPDATA"):
+                    candidates.append(Path(appdata) / "Dropbox" / "bin" / "Dropbox.exe")
+                candidates.extend([
                     Path(r"C:\Program Files\Dropbox\Client\Dropbox.exe"),
                     Path(r"C:\Program Files (x86)\Dropbox\Client\Dropbox.exe"),
-                ]
+                ])
                 for exe in candidates:
                     if exe.exists():
                         try:
@@ -633,13 +652,17 @@ class NextcloudProvider(SyncProvider):
         if default_root.exists():
             roots.append(default_root)
 
-        cfg_candidates = [
-            Path(os.environ.get("APPDATA", "")) / "Nextcloud" / "nextcloud.cfg",
-            Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "Nextcloud" / "nextcloud.cfg",
-            Path.home() / ".config" / "Nextcloud" / "nextcloud.cfg",
+        cfg_candidates: list[Path] = []
+        if appdata := os.environ.get("APPDATA"):
+            cfg_candidates.append(Path(appdata) / "Nextcloud" / "nextcloud.cfg")
+        if xdg_cfg := os.environ.get("XDG_CONFIG_HOME"):
+            cfg_candidates.append(Path(xdg_cfg) / "Nextcloud" / "nextcloud.cfg")
+        else:
+            cfg_candidates.append(Path.home() / ".config" / "Nextcloud" / "nextcloud.cfg")
+        cfg_candidates.extend([
             Path.home() / "Library" / "Preferences" / "Nextcloud" / "nextcloud.cfg",
             Path.home() / "Library" / "Application Support" / "Nextcloud" / "nextcloud.cfg",
-        ]
+        ])
         for cfg_path in cfg_candidates:
             if cfg_path.exists():
                 try:
@@ -650,7 +673,9 @@ class NextcloudProvider(SyncProvider):
                         _, raw_path = line.split("localPath=", 1)
                         normalized = raw_path.strip().strip('"').replace("/", os.sep)
                         if normalized:
-                            roots.append(Path(normalized))
+                            p = Path(normalized)
+                            if p.is_absolute() and p.exists():
+                                roots.append(p)
                 except OSError:
                     pass
         return _dedup_paths(roots)
@@ -665,11 +690,12 @@ class NextcloudProvider(SyncProvider):
     def resume(self) -> bool:
         with self._lock:
             if sys.platform == "win32":
-                candidates = [
+                candidates: list[Path] = [
                     Path(r"C:\Program Files\Nextcloud\nextcloud.exe"),
                     Path(r"C:\Program Files (x86)\Nextcloud\nextcloud.exe"),
-                    Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Nextcloud" / "nextcloud.exe",
                 ]
+                if localappdata := os.environ.get("LOCALAPPDATA"):
+                    candidates.append(Path(localappdata) / "Programs" / "Nextcloud" / "nextcloud.exe")
                 for exe in candidates:
                     if exe.exists():
                         try:
@@ -733,11 +759,13 @@ class PCloudProvider(SyncProvider):
     def resume(self) -> bool:
         with self._lock:
             if sys.platform == "win32":
-                candidates = [
-                    Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "pCloud" / "pCloud.exe",
+                candidates: list[Path] = []
+                if localappdata := os.environ.get("LOCALAPPDATA"):
+                    candidates.append(Path(localappdata) / "Programs" / "pCloud" / "pCloud.exe")
+                candidates.extend([
                     Path(r"C:\Program Files\pCloud\pCloud.exe"),
                     Path(r"C:\Program Files (x86)\pCloud\pCloud.exe"),
-                ]
+                ])
                 for exe in candidates:
                     if exe.exists():
                         try:
@@ -793,14 +821,18 @@ class SynologyDriveProvider(SyncProvider):
     def resume(self) -> bool:
         with self._lock:
             if sys.platform == "win32":
-                candidates = [
-                    Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
+                candidates: list[Path] = []
+                if localappdata := os.environ.get("LOCALAPPDATA"):
+                    candidates.extend([
+                        Path(localappdata) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "cloud-drive-ui.exe",
+                        Path(localappdata) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "SynologyDrive.exe",
+                    ])
+                candidates.extend([
                     Path(r"C:\Program Files\Synology\Synology Drive Client\cloud-drive-ui.exe"),
                     Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\cloud-drive-ui.exe"),
-                    Path(os.environ.get("LOCALAPPDATA", "")) / "SynologyDrive" / "SynologyDrive.app" / "bin" / "SynologyDrive.exe",
                     Path(r"C:\Program Files\Synology\Synology Drive Client\SynologyDrive.exe"),
                     Path(r"C:\Program Files (x86)\Synology\Synology Drive Client\SynologyDrive.exe"),
-                ]
+                ])
                 for exe in candidates:
                     if exe.exists():
                         try:

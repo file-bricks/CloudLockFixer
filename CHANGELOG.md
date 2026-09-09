@@ -5,12 +5,17 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Bugfix: Provider-Pfad-Sicherheit & Existenzprüfung (Bug #12-1) (2026-09-09)
+- **Verhinderung relativer CWD-Pfade bei fehlendem APPDATA/LOCALAPPDATA (`providers.py`):** Behebung einer Schwachstelle (CWE-426 Untrusted Search Path), bei der nicht gesetzte Umgebungsvariablen `APPDATA`/`LOCALAPPDATA` zu relativen Pfaden führten und versehentlich Dateien im aktuellen Arbeitsverzeichnis als Provider-Konfigurationen geladen oder relative Binaries ausgeführt werden konnten.
+- **Validierung und Filterung von Sync-Roots (`providers.py`):** `NextcloudProvider`, `DropboxProvider` und `OneDriveProvider` validieren nun gefundene Verzeichnisse strikt auf `p.is_absolute() and p.exists()`, um veraltete oder gelöschte Pfade nicht mehr als aktive Sync-Roots zu registrieren.
+- **Regressionstest-Suite erweitert (`tests/test_bugsweep_regressions.py`):** 3 neue Regressionstests gegen relative CWD-Pfadübernahmen, nicht-existente Sync-Roots und relative Resume-Binaries verankert.
+- The verification contract reflects the current unreleased source state: 240 passing tests.
+
 ### Plattform-Transfer: Provider-Abstraktion Linux & macOS (Phase 1) (2026-09-08)
 - **Plattformübergreifende Prozessverwaltung (`providers.py`):** `_check_process()` und `_kill_process()` von reinem Windows-`tasklist`/`taskkill` auf Cross-Platform-Erkennung (`pgrep -f`, POSIX `/proc` Fallback, `pkill -f` mit Timeout und Verifikation) und Namens-Aliase für Linux/macOS umgestellt.
 - **Provider-Erkennung auf macOS & Linux (`providers.py`):** Native Pfaderkennung für macOS (`~/Library/CloudStorage/` für OneDrive, Google Drive, Box, Dropbox; `~/Library/Mobile Documents/com~apple~CloudDocs` für iCloud; `~/Library/Preferences/Nextcloud/nextcloud.cfg` für Nextcloud; `~/Library/Application Support/` für Dropbox & Synology Drive) und Linux (`~/.config/Nextcloud/nextcloud.cfg`, `~/.dropbox/info.json`, `~/.SynologyDrive`, `~/pCloudDrive`) implementiert.
 - **Plattformübergreifendes Resume:** Native Relaunch-Mechanismen für macOS (`open -a`) und Linux (Executable-Suche per `shutil.which`) für alle unterstützten Provider verankert.
 - **Cross-Platform Vertragstests (`tests/test_providers_cross_platform.py` & `tests/source_platform_smoke.py`):** 17 neue Vertragstests für Prozessabstraktion, POSIX-Signalbehandlung, Pfad-Erkennung und Resume-Mechanismen implementiert.
-- The verification contract reflects the current unreleased source state: 237 passing tests.
 
 ### Standard-App-Icons, Multi-Layer ICO & Store-Readiness (2026-09-08)
 - **Multi-Layer Windows-Icon & Desktop-Parität:** Hochauflösendes 7-Layer Windows ICO (`CloudLockFixer.ico`, `DesktopIcon.ico`, `resources/icon.ico`, `assets/icon.ico`) mit Standardauflösungen 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 und 256x256 sowie Master-PNGs (1024x1024) in Root, `resources/` und `assets/` bereitgestellt.

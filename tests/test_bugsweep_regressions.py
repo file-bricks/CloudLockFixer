@@ -228,3 +228,114 @@ def test_worker_executes_case_only_rename_task(tmp_path):
     assert summary["done"] == 1
     assert q.tasks[0].status == "done"
     assert (tmp_path / "QUEUE_FILE.TXT").resolve().name == "QUEUE_FILE.TXT"
+
+
+# ---------------------------------------------------------------------------
+# Bug #12-1: Unset APPDATA / LOCALAPPDATA creates relative CWD candidate paths,
+# and non-existent sync roots are erroneously accepted without validation
+# ---------------------------------------------------------------------------
+
+def test_unset_appdata_does_not_probe_relative_cwd_configs(tmp_path, monkeypatch):
+    """Unset APPDATA/LOCALAPPDATA must not probe relative CWD directories (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import (
+        DropboxProvider,
+        NextcloudProvider,
+        _read_synology_custom_roots,
+    )
+
+    fake_sync = tmp_path / "CwdSyncDir"
+    fake_sync.mkdir()
+
+    # Create CWD folders that would be scanned if relative paths were constructed
+    cwd_db = tmp_path / "Dropbox"
+    cwd_db.mkdir()
+    (cwd_db / "info.json").write_text(
+        '{"personal": {"path": "' + str(fake_sync).replace("\\", "\\\\") + '"}}',
+        encoding="utf-8",
+    )
+
+    cwd_nc = tmp_path / "Nextcloud"
+    cwd_nc.mkdir()
+    (cwd_nc / "nextcloud.cfg").write_text(
+        f"0\\Folders\\1\\localPath={fake_sync.as_posix()}\n",
+        encoding="utf-8",
+    )
+
+    cwd_syno = tmp_path / "SynologyDrive" / "config"
+    cwd_syno.mkdir(parents=True)
+    (cwd_syno / "settings.conf").write_text(
+        f'local_path="{fake_sync.as_posix()}"\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("APPDATA", raising=False)
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+
+    db_roots = DropboxProvider()._detect_roots()
+    assert fake_sync not in db_roots, "DropboxProvider should not scan relative CWD info.json"
+
+    nc_roots = NextcloudProvider()._detect_roots()
+    assert fake_sync not in nc_roots, "NextcloudProvider should not scan relative CWD nextcloud.cfg"
+
+    syno_roots = _read_synology_custom_roots()
+    assert fake_sync not in syno_roots, "SynologyDrive should not scan relative CWD SynologyDrive"
+
+
+def test_nonexistent_sync_roots_are_filtered(tmp_path, monkeypatch):
+    """Sync roots from configs or environment must be absolute and actually exist (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import (
+        DropboxProvider,
+        NextcloudProvider,
+        OneDriveProvider,
+    )
+
+    appdata = tmp_path / "AppData" / "Roaming"
+    appdata.mkdir(parents=True)
+    monkeypatch.setenv("APPDATA", str(appdata))
+
+    missing_nc = tmp_path / "NonexistentNextcloudSync"
+    nc_cfg_dir = appdata / "Nextcloud"
+    nc_cfg_dir.mkdir(parents=True)
+    (nc_cfg_dir / "nextcloud.cfg").write_text(
+        f"0\\Folders\\1\\localPath={missing_nc.as_posix()}\n",
+        encoding="utf-8",
+    )
+
+    missing_db = tmp_path / "NonexistentDropboxSync"
+    db_info_dir = appdata / "Dropbox"
+    db_info_dir.mkdir(parents=True)
+    (db_info_dir / "info.json").write_text(
+        '{"personal": {"path": "' + str(missing_db).replace("\\", "\\\\") + '"}}',
+        encoding="utf-8",
+    )
+
+    missing_od = tmp_path / "NonexistentOneDriveCommercial"
+    monkeypatch.setenv("OneDriveCommercial", str(missing_od))
+
+    nc_roots = NextcloudProvider()._detect_roots()
+    assert missing_nc not in nc_roots, "NextcloudProvider must filter non-existent sync roots"
+
+    db_roots = DropboxProvider()._detect_roots()
+    assert missing_db not in db_roots, "DropboxProvider must filter non-existent sync roots"
+
+    od_roots = OneDriveProvider()._detect_roots()
+    assert missing_od not in od_roots, "OneDriveProvider must filter non-existent sync roots"
+
+
+def test_windows_resume_exe_candidates_are_strictly_absolute(monkeypatch):
+    """Executable candidates in resume() must be strictly absolute paths (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import OneDriveProvider
+
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+    monkeypatch.delenv("APPDATA", raising=False)
+
+    prov = OneDriveProvider()
+    for exe in prov._exe_candidates:
+        assert exe.is_absolute(), f"Candidate {exe} must be an absolute path, not relative to CWD"
