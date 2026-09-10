@@ -46,7 +46,7 @@ Sync-Clients. Sicherheitsrelevant sind insbesondere:
 
 ### Reaktionszeit
 
-Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet und priorisiert behandelt. Bitte geben Sie ausreichend Zeit zur Behebung, bevor Sie Details öffentlich machen.
+Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet, mit einer formalen Eingangsbestätigung beantwortet und innerhalb von 5 Werktagen einer verbindlichen Triage unterzogen. Bitte geben Sie ausreichend Zeit zur Behebung, bevor Sie Details öffentlich machen.
 
 ---
 
@@ -96,4 +96,4 @@ clients. Security-relevant areas include:
 
 ### Response Time
 
-Security-relevant reports are acknowledged within 48 hours and prioritized for rapid resolution. Please allow reasonable time before public disclosure.
+Security-relevant reports are acknowledged within 48 hours and prioritized for rapid resolution with a formal triage commitment within 5 business days. Please allow reasonable time before public disclosure.

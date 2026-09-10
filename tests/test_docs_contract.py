@@ -39,7 +39,7 @@ def test_llms_release_version_matches_package_version() -> None:
     assert 'baseline_tag = "v0.2.2"' in pyproject
 
     release_gate = (PROJECT_ROOT / "RELEASE_GATE.md").read_text(encoding="utf-8")
-    assert "Kanonische Source-Version:** `0.2.2`" in release_gate
+    assert f"Kanonische Source-Version:** `{cloudlockfixer.__version__}`" in release_gate
     assert "Historischer Initial-Tag:** `v1.0.0`" in release_gate
 
 

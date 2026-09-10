@@ -79,8 +79,40 @@ clf.log
 # Bugsweep-/Session-Backups
 *.bak
 _backups/
-# ---- Cloud-Sync Konfliktmuster ----
+
+# ---- Cloud-Sync Konfliktmuster & Multi-Host Hygiene ----
 *-WORKSTATION-LG*
 *-ASUS-GEI*
-*.conflict
+*-WORKSTATION*
+*-conflict-*
 *.sync-conflict-*
+*.conflict
+*-CONFLIT-*
+*.sync-temp-*
+* (kopie)*
+* (copy)*
+
+# ---- Multi-Agent Locks & State ----
+LOCK
+LOCK.*
+*.lock
+LOCK*.txt
+LOCK.permissions.json
+uv.lock
+
+# ---- Test-, Coverage- & Packaging-Caches ----
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+.ruff_cache/
+wheelhouse/
+.wheel-smoke/
+
+# ---- Temporäre Dateien & Editor-Backups ----
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+*.log

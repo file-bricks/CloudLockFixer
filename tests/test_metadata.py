@@ -19,7 +19,7 @@ def test_pyproject_pep621_metadata() -> None:
 
     project = data.get("project", {})
     assert project.get("name") == "cloudlockfixer"
-    assert project.get("version") == "0.2.2"
+    assert project.get("version") == "0.2.3"
     assert project.get("license") == {"text": "MIT"}
     assert project.get("requires-python") == ">=3.10"
 
@@ -156,7 +156,7 @@ def test_version_parity_across_repo() -> None:
     import cloudlockfixer
 
     version = cloudlockfixer.__version__
-    assert version == "0.2.2"
+    assert version == "0.2.3"
 
     pyproject_text = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert f'version = "{version}"' in pyproject_text
@@ -174,8 +174,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-06" in text
-    assert "## Last-checked: 2026-09-06" in text
+    assert "> Last-checked: 2026-09-10" in text
+    assert "## Last-checked: 2026-09-10" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -228,3 +228,70 @@ def test_security_policy_supported_versions() -> None:
     assert "| `< 0.2.0` | :x: |" in sec_text
     assert "### Unterstützte Versionen" in sec_text
     assert "### Supported Versions" in sec_text
+
+
+def test_gitignore_hygiene_patterns() -> None:
+    """Ensure .gitignore enforces multi-host sync, lock and coverage hardening."""
+    gi_path = PROJECT_ROOT / ".gitignore"
+    assert gi_path.is_file(), ".gitignore must exist"
+    gi_text = gi_path.read_text(encoding="utf-8")
+
+    expected_patterns = [
+        "*-WORKSTATION-LG*",
+        "*-ASUS-GEI*",
+        "*-WORKSTATION*",
+        "*-conflict-*",
+        "*.sync-conflict-*",
+        "*.conflict",
+        "*-CONFLIT-*",
+        "*.sync-temp-*",
+        "* (kopie)*",
+        "* (copy)*",
+        "LOCK",
+        "LOCK.*",
+        "*.lock",
+        "LOCK*.txt",
+        "LOCK.permissions.json",
+        "uv.lock",
+        ".coverage",
+        ".coverage.*",
+        "coverage/",
+        "htmlcov/",
+        ".ruff_cache/",
+        "wheelhouse/",
+        ".wheel-smoke/",
+    ]
+    for pat in expected_patterns:
+        assert pat in gi_text, f"Missing pattern '{pat}' in .gitignore"
+
+
+def test_pytest_configuration_and_flags() -> None:
+    """Ensure pyproject.toml configures standardized pytest options."""
+    pyproject_path = PROJECT_ROOT / "pyproject.toml"
+    assert pyproject_path.is_file(), "pyproject.toml must exist"
+    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+
+    pytest_ini = data.get("tool", {}).get("pytest", {}).get("ini_options", {})
+    assert pytest_ini.get("testpaths") == ["tests"]
+    assert pytest_ini.get("pythonpath") == ["src"]
+    assert pytest_ini.get("addopts") == "-ra -v"
+
+
+def test_ci_workflow_pytest_flags() -> None:
+    """Ensure CI workflow runs compileall and pytest with -ra -v."""
+    workflow_path = PROJECT_ROOT / ".github" / "workflows" / "tests.yml"
+    assert workflow_path.is_file(), "tests.yml must exist"
+    workflow_text = workflow_path.read_text(encoding="utf-8")
+
+    assert "python -m compileall -q src tests" in workflow_text
+    assert "python -m pytest -ra -v" in workflow_text
+
+
+def test_changelog_recent_pfad_a_entry() -> None:
+    """Ensure CHANGELOG.md records the current patch release and hygiene entry."""
+    changelog_path = PROJECT_ROOT / "CHANGELOG.md"
+    assert changelog_path.is_file(), "CHANGELOG.md must exist"
+    cl_text = changelog_path.read_text(encoding="utf-8")
+
+    assert "## [0.2.3] - 2026-09-10" in cl_text
+    assert "Pfad A" in cl_text

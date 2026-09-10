@@ -6,10 +6,25 @@ für die Laufzeit konstant.
 """
 from __future__ import annotations
 
+import json
 import locale
+from pathlib import Path
 from typing import Literal
 
 Language = Literal["de", "en", "es", "zh", "ja", "ru"]
+
+SUPPORTED_LANGUAGES: tuple[Language, ...] = ("de", "en", "es", "zh", "ja", "ru")
+DEFAULT_LANGUAGE: Language = "de"
+FALLBACK_CHAIN: tuple[str, ...] = ("en", "de")
+
+LANGUAGE_DISPLAY_NAMES: dict[Language, str] = {
+    "de": "Deutsch",
+    "en": "English",
+    "es": "Español",
+    "zh": "中文 (简体)",
+    "ja": "日本語",
+    "ru": "Русский",
+}
 
 _CATALOG: dict[str, dict[Language, str]] = {
     'status_no_tasks': {
@@ -684,11 +699,18 @@ def get_language() -> Language:
 
 
 def t(key: str, **kwargs: object) -> str:
-    """Übersetze einen Schlüssel in die aktive Sprache."""
+    """Übersetze einen Schlüssel in die aktive Sprache mit deterministischer 4-stufiger Fallback-Kette.
+
+    Fallback-Kette (Policy P-006):
+    1. Aktive Zielsprache (_current)
+    2. Englisch ('en') als universelle Zwischenstufe
+    3. Deutsch ('de') als Primärsprache des Ökosystems
+    4. Key selbst
+    """
     entry = _CATALOG.get(key)
     if entry is None:
         return key
-    text = entry.get(_current) or entry.get("de") or key
+    text = entry.get(_current) or entry.get("en") or entry.get("de") or key
     if kwargs:
         try:
             return text.format(**kwargs)
@@ -699,3 +721,15 @@ def t(key: str, **kwargs: object) -> str:
 
 def available_keys() -> list[str]:
     return sorted(_CATALOG.keys())
+
+
+def export_catalog_json(target_path: Path | str | None = None) -> Path:
+    """Exportiert den Übersetzungskatalog nach locales/translations.json für Ökosystem-Parität."""
+    if target_path is None:
+        target_path = Path(__file__).resolve().parents[2] / "locales" / "translations.json"
+    else:
+        target_path = Path(target_path)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(_CATALOG, f, indent=2, ensure_ascii=False, sort_keys=True)
+    return target_path

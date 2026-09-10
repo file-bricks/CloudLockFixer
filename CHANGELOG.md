@@ -3,13 +3,30 @@
 Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## [Unreleased]
+## [0.2.3] - 2026-09-10
+
+### Internationalisierung & Tier-2-Expansion (P-006) (2026-09-10)
+- **4-stufige deterministische Fallback-Kette (`i18n.py`):** `t()` auf den Standard `target -> en -> de -> key` gemäß Policy P-006 erweitert. Export der kanonischen Konstanten `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE`, `FALLBACK_CHAIN` und `LANGUAGE_DISPLAY_NAMES`.
+- **Translations-Manager & CI-Auditor (`manage_translations.py`):** Neuer CLI- und CI-Scanner zur automatischen Konsistenz- und Paritätsprüfung über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit `--check` und `--export-json`.
+- **JSON-Katalog (`locales/translations.json`):** Maschinell lesbarer Übersetzungskatalog mit 100 % Parität für alle 79 Schlüssel exportiert und verifiziert.
+- **Spanische Gesamtdokumentation (`README.es.md`):** Vollständige spanische Dokumentation mit 1:1 struktureller Parität, übersetzten Mermaid-Diagrammen und Ökosystem-Matrix (Tier-2).
+- **Mehrsprachige Umschalter:** Sprachleiste in `README.md`, `README.de.md` und `README.es.md` auf `English | Deutsch | Español` standardisiert; `llms.txt` aktualisiert.
+- **Automatisierte Vertragstests erweitert (`tests/test_i18n.py`):** 5 neue Tests für 4-Stufen-Fallback, Konstanten, JSON-Parität, Auditor-Check und spanische Dokumentations-Parität hinzugefügt.
+- The verification contract reflects the current unreleased source state: 249 passing tests.
+
+### Technische Hygiene & CI-Härtung (Pfad A) (2026-09-10)
+- **Patch-Versionsanhebung:** Version auf `0.2.3` angehoben und repositoryweit synchronisiert (`pyproject.toml`, `cloudlockfixer.__version__`, `RELEASE_GATE.md`, `README.md`, `README.de.md`, `llms.txt`).
+- **Standardisierung der Pytest-Optionen:** `pyproject.toml` auf `addopts = "-ra -v"` standardisiert für detaillierte und reproduzierbare Testzusammenfassungen.
+- **CI-Workflow-Härtung (`tests.yml`):** Bytecode-Kompilierungsschritt (`python -m compileall -q src tests`) integriert und Pytest-Aufruf auf `-ra -v` standardisiert.
+- **Sicherheitsrichtlinie & SLA präzisiert (`SECURITY.md`):** Zweisprachige 48-Stunden-Reaktionszeit um eine verbindliche Triage-Zusage innerhalb von 5 Werktagen geschärft.
+- **Versionskontroll-Härtung (`.gitignore`):** Multi-Host-Sync-Konfliktmuster (`*-WORKSTATION*`, `*-conflict-*`, `*.sync-conflict-*`, `* (kopie)*`, `* (copy)*`), Multi-Agent-Locks (`LOCK`, `LOCK.*`, `uv.lock`) sowie Coverage- und Cache-Artefakte (`.coverage.*`, `.wheel-smoke/`, `wheelhouse/`) abgesichert.
+- **Automatisierte Vertragstests erweitert (`tests/test_metadata.py`):** 4 neue automatisierte Vertragstests für `.gitignore`-Hygiene, Pytest-Flags, CI-Compileall-Schritte und Changelog-Pfad-A-Eintrag verankert.
 
 ### Bugfix: Provider-Pfad-Sicherheit & Existenzprüfung (Bug #12-1) (2026-09-09)
 - **Verhinderung relativer CWD-Pfade bei fehlendem APPDATA/LOCALAPPDATA (`providers.py`):** Behebung einer Schwachstelle (CWE-426 Untrusted Search Path), bei der nicht gesetzte Umgebungsvariablen `APPDATA`/`LOCALAPPDATA` zu relativen Pfaden führten und versehentlich Dateien im aktuellen Arbeitsverzeichnis als Provider-Konfigurationen geladen oder relative Binaries ausgeführt werden konnten.
 - **Validierung und Filterung von Sync-Roots (`providers.py`):** `NextcloudProvider`, `DropboxProvider` und `OneDriveProvider` validieren nun gefundene Verzeichnisse strikt auf `p.is_absolute() and p.exists()`, um veraltete oder gelöschte Pfade nicht mehr als aktive Sync-Roots zu registrieren.
 - **Regressionstest-Suite erweitert (`tests/test_bugsweep_regressions.py`):** 3 neue Regressionstests gegen relative CWD-Pfadübernahmen, nicht-existente Sync-Roots und relative Resume-Binaries verankert.
-- The verification contract reflects the current unreleased source state: 240 passing tests.
+- Verifikationsstand nach Bugfix #12-1: 240 bestandene Tests.
 
 ### Plattform-Transfer: Provider-Abstraktion Linux & macOS (Phase 1) (2026-09-08)
 - **Plattformübergreifende Prozessverwaltung (`providers.py`):** `_check_process()` und `_kill_process()` von reinem Windows-`tasklist`/`taskkill` auf Cross-Platform-Erkennung (`pgrep -f`, POSIX `/proc` Fallback, `pkill -f` mit Timeout und Verifikation) und Namens-Aliase für Linux/macOS umgestellt.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cloudlockfixer"
-version = "0.2.2"
+version = "0.2.3"
 description = "Windows tray and CLI tool for delayed rename, move and delete operations in cloud-sync folders"
 readme = "README.md"
 authors = [
@@ -83,7 +83,7 @@ historical_initial_tag = "v1.0.0"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-v"
+addopts = "-ra -v"
 
 [tool.ruff]
 line-length = 100
