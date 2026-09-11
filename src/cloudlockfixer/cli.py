@@ -49,6 +49,8 @@ def main(argv: list[str] | None = None) -> int:
     p_run = sub.add_parser("run-now", help=t("cli_run_help"))
     p_run.add_argument("--pause", action="store_true",
                        help=t("cli_pause_help"))
+    p_run.add_argument("--max-retries", type=int, default=None, metavar="N",
+                       help=t("cli_max_retries_help"))
 
     p_retry = sub.add_parser("retry", help=t("cli_retry_help"))
     p_retry.add_argument("task_id", metavar="ID", help=t("cli_retry_id_help"))
@@ -99,7 +101,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "run-now":
-        summary = run_once(queue, force_pause=args.pause)
+        max_retries = (args.max_retries if args.max_retries is not None
+                       else settings.get_max_retries(cfg))
+        summary = run_once(queue, force_pause=args.pause, max_retries=max_retries)
         paused = ""
         if summary["paused_providers"]:
             paused = t("paused_providers",

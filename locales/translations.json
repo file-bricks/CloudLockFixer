@@ -135,6 +135,14 @@
     "ru": "Показать очередь",
     "zh": "显示任务队列"
   },
+  "cli_max_retries_help": {
+    "de": "Maximale Wiederholungen für fehlgeschlagene Tasks (Standard: unbegrenzt oder aus settings.json)",
+    "en": "Maximum retries for failing tasks (default: unlimited or from settings.json)",
+    "es": "Reintentos máximos para tareas fallidas (por defecto: ilimitado o de settings.json)",
+    "ja": "失敗したタスクの最大再試行回数（デフォルト：無制限、または settings.json より）",
+    "ru": "Максимальное количество повторов для сбойных задач (по умолчанию: без ограничений или из settings.json)",
+    "zh": "失败任务的最大重试次数（默认：无限制或来自 settings.json）"
+  },
   "cli_pause_help": {
     "de": "Sync-Client für den Lauf pausieren (M2)",
     "en": "Pause sync client during run (M2)",
@@ -359,6 +367,22 @@
     "ru": "Язык / Language",
     "zh": "语言 / Language"
   },
+  "max_retries_menu": {
+    "de": "Max. Wiederholungen",
+    "en": "Max retries",
+    "es": "Reintentos máximos",
+    "ja": "最大再試行回数",
+    "ru": "Макс. количество повторов",
+    "zh": "最大重试次数"
+  },
+  "max_retries_unlimited": {
+    "de": "Unbegrenzt (Standard)",
+    "en": "Unlimited (default)",
+    "es": "Ilimitado (por defecto)",
+    "ja": "無制限（デフォルト）",
+    "ru": "Без ограничений (по умолчанию)",
+    "zh": "无限制（默认）"
+  },
   "no_failed_tasks": {
     "de": "Keine fehlgeschlagenen oder blockierten Aufgaben vorhanden.",
     "en": "No failed or blocked tasks found.",
@@ -374,6 +398,14 @@
     "ja": "システムトレイが利用できません。",
     "ru": "Системный трей недоступен.",
     "zh": "系统托盘不可用。"
+  },
+  "notifications_label": {
+    "de": "Desktop-Benachrichtigungen",
+    "en": "Desktop notifications",
+    "es": "Notificaciones de escritorio",
+    "ja": "デスクトップ通知",
+    "ru": "Уведомления на рабочем столе",
+    "zh": "桌面通知"
   },
   "open_data_folder": {
     "de": "Datenordner öffnen",
@@ -598,6 +630,30 @@
     "ja": "タスク {id}（{desc}）が再試行用にキューされました。",
     "ru": "Задача {id} ({desc}) поставлена в очередь на повтор.",
     "zh": "任务 {id}（{desc}）已重新加入重试队列。"
+  },
+  "tasks_blocked_toast": {
+    "de": "{n} Aufgabe(n) durch Zielkonflikt dauerhaft blockiert.",
+    "en": "{n} task(s) permanently blocked due to target conflict.",
+    "es": "{n} tarea(s) bloqueadas permanentemente por conflicto de destino.",
+    "ja": "ターゲットの競合により、{n} 件のタスクが永続的にブロックされました。",
+    "ru": "{n} задач(и) окончательно заблокированы из-за конфликта целей.",
+    "zh": "{n} 个任务因目标冲突而被永久阻止。"
+  },
+  "tasks_failed_and_blocked_toast": {
+    "de": "{count} Aufgabe(n) dauerhaft fehlgeschlagen ({permanent} Max-Retries, {blocked} blockiert).",
+    "en": "{count} task(s) permanently failed ({permanent} max retries, {blocked} blocked).",
+    "es": "{count} tarea(s) fallaron permanentemente ({permanent} reintentos máx., {blocked} bloqueadas).",
+    "ja": "{count} 件のタスクが永続的に失敗しました（最大再試行 {permanent} 件、ブロック {blocked} 件）。",
+    "ru": "Не удалось выполнить {count} задач(и) ({permanent} превысили лимит повторов, {blocked} заблокировано).",
+    "zh": "{count} 个任务永久失败（{permanent} 次达重试上限，{blocked} 个被阻止）。"
+  },
+  "tasks_failed_permanent_toast": {
+    "de": "{n} Aufgabe(n) nach maximalen Wiederholungen fehlgeschlagen.",
+    "en": "{n} task(s) failed after maximum retries.",
+    "es": "{n} tarea(s) fallaron tras el número máximo de reintentos.",
+    "ja": "最大再試行回数に達したため、{n} 件のタスクが失敗しました。",
+    "ru": "{n} задач(и) завершились ошибкой после максимального числа повторов.",
+    "zh": "{n} 个任务在达到最大重试次数后失败。"
   },
   "tasks_retried_summary": {
     "de": "{count} fehlgeschlagene/blockierte Aufgabe(n) zur Wiederaufnahme vorgemerkt.",

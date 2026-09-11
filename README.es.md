@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Estado de Pytest](https://img.shields.io/badge/tests-244%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Estado de Pytest](https://img.shields.io/badge/tests-257%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Versión de Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Plataforma](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacidad](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
@@ -280,7 +280,7 @@ CloudLockFixer no es un desbloqueador genérico de archivos, una herramienta ant
 - **P1 (completado):** Núcleo (copy+delete, cadenas, reintento) · CLI (`add`, `list`, `retry`, `retry-all`, `run-now`) · `queue.txt` · Bandeja (con acción de reintento) · Inicio automático · Proveedor de OneDrive.
 - **P2 (completado):** Menú contextual del clic derecho de Explorer (cascada en HKCU, opcional mediante selector en la bandeja).
 - **P3 (completado):** Vigilante preventivo (supervisa la tasa de cambios de carpetas *configuradas* → pausa/reanuda el cliente de sincronización; acotado, solo estadísticas, no hidrata marcadores de posición online; opcional).
-- **Pruebas:** `pytest`, 244 pasadas (núcleo + P2/P3 + reintento/reanudación + i18n Tier-2 + multicloud incl. pCloud/Synology + Box + Nextcloud + bloqueo de manejador propio de directorio vacío + protección de montajes virtuales + escaneo de unidades + reintento duradero por defecto + visibilidad de tareas fallidas + regresiones de bloqueo de proveedor + contratos de directorios entre plataformas, XDG en Linux y LaunchAgent en macOS + suite automatizada de metadatos PEP 621 y zero-egress + pruebas de regresión de renombrado solo de mayúsculas/minúsculas + contratos bilingües de Mermaid y ecosistema).
+- **Pruebas:** `pytest`, 257 pasadas (núcleo + P2/P3 + reintento/reanudación + i18n Tier-2 + multicloud incl. pCloud/Synology + Box + Nextcloud + bloqueo de manejador propio de directorio vacío + protección de montajes virtuales + escaneo de unidades + reintento duradero por defecto + visibilidad de tareas fallidas + regresiones de bloqueo de proveedor + contratos de directorios entre plataformas, XDG en Linux y LaunchAgent en macOS + suite automatizada de metadatos PEP 621 y zero-egress + límites configurables de reintentos y notificaciones de errores persistentes + pruebas de regresión de renombrado solo de mayúsculas/minúsculas + contratos bilingües de Mermaid y ecosistema).
 - **Abierto/futuro:** Más adaptadores de proveedores; supresión opcional de relanzamiento del cliente de sincronización durante operaciones prolongadas.
 
 Windows es el objetivo principal en el alcance empaquetado. El árbol de fuentes está además cubierto por pruebas de humo en Linux/macOS para la ruta principal sin GUI, incluyendo ciclos completos de inicio automático XDG en Linux y LaunchAgent en macOS. Los paquetes nativos y la integración real de clientes en plataformas de destino siguen abiertos.

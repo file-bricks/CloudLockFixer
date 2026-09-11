@@ -70,12 +70,14 @@
   - Nextcloud erledigt 2026-06-16
   - pCloud erledigt 2026-06-28
   - Synology Drive erledigt 2026-06-30
-- [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit).
-  Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
-  endliches Limit übergeben.
+- [x] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit)
+  in settings.py / worker.py / cli.py / tray.py. Der Default bleibt
+  unbegrenzt; persistierbares Limit per Tray und CLI `--max-retries`
+  (erledigt 2026-09-11).
 - [x] Strukturierte Ausgänge für Worker-Fehler: retryfähige Fehler bleiben
   `pending`; deterministische Zielkonflikte werden als `blocked` gespeichert;
   ein explizites Limit bleibt `permanent`/`failed`.
-- [ ] Benachrichtigungen (System-Toast bei Dauerfehler)
+- [x] Benachrichtigungen (System-Toast bei Dauerfehler und blockierten Tasks
+  via QSystemTrayIcon, konfigurierbar über Tray-Menü, erledigt 2026-09-11).
 - [ ] Web-Dashboard / Remote-Status
 - [ ] Plugin-System für Community-Provider

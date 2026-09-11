@@ -5,6 +5,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Retry-Limit-Konfiguration & System-Toast-Benachrichtigungen (2026-09-11)
+- **Konfigurierbare Retry-Limits (`settings.py` / `worker.py` / `cli.py` / `tray.py`):** Persistierbare Begrenzung von Wiederholungsversuchen (`max_retries`) in `settings.json` mit Hilfsfunktionen `get_max_retries()` und `set_max_retries()`. Standardmäßig unbegrenzt (Fire-and-Forget). CLI-Unterstützung via `clf run-now --max-retries N` und dynamisches Tray-Menü ("Max. Wiederholungen" mit Optionen Unbegrenzt, 3, 5, 10, 20).
+- **System-Toast-Benachrichtigungen bei Dauerfehlern (`tray.py`):** Native Benachrichtigungen bei dauerhaft fehlgeschlagenen Tasks (`failed_permanent` nach Erreichen des Retry-Limits) und blockierten Tasks (`blocked` wegen Zielkonflikten). Konfigurierbar und persistierbar über Tray-Menü ("Desktop-Benachrichtigungen", `notifications_enabled`).
+- **Tier-2 i18n-Erweiterung (`i18n.py` / `locales/translations.json`):** 7 neue Übersetzungsschlüssel für Benachrichtigungen, Menüeinträge und CLI-Hilfetexte mit 100 % Parität über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU).
+- **Automatisierte Vertragstests erweitert (`tests/test_notifications_and_retries.py`):** 8 neue automatisierte Unittests für Retry-Defaults, Persistenz, Validierung, Benachrichtigungs-Trigger, Unterdrückung bei Deaktivierung und CLI-Integration.
+- The verification contract reflects the current unreleased source state: 257 passing tests.
+
 ### Internationalisierung & Tier-2-Expansion (P-006) (2026-09-10)
 - **4-stufige deterministische Fallback-Kette (`i18n.py`):** `t()` auf den Standard `target -> en -> de -> key` gemäß Policy P-006 erweitert. Export der kanonischen Konstanten `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE`, `FALLBACK_CHAIN` und `LANGUAGE_DISPLAY_NAMES`.
 - **Translations-Manager & CI-Auditor (`manage_translations.py`):** Neuer CLI- und CI-Scanner zur automatischen Konsistenz- und Paritätsprüfung über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit `--check` und `--export-json`.
@@ -12,7 +19,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Spanische Gesamtdokumentation (`README.es.md`):** Vollständige spanische Dokumentation mit 1:1 struktureller Parität, übersetzten Mermaid-Diagrammen und Ökosystem-Matrix (Tier-2).
 - **Mehrsprachige Umschalter:** Sprachleiste in `README.md`, `README.de.md` und `README.es.md` auf `English | Deutsch | Español` standardisiert; `llms.txt` aktualisiert.
 - **Automatisierte Vertragstests erweitert (`tests/test_i18n.py`):** 5 neue Tests für 4-Stufen-Fallback, Konstanten, JSON-Parität, Auditor-Check und spanische Dokumentations-Parität hinzugefügt.
-- The verification contract reflects the current unreleased source state: 249 passing tests.
+- Verifikationsstand nach Tier-2-Expansion: 249 bestandene Tests.
 
 ### Technische Hygiene & CI-Härtung (Pfad A) (2026-09-10)
 - **Patch-Versionsanhebung:** Version auf `0.2.3` angehoben und repositoryweit synchronisiert (`pyproject.toml`, `cloudlockfixer.__version__`, `RELEASE_GATE.md`, `README.md`, `README.de.md`, `llms.txt`).

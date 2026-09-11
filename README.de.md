@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-249%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-257%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacy](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
@@ -321,11 +321,12 @@ stehen, aber temporär durch einen Cloud-Sync-Provider blockiert werden.
 - **P3 (fertig):** Präventiv-Wächter (Änderungsrate *konfigurierter* Ordner
   beobachten → Sync-Client automatisch pausieren/fortsetzen; bounded + stat-only,
   hydratisiert keine Online-only-Placeholder; opt-in).
-- **Tests:** `pytest`, **249 grün** (Core + P2/P3 + Retry/Resume + i18n Tier-2 + Multicloud inkl.
+- **Tests:** `pytest`, **257 grün** (Core + P2/P3 + Retry/Resume + i18n Tier-2 + Multicloud inkl.
   pCloud/Synology + Box + Nextcloud + Leerordner-Eigen-Handle-Lock + Virtual-
   Mount-Guard + Laufwerks-Scan + dauerhafter Retry-Default + Failed-Task-Sichtbarkeit +
   Provider-Lock-Regressionen + Cross-Platform-Datenpfad-, Linux-XDG- und
   macOS-LaunchAgent-Autostart-Verträge + automatisierte PEP 621 Metadaten- & Zero-Egress-Vertragssuite +
+  konfigurierbare Retry-Limits & Dauerfehler-Toast-Benachrichtigungen +
   Case-Only-Rename-Dateisystem-Regressionstests + zweisprachige Mermaid- & Ökosystem-Verträge).
 - **Im Lifetest gehärtet (2026-05-29):** `is_running()/pause()` robust gegen
   nicht-UTF-8-`tasklist`-Ausgabe; `delete` entfernt read-only-Attribute statt an
