@@ -339,3 +339,68 @@ def test_windows_resume_exe_candidates_are_strictly_absolute(monkeypatch):
     prov = OneDriveProvider()
     for exe in prov._exe_candidates:
         assert exe.is_absolute(), f"Candidate {exe} must be an absolute path, not relative to CWD"
+
+
+# ---------------------------------------------------------------------------
+# Bug #12-2: Cross-Directory Move of Hardlinks / Shared Inodes incorrectly
+# skipped as 'bereits am Ziel' without unlinking the source path
+# ---------------------------------------------------------------------------
+
+def test_cross_directory_move_hardlink_unlinks_source(tmp_path):
+    """Moving a hardlinked file across directories must unlink the source (Bug #12-2)."""
+    import os
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import move_path
+
+    dir1 = tmp_path / "source_dir"
+    dir2 = tmp_path / "target_dir"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    src = dir1 / "payload.bin"
+    dst = dir2 / "payload.bin"
+    src.write_bytes(b"shared-hardlink-content-12345")
+    os.link(src, dst)
+
+    assert src.samefile(dst), "Precondition: files must share same inode/file-index"
+    assert src.resolve() != dst.resolve(), "Precondition: files must be in different directories"
+
+    ok, msg = move_path(src, dst)
+    assert ok, f"move_path failed: {msg}"
+    assert not src.exists(), f"Source file {src} must be unlinked/deleted after move, but still exists!"
+    assert dst.exists(), f"Destination file {dst} must exist after move!"
+    assert dst.read_bytes() == b"shared-hardlink-content-12345"
+
+
+def test_cross_directory_move_hardlink_in_task_chain(tmp_path):
+    """Task chain with cross-directory move of hardlink must succeed and remove source (Bug #12-2)."""
+    import os
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import Step, Task
+    from cloudlockfixer.ops import execute_chain
+
+    dir1 = tmp_path / "d1"
+    dir2 = tmp_path / "d2"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    src = dir1 / "item.txt"
+    dst = dir2 / "item.txt"
+    cleanup = dir1 / "marker.tmp"
+    src.write_text("item-content", encoding="utf-8")
+    cleanup.write_text("marker", encoding="utf-8")
+    os.link(src, dst)
+
+    task = Task(chain=[
+        Step(op="move", src=str(src), arg=str(dst)),
+        Step(op="delete", src=str(cleanup)),
+    ])
+
+    success = execute_chain(task)
+    assert success, f"execute_chain failed: {task.last_error}"
+    assert task.status == "done"
+    assert not src.exists(), "Source must be unlinked"
+    assert dst.exists() and dst.read_text(encoding="utf-8") == "item-content"
+    assert not cleanup.exists(), "Subsequent delete step in chain must succeed"

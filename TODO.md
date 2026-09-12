@@ -7,7 +7,7 @@
 - [x] `src/cloudlockfixer/tray.py`: Menü für Max. Wiederholungen (Unbegrenzt, 3, 5, 10, 20) und Checkbox für Desktop-Benachrichtigungen integriert; System-Toasts bei Dauerfehlern (`failed_permanent`) und Blockaden (`blocked`) via `showMessage()` implementiert.
 - [x] `src/cloudlockfixer/i18n.py` & `locales/translations.json`: 7 neue Keys über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit 100 % Parität.
 - [x] `tests/test_notifications_and_retries.py`: 8 Unittests für Settings, CLI und Tray-Benachrichtigungen hinzugefügt.
-- [x] Gesamtsuite auf 257 bestandene Tests gehärtet; Dokumentation und Verträge synchronisiert.
+- [x] Gesamtsuite auf 259 bestandene Tests gehärtet; Dokumentation und Verträge synchronisiert.
 
 ## Software-Review-Loop 2026-07-12 (Fable) — zurückgestellt (brauchen echtes Gerät/Recherche)
 

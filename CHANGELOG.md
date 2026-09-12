@@ -5,12 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Bugfix Dateisystem-Operationen (Bug #12-2) (2026-09-12)
+- **Hardlink-Move über Verzeichnisgrenzen hinweg (`ops.py`):** In `_do_move` prüfte die Case-Only-Rename-Erkennung fälschlicherweise nur `src.samefile(dst) and src.resolve().name == dst.name`. Bei Hardlinks in unterschiedlichen Ordnern mit gleichem Dateinamen führte dies dazu, dass der Move vorzeitig mit `"bereits am Ziel"` abbrach und die Quelle nicht entfernt wurde. Die Bedingung wurde präzise auf denselben kanonischen Pfad `src.resolve() == dst.resolve()` eingegrenzt, sodass dateisystemübergreifende Moves via `_verify_copy` verifiziert und die Quelle sauber unlinked wird.
+- **Automatisierte Regressionstests (`tests/test_bugsweep_regressions.py`):** 2 neue Tests für Cross-Directory Hardlink Unlink und Task-Chain-Ausführung hinzugefügt.
+- The verification contract reflects the current unreleased source state: 259 passing tests.
+
 ### Retry-Limit-Konfiguration & System-Toast-Benachrichtigungen (2026-09-11)
 - **Konfigurierbare Retry-Limits (`settings.py` / `worker.py` / `cli.py` / `tray.py`):** Persistierbare Begrenzung von Wiederholungsversuchen (`max_retries`) in `settings.json` mit Hilfsfunktionen `get_max_retries()` und `set_max_retries()`. Standardmäßig unbegrenzt (Fire-and-Forget). CLI-Unterstützung via `clf run-now --max-retries N` und dynamisches Tray-Menü ("Max. Wiederholungen" mit Optionen Unbegrenzt, 3, 5, 10, 20).
 - **System-Toast-Benachrichtigungen bei Dauerfehlern (`tray.py`):** Native Benachrichtigungen bei dauerhaft fehlgeschlagenen Tasks (`failed_permanent` nach Erreichen des Retry-Limits) und blockierten Tasks (`blocked` wegen Zielkonflikten). Konfigurierbar und persistierbar über Tray-Menü ("Desktop-Benachrichtigungen", `notifications_enabled`).
 - **Tier-2 i18n-Erweiterung (`i18n.py` / `locales/translations.json`):** 7 neue Übersetzungsschlüssel für Benachrichtigungen, Menüeinträge und CLI-Hilfetexte mit 100 % Parität über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU).
 - **Automatisierte Vertragstests erweitert (`tests/test_notifications_and_retries.py`):** 8 neue automatisierte Unittests für Retry-Defaults, Persistenz, Validierung, Benachrichtigungs-Trigger, Unterdrückung bei Deaktivierung und CLI-Integration.
-- The verification contract reflects the current unreleased source state: 257 passing tests.
 
 ### Internationalisierung & Tier-2-Expansion (P-006) (2026-09-10)
 - **4-stufige deterministische Fallback-Kette (`i18n.py`):** `t()` auf den Standard `target -> en -> de -> key` gemäß Policy P-006 erweitert. Export der kanonischen Konstanten `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE`, `FALLBACK_CHAIN` und `LANGUAGE_DISPLAY_NAMES`.
