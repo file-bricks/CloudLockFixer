@@ -139,8 +139,8 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 - [x] TASKPLAN #852 / TW-CLF-01 — Versions- und Release-Stand konsolidieren — DONE 2026-07-28 (Git-Arbeitskopie mit origin/main synchronisiert, fast-forwarded & 165 Tests grün)
 - [x] TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren — DONE 2026-07-22 (165 lokale Python-Tests; Linux/macOS nur Source-/CI-Nachweis, kein nativer Release)
 - [x] TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen — DONE 2026-08-11, Retry-Vertrag am 2026-08-12 korrigiert: 8 Provider, `&&`-Ketten, Datenordner-Aktion und unbegrenzter Default für retryfähige Tasks; native/integrative Gatter bleiben offen.
-- TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren
-- TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten
+- TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren (Task 166)
+- TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten (Task 167)
 - [x] TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern.
   DONE 2026-07-22: Die vorherige Prüfung verglich nur Dateizahl und Gesamtgröße;
   gleich große, aber abweichende Inhalte hätten dadurch das Löschen der Quelle
@@ -155,7 +155,7 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
   OneDrive-Arbeitsbaum enthält kein `.git`, keinen Quellcode und keine Caches mehr.
 - [x] TASKPLAN #859 / TW-CLF-08 — Build-, Dependency- und CI-Vertrag schließen — DONE 2026-07-22
 - [x] TASKPLAN #860 / TW-CLF-09 — Frühes Runtime-Logging und Debug-Pfad absichern — DONE 2026-07-22
-- TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren
+- TASKPLAN #861 / TW-CLF-10 — Windows-Release-Smoke für Sicherheitsgrenzen formalisieren (Task 168)
 
 Belegte Ist-Stände: Source und neuester Release-Tag stehen lokal auf 0.2.2,
 während Root-Registry/GitHub-Status noch 1.0.0 führen; `PYTHONPATH=src python -m
@@ -165,3 +165,34 @@ sind in der Roadmap explizit als erledigte Source-/CI-Stände markiert. Offen
 bleiben Synology-, Volume-Label-,
 Build-/CI-, Startdiagnose- und Windows-Smoke-Gates
 sowie die separate Root-Release-Entscheidung.
+Belegte historische Ist-Stände dieser Formalisierung: Source und der damals
+neueste Release-Tag standen lokal auf 0.2.2, während Root-Registry/GitHub-Status
+noch 1.0.0 führten; `PYTHONPATH=src python -m pytest -q` sammelte damals 165
+Tests. Cross-Platform-Source-Support sowie Linux-XDG-/macOS-Autostart waren in
+der Roadmap als erledigte Source-/CI-Stände markiert. Offen blieben Synology-,
+Volume-Label-, Build-/CI-, Startdiagnose- und Windows-Smoke-Gates sowie die
+separate Root-Release-Entscheidung.
+
+Aktueller unveröffentlichter Kontrollstand vom 2026-09-05:
+`PYTHONPATH=src python -m pytest --collect-only -q` sammelt 205 Tests und
+`PYTHONPATH=src python -m pytest -q` besteht mit 205 Tests. Der verlinkte
+Vertragscheck [tests/test_docs_contract.py](tests/test_docs_contract.py) gleicht
+diese aktuelle Zahl mit README, README.de, `llms.txt` und dem Unreleased-Eintrag
+im Changelog ab. Historische Zählungen bleiben datiert erhalten; Versions- und
+Releaseaussagen ändern sich nicht.
+
+## TASKWRITER-REVIEW-LOG — 2026-09-05
+
+- Der aktuelle Checkout `main` steht sauber auf `287d9f4` und ist exakt zu
+  `origin/main` synchron. Das GitHub-Repository hat keine offenen Issues oder
+  Pull Requests; der veröffentlichte Tag `v1.0.0` bleibt vom aktuellen,
+  unreleased Source-Stand `0.2.2` getrennt.
+- Read-only-Verifikation: `PYTHONPATH=src python -m pytest -q` ergibt **205
+  passed**; `ruff check .` und `compileall` sind grün. `ruff format --check`
+  ist kein CI-Gate und würde 29 Bestandsdateien umformatieren; es wurde nichts
+  ungefragt reformatiert. Die aktuellen GitHub-Runs für Tests und Source-Smoke
+  sind erfolgreich.
+- Die historischen Zählungen 165/167/183 in den datierten TASKPLAN-/Roadmap-
+  Abschnitten bleiben als Historie erhalten. Der offene Synchronisationsauftrag
+  dafür ist Task 165; echte Windows-/Release-Gates sind Tasks 166–168, der
+  Cross-Platform-/Roadmap-Scope Tasks 169–173.

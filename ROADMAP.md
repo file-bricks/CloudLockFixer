@@ -35,21 +35,21 @@
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [x] macOS-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
-- [ ] Plattform-Abstraktion für Prozessmanagement
-- [ ] Plattform-Abstraktion für Autostart/Kontextmenü
+- [ ] Plattform-Abstraktion für Prozessmanagement (Task 169)
+- [ ] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
   - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
   - [x] macOS-LaunchAgent auf Source-Ebene (DONE 2026-07-22)
-  - [ ] Linux-/macOS-Kontextmenü
+  - [ ] Linux-/macOS-Kontextmenü (Task 170)
 - [x] CI für Linux/macOS-Source-Smokes
-- [ ] CI/CD für native Multi-Plattform-Builds und Paketierung
+- [ ] CI/CD für native Multi-Plattform-Builds und Paketierung (Task 171)
 
 ## v2.x — Release-Scope nach dem Source-Support
 
-- [ ] Native Linux-Integration jenseits des Source-Smokes entscheiden
-- [ ] Native macOS-App-/Paketierungsweg entscheiden
+- [ ] Native Linux-Integration jenseits des Source-Smokes entscheiden (Task 171)
+- [ ] Native macOS-App-/Paketierungsweg entscheiden (Task 171)
 - [x] Linux-XDG-Autostart auf Source-Ebene
 - [x] macOS-LaunchAgent auf Source-Ebene
-- [ ] Linux-/macOS-Kontextmenüs
+- [ ] Linux-/macOS-Kontextmenüs (Task 170)
 
 ## Verifizierter Source-Stand 2026-08-11
 
@@ -81,3 +81,26 @@
   via QSystemTrayIcon, konfigurierbar über Tray-Menü, erledigt 2026-09-11).
 - [ ] Web-Dashboard / Remote-Status
 - [ ] Plugin-System für Community-Provider
+- [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172).
+  Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
+  endliches Limit übergeben.
+- [x] Strukturierte Ausgänge für Worker-Fehler: retryfähige Fehler bleiben
+  `pending`; deterministische Zielkonflikte werden als `blocked` gespeichert;
+  ein explizites Limit bleibt `permanent`/`failed`.
+- [ ] Benachrichtigungen (System-Toast bei Dauerfehler) (Task 173)
+- [ ] Web-Dashboard / Remote-Status (Task 173)
+- [ ] Plugin-System für Community-Provider (Task 173)
+
+## TASKWRITER-REVIEW-LOG — 2026-09-05
+
+- Der historische Source-Stand vom 2026-08-11 bleibt mit 167 Tests datiert;
+  der aktuelle Checkout wurde separat mit 205 gesammelten und bestandenen
+  Tests verifiziert. README, README.de, llms.txt und CHANGELOG führen bereits
+  die aktuelle Zahl 205.
+- `main` ist sauber und zu `origin/main` synchron (`287d9f4`). Die aktuellen
+  GitHub-Test- und Source-Smoke-Runs sind erfolgreich; native Installer,
+  echte Cloud-Client-Prozesse, Security-Freigabe und Veröffentlichung bleiben
+  nach `RELEASE_GATE.md` offen.
+- Tasks 165–173 sind als evidenzbasierte Folgeaufträge angelegt. Es wurden
+  keine Provider-Prozesse, Registry-Einträge, Desktop-Kontextmenüs, Builds,
+  Signaturen oder Uploads ausgeführt.
