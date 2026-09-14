@@ -5,6 +5,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### GitHub- & Upstream-Synchronisation [SOFTWARE_GITHUB] (2026-09-14)
+- **Upstream Fast-Forward (PR #1):** PR #1 (`5f030f5`) von `origin/main` via `git pull --ff-only` übernommen; Dokumentation der Arbeitsbaum-Historie und Taskwriter-Review in `ROADMAP.md` und `TODO.md` integriert.
+- **Privacy- & Secret-Audit:** Verifikation von 0 hardcodierten Benutzerpfaden (`C:\Users\lukas`, `/home/lukas`), 0 API-Keys/Tokens/Secrets und sauberem Git-Tracking über alle Projektdateien.
+- **Repository- & Metadatenpflege:** `llms.txt` Last-checked auf 2026-09-14 aktualisiert und Vertragstest in `tests/test_metadata.py` angeglichen.
+- **Test- & Qualitätsverifikation:** 259/259 Pytest-Tests grün (100 %), `ruff check .` 0 Warnungen, Bytecode-Kompilierung fehlerfrei.
+- The verification contract reflects the current unreleased source state: 259 passing tests.
+
 ### Bugfix Dateisystem-Operationen (Bug #12-2) (2026-09-12)
 - **Hardlink-Move über Verzeichnisgrenzen hinweg (`ops.py`):** In `_do_move` prüfte die Case-Only-Rename-Erkennung fälschlicherweise nur `src.samefile(dst) and src.resolve().name == dst.name`. Bei Hardlinks in unterschiedlichen Ordnern mit gleichem Dateinamen führte dies dazu, dass der Move vorzeitig mit `"bereits am Ziel"` abbrach und die Quelle nicht entfernt wurde. Die Bedingung wurde präzise auf denselben kanonischen Pfad `src.resolve() == dst.resolve()` eingegrenzt, sodass dateisystemübergreifende Moves via `_verify_copy` verifiziert und die Quelle sauber unlinked wird.
 - **Automatisierte Regressionstests (`tests/test_bugsweep_regressions.py`):** 2 neue Tests für Cross-Directory Hardlink Unlink und Task-Chain-Ausführung hinzugefügt.

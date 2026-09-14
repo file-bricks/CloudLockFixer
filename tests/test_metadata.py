@@ -174,8 +174,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-10" in text
-    assert "## Last-checked: 2026-09-10" in text
+    assert "> Last-checked: 2026-09-14" in text
+    assert "## Last-checked: 2026-09-14" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
