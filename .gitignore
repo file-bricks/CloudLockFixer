@@ -84,6 +84,9 @@ _backups/
 *-WORKSTATION-LG*
 *-ASUS-GEI*
 *-WORKSTATION*
+*-ASUS*
+*-LAPTOP*
+*-Mac Studio*
 *-conflict-*
 *.sync-conflict-*
 *.conflict
@@ -91,6 +94,9 @@ _backups/
 *.sync-temp-*
 * (kopie)*
 * (copy)*
+* (Kopie)*
+* (Copy)*
+*conflicted copy*
 
 # ---- Multi-Agent Locks & State ----
 LOCK
@@ -99,6 +105,7 @@ LOCK.*
 LOCK*.txt
 LOCK.permissions.json
 uv.lock
+!package-lock.json
 
 # ---- Test-, Coverage- & Packaging-Caches ----
 .coverage
@@ -106,6 +113,9 @@ uv.lock
 coverage/
 htmlcov/
 .ruff_cache/
+.hypothesis/
+.turbo/
+.nyc_output/
 wheelhouse/
 .wheel-smoke/
 
@@ -116,3 +126,5 @@ wheelhouse/
 *.swo
 *~
 *.log
+*.orig
+*.rej

@@ -68,6 +68,8 @@ Repository = "https://github.com/file-bricks/CloudLockFixer.git"
 "Security Policy" = "https://github.com/file-bricks/CloudLockFixer/blob/main/SECURITY.md"
 "Parent Org" = "https://github.com/file-bricks"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
+"LLM Ready" = "https://github.com/file-bricks/CloudLockFixer/blob/main/llms.txt"
+"Marketing Log" = "https://github.com/file-bricks/CloudLockFixer/blob/main/MARKETING-LOG.txt"
 
 [project.scripts]
 cloudlockfixer = "cloudlockfixer.cli:main"
@@ -81,9 +83,11 @@ baseline_tag = "v0.2.2"
 historical_initial_tag = "v1.0.0"
 
 [tool.pytest.ini_options]
+minversion = "7.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-ra -v"
+norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist"]
 
 [tool.ruff]
 line-length = 100

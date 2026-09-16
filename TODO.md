@@ -1,5 +1,14 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Repository-Hygiene & CI-Workflow-Härtung (Pfad A) — erledigt 2026-09-16
+
+- [x] `.github/workflows/`: `timeout-minutes: 15` zu `tests.yml` und `source-platform-smoke.yml` hinzugefügt; `stale.yml` (v10, timeout 10m) und `welcome.yml` (v3, timeout 5m) mit `cancel-in-progress: true` Concurrency etabliert.
+- [x] `.gitignore`: Umfassende Multi-Host- (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), Lock- (`!package-lock.json`), Backup- (`*.orig`, `*.rej`) und Test-Cache-Muster (`.hypothesis/`, `.turbo/`, `.nyc_output/`) gehärtet.
+- [x] `pyproject.toml`: `"LLM Ready"` und `"Marketing Log"` URLs ergänzt; `[tool.pytest.ini_options]` mit `minversion = "7.0"` und `norecursedirs` standardisiert.
+- [x] `MARKETING-LOG.txt`: Kanonisches Marketing- und Governance-Register (INV-LOCAL-01 bis INV-SLA-10, 4 Personas, Suchanfragen, Pfad A Audit) angelegt.
+- [x] `llms.txt`, `README.md`, `README.de.md`, `README.es.md`: Metadaten- und Dokumentationsparität auf Stand 2026-09-16 und 262 bestandene Tests aktualisiert.
+- [x] `tests/test_metadata.py`: 3 neue automatisierte Vertragstests für CI-Guardrails, .gitignore-Muster und Marketing-Log verankert (Gesamtsuite: 262/262 Tests grün).
+
 ## Feature: Konfigurierbare Retry-Limits & System-Toast-Benachrichtigungen — erledigt 2026-09-11
 
 - [x] `src/cloudlockfixer/settings.py`: `get_max_retries()`, `set_max_retries()`, `get_notifications_enabled()`, `set_notifications_enabled()` implementiert.

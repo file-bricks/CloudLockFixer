@@ -63,6 +63,8 @@ def test_project_urls_integrity() -> None:
         "Security Policy",
         "Parent Org",
         "Umbrella Ecosystem",
+        "LLM Ready",
+        "Marketing Log",
     ]
     for key in expected_keys:
         assert key in urls, f"Missing project.urls entry: {key}"
@@ -174,8 +176,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-14" in text
-    assert "## Last-checked: 2026-09-14" in text
+    assert "> Last-checked: 2026-09-16" in text
+    assert "## Last-checked: 2026-09-16" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -295,3 +297,65 @@ def test_changelog_recent_pfad_a_entry() -> None:
 
     assert "## [0.2.3] - 2026-09-10" in cl_text
     assert "Pfad A" in cl_text
+
+
+def test_ci_concurrency_and_timeout_guardrails() -> None:
+    """Verify CI workflows have concurrency cancellation and explicit timeout-minutes."""
+    workflow_dir = PROJECT_ROOT / ".github" / "workflows"
+    workflows = {
+        "tests.yml": 15,
+        "source-platform-smoke.yml": 15,
+        "stale.yml": 10,
+        "welcome.yml": 5,
+    }
+
+    for wf_name, expected_timeout in workflows.items():
+        wf_file = workflow_dir / wf_name
+        assert wf_file.is_file(), f"Workflow {wf_name} missing"
+        content = wf_file.read_text(encoding="utf-8")
+        assert "concurrency:" in content, f"concurrency missing in {wf_name}"
+        assert "cancel-in-progress: true" in content, f"cancel-in-progress missing in {wf_name}"
+        assert f"timeout-minutes: {expected_timeout}" in content, (
+            f"timeout-minutes: {expected_timeout} missing in {wf_name}"
+        )
+
+
+def test_gitignore_multihost_and_lock_defense() -> None:
+    """Verify .gitignore includes multi-host, cloud conflict, and canonical lock patterns."""
+    gitignore_file = PROJECT_ROOT / ".gitignore"
+    assert gitignore_file.is_file(), ".gitignore must exist"
+    content = gitignore_file.read_text(encoding="utf-8")
+
+    patterns = [
+        "*conflicted copy*",
+        "* (Kopie)*",
+        "* (Copy)*",
+        "*-WORKSTATION*",
+        "*-ASUS*",
+        "*-LAPTOP*",
+        "*-Mac Studio*",
+        "LOCK",
+        "*.lock",
+        "uv.lock",
+        "!package-lock.json",
+        "*.orig",
+        "*.rej",
+        ".coverage.*",
+        ".hypothesis/",
+        ".turbo/",
+        ".nyc_output/",
+    ]
+    for pattern in patterns:
+        assert pattern in content, f"Pattern {pattern} missing in .gitignore"
+
+
+def test_marketing_log_recent_hygiene_entry() -> None:
+    """Verify MARKETING-LOG.txt exists, is up-to-date, and documents governance invariants."""
+    mktg_file = PROJECT_ROOT / "MARKETING-LOG.txt"
+    assert mktg_file.is_file(), "MARKETING-LOG.txt must exist"
+    content = mktg_file.read_text(encoding="utf-8")
+
+    assert "Stand: 2026-09-16" in content, "Recent audit date missing in MARKETING-LOG.txt"
+    assert "CLOUDLOCKFIXER SUITE" in content
+    assert "INV-LOCAL-01" in content and "INV-SLA-10" in content, "Governance pillars missing in MARKETING-LOG.txt"
+    assert "Pfad A" in content or "PFAD A" in content, "Pfad A maintenance section missing in MARKETING-LOG.txt"

@@ -1,0 +1,136 @@
+================================================================================
+CLOUDLOCKFIXER SUITE — MARKETING, DISCOVERY & GOVERNANCE LOG
+================================================================================
+Stand: 2026-09-16
+Repository: file-bricks/CloudLockFixer
+Branch: main
+Version: 0.2.3
+Organization: file-bricks
+Umbrella Ecosystem: open-bricks
+Primary License: MIT
+================================================================================
+
+1. EXECUTIVE VALUE PROPOSITION
+--------------------------------------------------------------------------------
+CloudLockFixer (CLF-WDAS) is an autonomous Windows tray service and developer CLI
+tool for delayed, non-blocking rename, move, and delete operations inside cloud-sync
+folders (OneDrive, Dropbox, Google Drive, Box, iCloud, Nextcloud, pCloud, and
+Synology Drive). It eliminates filesystem friction caused by the Windows Cloud
+Files Mini-Filter (`cldflt.sys`) and syncing background engines through a reliable
+queue-driven copy+delete fallback mechanism with bit-for-bit SHA-256 verification,
+100% local-first zero-egress data isolation, and unprivileged user-mode execution.
+
+
+2. TARGET AUDIENCE & STAKEHOLDER PERSONAS
+--------------------------------------------------------------------------------
+Persona 1: Desktop Power Users & Cloud Sync Workers
+- Context: Work daily in local folders synchronized with OneDrive, Dropbox, or Google Drive.
+- Pain Point: "File in use by another process" (EBUSY / WinError 32 / WinError 5) blocks
+  renaming, moving, or cleaning up folders during active background sync cycles.
+- Benefit: Silent, automatic delayed execution via system tray and Explorer context menu;
+  queue and forget without manual retries or process kills.
+
+Persona 2: Autonomous AI Coding Agents & Developer CLI Tools
+- Context: LLM agents (Antigravity, Codex, Claude Code) and build scripts orchestrating
+  automated workspace refactoring, file migrations, and cleanup.
+- Pain Point: Scripted file operations fail abruptly when cloud sync engines hold transient
+  file locks, corrupting automated test suites and agent worktrees.
+- Benefit: Headless CLI (`clf add`, `clf run-now`, `clf list`, `clf retry-all`), plain text
+  `queue.txt` interface, and structured `llms.txt` context for fail-safe automation.
+
+Persona 3: DevOps & CI/CD Pipeline Automation Engineers
+- Context: Multi-OS build matrices, scheduled automation runners, and developer workstations.
+- Pain Point: Leftover build artifacts, locked test caches, and sync-lock race conditions
+  causing non-deterministic build step failures.
+- Benefit: Multi-step atomic operation chains (`op1 && op2 && op3`), deterministic task
+  states (`pending`, `done`, `retryable`, `blocked`, `permanent`), and cross-platform
+  compatibility across Windows, Linux, and macOS.
+
+Persona 4: Enterprise Privacy & Compliance Auditors
+- Context: Regulated enterprise environments subject to strict data governance and GDPR/DSGVO.
+- Pain Point: File unlocking utilities often require kernel drivers, administrative elevation,
+  or communicate with closed telemetry endpoints.
+- Benefit: Zero outbound network egress (verified by static AST inspection), strictly
+  unprivileged RunAsInvoker operation mode, and complete MIT-licensed transparency.
+
+
+3. HIGH-INTENT SEARCH QUERIES (EN & DE)
+--------------------------------------------------------------------------------
+English High-Intent Search Queries:
+- onedrive file locked cannot rename move delete fix
+- cldflt.sys file in use error python workaround
+- windows delayed action file queue open source
+- copy delete fallback file unlocker python
+- dropbox google drive permissionerror ebusy fix
+- local first cloud sync file retry tray app
+- pyside6 file lock resolver windows 11
+- automated file rename queue for ai coding agents
+
+German High-Intent Search Queries:
+- onedrive datei gesperrt umbenennen fehler beheben
+- datei wird von einem anderen prozess verwendet cloud sync
+- cldflt fehler 0x8007016A datei verschieben
+- cloud sync dateisperre automatisches verzögertes verschieben
+- python file lock retry queue windows
+- lokales dateisystem werkzeug ohne cloud egress
+
+
+4. 5-WAY COMPETITIVE POSITIONING MATRIX
+--------------------------------------------------------------------------------
+| Dimension / Feature | CloudLockFixer | Unlocker / LockHunter | Generic Scripts | Sync Client UI | Manual Retries |
+|---|---|---|---|---|---|
+| Architecture | Local-First Queue | Kernel Driver / Hook | Ad-hoc Batch/PS | Cloud-Native App | Human Intervention |
+| User Privileges | Unprivileged (User) | Admin Elevation Req. | Depends on Script | Unprivileged | Unprivileged |
+| Data Integrity | SHA-256 Verified | Force Close / Danger | Unverified | Cloud Eventual | Manual Inspection |
+| Multi-Cloud Support | 8 Providers Auto | Generic Handles | None | Single Provider | N/A |
+| Multi-Step Chains | Atomic (1-4 steps) | Single File Only | Fragile | None | Tedious |
+| AI / CLI Interface | CLI + queue.txt + llms | None / GUI only | Partial CLI | None | None |
+| Egress & Telemetry | 0% (Zero-Egress) | Closed Source Ads | None | High Telemetry | N/A |
+| Cross-Platform | Win / Linux / Mac | Windows Only | OS-Specific | Multi-Platform | OS-Dependent |
+
+
+5. SIBLING ECOSYSTEM & WORKSPACE SYNERGIES
+--------------------------------------------------------------------------------
+CloudLockFixer integrates harmoniously into the file-bricks and open-bricks suites:
+- `file-bricks/SoftwareCenter`: Central app manager and lifecycle hub.
+- `file-bricks/knowledgedigest`: Structured file and document knowledge extractor.
+- `file-bricks/ExplorerPro`: Advanced multi-tab desktop file manager with inline preview.
+- `file-bricks/ProSync`: Robust multi-target file and directory synchronizer.
+- `open-bricks`: Open-source umbrella foundation establishing local-first standards.
+- `ellmos-ai/system-auditor`: Automated host and multi-agent compliance verification.
+- `dev-bricks/automizer-for-claude-desktop`: Desktop workflow automation and bridging.
+
+
+6. GOVERNANCE & RUNTIME INVARIANTS
+--------------------------------------------------------------------------------
+- INV-LOCAL-01: 100% Local-First & Zero-Egress. No outbound socket, HTTP, or telemetry traffic.
+- INV-PRIV-02:  Unprivileged Execution. Runs strictly as user (RunAsInvoker); no UAC prompt.
+- INV-SAFE-03:  Cryptographic Data Verification. Fallback copies verify bit-for-bit SHA-256 match.
+- INV-ATOM-04:  Atomic Step Ordering. In chains, Step N executes only if Step N-1 succeeded.
+- INV-RETRY-05: Configurable Retry Limits. Default fire-and-forget; configurable max retries.
+- INV-NOTIF-06: Desktop Notification Contract. Emits tray toasts on permanent failures or blocks.
+- INV-PROV-07:  Virtual Mount Guard. Never pauses virtual-mount providers (Google Drive, pCloud).
+- INV-CONF-08:  Multi-Host Conflict Defense. Strict gitignore blocking of sync copies and locks.
+- INV-CI-09:    Deterministic CI Guardrails. Matrix timeout-minutes (15/10/5) and cancel-in-progress.
+- INV-SLA-10:   Bilingual Security Policy. 48-hour response SLA and 5-business-day triage commitment.
+
+
+7. AUDIT & MAINTENANCE LOG
+--------------------------------------------------------------------------------
+- 2026-09-16 — Pfad A Technical Hygiene, CI Hardening & Contract Audit (file-bricks/CloudLockFixer):
+  1. CI Workflow Hardening: Added explicit `timeout-minutes: 15` to `tests.yml` and
+     `source-platform-smoke.yml`; established automated `stale.yml` (timeout 10m, v10)
+     and `welcome.yml` (timeout 5m, v3) with `cancel-in-progress: true` concurrency.
+  2. Multi-Host Defense in `.gitignore`: Hardened against sync conflict patterns
+     (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`, `*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`),
+     editor backups (`*.orig`, `*.rej`), test caches (`.hypothesis/`, `.turbo/`, `.nyc_output/`),
+     and package lock preservation (`!package-lock.json`).
+  3. PEP 621 Metadata Standardization in `pyproject.toml`: Added `"LLM Ready"` and `"Marketing Log"`
+     project URLs; standardized `[tool.pytest.ini_options]` with `minversion = "7.0"` and `norecursedirs`.
+  4. Marketing & Governance Register (`MARKETING-LOG.txt`): Initialized canonical log with 4 target
+     personas, 10 governance invariants (INV-LOCAL-01 to INV-SLA-10), and competitive matrix.
+  5. Documentation & Context Sync: Synchronized `llms.txt` (Last-checked: 2026-09-16), test badges,
+     and bilingual README files.
+  6. Automated Contract Test Suite: Expanded `tests/test_metadata.py` with contract tests for CI
+     timeouts/concurrency, `.gitignore` multi-host patterns, and marketing log governance.
+  7. Verification: Full pytest suite 262 passed, 0 failures, ruff check clean, compileall clean.

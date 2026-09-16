@@ -5,6 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Repository-Hygiene & CI-Workflow-Härtung (Pfad A) (2026-09-16)
+- **CI-Workflow-Härtung (`tests.yml` & `source-platform-smoke.yml`):** Explizite `timeout-minutes: 15` auf allen Matrix-Jobs und Bestätigung von `cancel-in-progress: true` Concurrency Guardrails verankert.
+- **Automatisierte Stale- & Welcome-Workflows (`stale.yml` & `welcome.yml`):** Tägliche Stale-Automation (`actions/stale@v10`, 30 Tage Inaktivität, 7 Tage Gnadenfrist, least-privilege `issues: write`, `pull-requests: write`, `timeout-minutes: 10`) und Begrüßungsworkflow (`actions/first-interaction@v3`, `timeout-minutes: 5`) mit Concurrency-Cancellation eingerichtet.
+- **Erweiterte Multi-Host- & Cloud-Sync-Absicherung (`.gitignore`):** Zusätzliche Ignoriermuster für Windows-, Linux- & macOS-Konfliktdateien (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`, `*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`), Editor- und Merge-Backups (`*.orig`, `*.rej`), Test- & Tool-Caches (`.hypothesis/`, `.turbo/`, `.nyc_output/`) sowie Lock-Preservation (`!package-lock.json`).
+- **PEP 621 Metadaten- & Tool-Standardisierung (`pyproject.toml`):** `[project.urls]` um `"LLM Ready"` und `"Marketing Log"` erweitert; `[tool.pytest.ini_options]` um `minversion = "7.0"` und `norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist"]` ergänzt.
+- **Marketing- & Governance-Register (`MARKETING-LOG.txt`):** Kanonisches Marketing-, Discovery- und Governance-Register nach file-bricks Standard mit 4 Ziel-Personas, High-Intent-Suchbegriffen (EN/DE), 10 Governance- & Laufzeit-Invarianten (INV-LOCAL-01 bis INV-SLA-10) und aktuellem Pfad A Audit-Log (Stand 2026-09-16) etabliert.
+- **Metadaten- & Kontext-Parität (`llms.txt`, `README.md`, `README.de.md`, `README.es.md`):** `llms.txt` Last-checked Timestamp auf 2026-09-16 synchronisiert, Test-Badges und Dokumentationsangaben auf 262 bestandene Tests angeglichen und `MARKETING-LOG.txt` verlinkt.
+- **Automatisierte Vertragstests erweitert (`tests/test_metadata.py`):** 3 neue Vertragstests für CI-Workflow-Timeouts & Concurrency (`test_ci_concurrency_and_timeout_guardrails`), erweiterte `.gitignore` Multi-Host Schutzmuster (`test_gitignore_multihost_and_lock_defense`) und `MARKETING-LOG.txt` Governance-Integrität (`test_marketing_log_recent_hygiene_entry`) verankert.
+- The verification contract reflects the current unreleased source state: 262 passing tests.
+
 ### GitHub- & Upstream-Synchronisation [SOFTWARE_GITHUB] (2026-09-14)
 - **Upstream Fast-Forward (PR #1):** PR #1 (`5f030f5`) von `origin/main` via `git pull --ff-only` übernommen; Dokumentation der Arbeitsbaum-Historie und Taskwriter-Review in `ROADMAP.md` und `TODO.md` integriert.
 - **Privacy- & Secret-Audit:** Verifikation von 0 hardcodierten Benutzerpfaden (`C:\Users\lukas`, `/home/lukas`), 0 API-Keys/Tokens/Secrets und sauberem Git-Tracking über alle Projektdateien.
