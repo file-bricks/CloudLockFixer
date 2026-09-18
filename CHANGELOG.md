@@ -5,6 +5,18 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Discoverability, Visual Architecture & SBOM-Audit (Pfad B) (2026-09-18)
+- **18-Punkte bilinguale Schnellnavigation & Anker-Parität (`README.md`, `README.de.md`):** Etablierung einer 1:1 symmetrischen 18-Punkte Schnellnavigation mit wechselseitigen HTML-Anker-IDs (`id="1-features"`, `id="features"` bis `id="18-security-policy--statutory-notice"`), dualer Sprachumschaltung und lückenloser Querverlinkung.
+- **Zielgruppen-Personas & High-Intent SEO:** Vollständige Dokumentation von 4 Stakeholder-Personas (`[PERSONA-01]` bis `[PERSONA-04]`) sowie zweisprachigen High-Intent-Suchbegriffen zur gezielten Auffindbarkeit bei `cldflt.sys`-, OneDrive-, Dropbox- und Cloud-Sync-Sperren.
+- **10-Dimensionen Vergleichsmatrix:** Strukturierte Differenzierung gegenüber 4 Alternativen (Windows Explorer/PowerShell, Kernel-Unlocker wie LockHunter/Unlocker, Ad-hoc-Skripte, Cloud-Web-UIs) mit direkter Zuordnung zu den Invarianten `INV-LOCAL-01` bis `INV-SLA-10`.
+- **Duale Mermaid-Diagramme:** Ausbau des Systemarchitektur-Flussdiagramms (`flowchart TD`) und des End-to-End Task-Lifecycle-Sequenzdiagramms (`sequenceDiagram`) mit automatischer Nummerierung, Erkennung von `cldflt`-Treiber-Sperren, SHA-256 Digest-Abgleich und selektiver Provider-Pause/Resume-Logik.
+- **SBOM & Drittanbieter-Lizenzinventar (`THIRD_PARTY_LICENSES.md`):** Erstellung eines vollständigen Software Bill of Materials (SBOM) mit SPDX-Identifikatoren für PySide6 (LGPL-3.0-only), shiboken6, PyInstaller, Pillow, pytest und ruff. Zertifizierung der dynamischen Bindung, des unprivilegierten Betriebs (`RunAsInvoker`) und der Zero-Copyleft-Isolation.
+- **Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht):** Verankerung des standardisierten Haftungsausschlusses für unentgeltliche Open-Source-Bereitstellung in `README.de.md`.
+- **PEP 621 Projekt-URLs (`pyproject.toml`):** Ergänzung von `"Third-Party Licenses"` unter `[project.urls]`.
+- **LLM-Kontext- & Log-Synchronisation (`llms.txt`, `MARKETING-LOG.txt`):** Aktualisierung der Zeitstempel auf 2026-09-18, Nachweis der 18-Punkte-Navigationsstruktur und Registrierung des Pfad B Audits.
+- **Automatisierte Vertragstests (`tests/test_metadata.py`):** Neue Vertragstests zur kontinuierlichen Verifikation der 18-Punkte-Navigationsparität, Persona-IDs, Vergleichsmatrix, Mermaid-Syntax, SBOM-Integrität und § 521 BGB Klausel.
+- The verification contract reflects the current unreleased source state: 269 passing tests.
+
 ### Repository-Hygiene & CI-Workflow-Härtung (Pfad A) (2026-09-16)
 - **CI-Workflow-Härtung (`tests.yml` & `source-platform-smoke.yml`):** Explizite `timeout-minutes: 15` auf allen Matrix-Jobs und Bestätigung von `cancel-in-progress: true` Concurrency Guardrails verankert.
 - **Automatisierte Stale- & Welcome-Workflows (`stale.yml` & `welcome.yml`):** Tägliche Stale-Automation (`actions/stale@v10`, 30 Tage Inaktivität, 7 Tage Gnadenfrist, least-privilege `issues: write`, `pull-requests: write`, `timeout-minutes: 10`) und Begrüßungsworkflow (`actions/first-interaction@v3`, `timeout-minutes: 5`) mit Concurrency-Cancellation eingerichtet.

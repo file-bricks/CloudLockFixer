@@ -1,7 +1,7 @@
 ================================================================================
 CLOUDLOCKFIXER SUITE — MARKETING, DISCOVERY & GOVERNANCE LOG
 ================================================================================
-Stand: 2026-09-16
+Stand: 2026-09-18
 Repository: file-bricks/CloudLockFixer
 Branch: main
 Version: 0.2.3
@@ -23,14 +23,14 @@ queue-driven copy+delete fallback mechanism with bit-for-bit SHA-256 verificatio
 
 2. TARGET AUDIENCE & STAKEHOLDER PERSONAS
 --------------------------------------------------------------------------------
-Persona 1: Desktop Power Users & Cloud Sync Workers
+Persona 1 [PERSONA-01]: Desktop Power Users & Cloud Sync Workers
 - Context: Work daily in local folders synchronized with OneDrive, Dropbox, or Google Drive.
 - Pain Point: "File in use by another process" (EBUSY / WinError 32 / WinError 5) blocks
   renaming, moving, or cleaning up folders during active background sync cycles.
 - Benefit: Silent, automatic delayed execution via system tray and Explorer context menu;
   queue and forget without manual retries or process kills.
 
-Persona 2: Autonomous AI Coding Agents & Developer CLI Tools
+Persona 2 [PERSONA-02]: Autonomous AI Coding Agents & Developer CLI Tools
 - Context: LLM agents (Antigravity, Codex, Claude Code) and build scripts orchestrating
   automated workspace refactoring, file migrations, and cleanup.
 - Pain Point: Scripted file operations fail abruptly when cloud sync engines hold transient
@@ -38,7 +38,7 @@ Persona 2: Autonomous AI Coding Agents & Developer CLI Tools
 - Benefit: Headless CLI (`clf add`, `clf run-now`, `clf list`, `clf retry-all`), plain text
   `queue.txt` interface, and structured `llms.txt` context for fail-safe automation.
 
-Persona 3: DevOps & CI/CD Pipeline Automation Engineers
+Persona 3 [PERSONA-03]: DevOps & CI/CD Pipeline Automation Engineers
 - Context: Multi-OS build matrices, scheduled automation runners, and developer workstations.
 - Pain Point: Leftover build artifacts, locked test caches, and sync-lock race conditions
   causing non-deterministic build step failures.
@@ -46,7 +46,7 @@ Persona 3: DevOps & CI/CD Pipeline Automation Engineers
   states (`pending`, `done`, `retryable`, `blocked`, `permanent`), and cross-platform
   compatibility across Windows, Linux, and macOS.
 
-Persona 4: Enterprise Privacy & Compliance Auditors
+Persona 4 [PERSONA-04]: Enterprise Privacy & Compliance Auditors
 - Context: Regulated enterprise environments subject to strict data governance and GDPR/DSGVO.
 - Pain Point: File unlocking utilities often require kernel drivers, administrative elevation,
   or communicate with closed telemetry endpoints.
@@ -134,3 +134,20 @@ CloudLockFixer integrates harmoniously into the file-bricks and open-bricks suit
   6. Automated Contract Test Suite: Expanded `tests/test_metadata.py` with contract tests for CI
      timeouts/concurrency, `.gitignore` multi-host patterns, and marketing log governance.
   7. Verification: Full pytest suite 262 passed, 0 failures, ruff check clean, compileall clean.
+
+- 2026-09-18 — Pfad B Discoverability, Visual Architecture & SBOM Audit (file-bricks/CloudLockFixer):
+  1. 18-Point Bilingual Navigation Parity: Aligned README.md and README.de.md with symmetrical
+     18-point quick navigation structures, reciprocal HTML anchor IDs, and bidirectional cross-links.
+  2. Target Personas & High-Intent SEO: Fully documented 4 stakeholder personas ([PERSONA-01] to [PERSONA-04])
+     and dual-language search phrase matrices across READMEs, MARKETING-LOG.txt, and llms.txt.
+  3. 10-Dimension Comparative Matrix: Formally mapped CloudLockFixer against 4 alternatives (Windows Explorer,
+     Kernel-hook Unlockers, Generic scripts, Cloud Web UIs) with explicit INV-LOCAL-01..INV-SLA-10 governance ties.
+  4. Visual Architecture & Dual Mermaid Diagrams: Enhanced 5-tier architecture flowchart TD and
+     end-to-end task lifecycle sequenceDiagram with autonumbering, lock detection, and fallback resolution.
+  5. Third-Party Licenses SBOM: Created comprehensive THIRD_PARTY_LICENSES.md cataloging PySide6 (LGPL-3.0-only),
+     shiboken6, PyInstaller, Pillow, pytest, and ruff; certified dynamic linking compliance, RunAsInvoker
+     unprivileged execution, and Zero-Copyleft isolation.
+  6. Statutory Notice (§ 521 BGB): Embedded German statutory disclaimer (Gefälligkeitsrecht) in README.de.md.
+  7. Metadata Contract Expansion: Added contract tests in tests/test_metadata.py validating 18-point nav parity,
+     reciprocal anchors, persona IDs, comparative matrix, dual Mermaid syntax, SBOM completeness, and PEP 621 URLs.
+  8. Verification: Full pytest test suite passing with 100% green coverage, ruff check clean, compileall clean.

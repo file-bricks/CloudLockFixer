@@ -70,6 +70,7 @@ Repository = "https://github.com/file-bricks/CloudLockFixer.git"
 "Umbrella Ecosystem" = "https://github.com/open-bricks"
 "LLM Ready" = "https://github.com/file-bricks/CloudLockFixer/blob/main/llms.txt"
 "Marketing Log" = "https://github.com/file-bricks/CloudLockFixer/blob/main/MARKETING-LOG.txt"
+"Third-Party Licenses" = "https://github.com/file-bricks/CloudLockFixer/blob/main/THIRD_PARTY_LICENSES.md"
 
 [project.scripts]
 cloudlockfixer = "cloudlockfixer.cli:main"
