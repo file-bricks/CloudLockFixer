@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import shlex
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -73,6 +72,70 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _split_chained_parts(line: str) -> list[str]:
+    """Teilt eine Zeile an '&&' auf, ignoriert aber '&&' innerhalb von Anführungszeichen."""
+    parts: list[str] = []
+    current: list[str] = []
+    in_quote: str | None = None
+    i = 0
+    n = len(line)
+    while i < n:
+        ch = line[i]
+        if ch in ('"', "'"):
+            if in_quote is None:
+                in_quote = ch
+            elif in_quote == ch:
+                in_quote = None
+            current.append(ch)
+            i += 1
+        elif in_quote is None and line[i:i + 2] == "&&":
+            parts.append("".join(current))
+            current = []
+            i += 2
+        else:
+            current.append(ch)
+            i += 1
+    if current:
+        parts.append("".join(current))
+    return parts
+
+
+def _split_command_tokens(part: str) -> list[str]:
+    """Teilt einen Befehlsabschnitt in Tokens auf.
+
+    Unterstützt Pfade mit und ohne Anführungszeichen, erhält Windows-Backslashes
+    vollständig (kein POSIX-Escape-Verlust von \\) und erlaubt Trailing Backslashes
+    in Pfaden wie 'C:\\Folder\\'.
+    """
+    s = part.strip()
+    tokens: list[str] = []
+    i = 0
+    n = len(s)
+
+    while i < n:
+        while i < n and s[i].isspace():
+            i += 1
+        if i >= n:
+            break
+
+        quote_char = s[i]
+        if quote_char in ('"', "'"):
+            close_idx = s.find(quote_char, i + 1)
+            if close_idx == -1:
+                raise ValueError(f"Nicht geschlossene Anführungszeichen in: {part!r}")
+            tokens.append(s[i + 1:close_idx])
+            i = close_idx + 1
+        else:
+            start = i
+            while i < n and not s[i].isspace():
+                if s[i] in ('"', "'"):
+                    break
+                i += 1
+            tokens.append(s[start:i])
+
+    return tokens
+
+
 def parse_txt_line(line: str) -> Task | None:
     """Parst eine queue.txt-Zeile in einen Task.
 
@@ -87,8 +150,8 @@ def parse_txt_line(line: str) -> Task | None:
     if not line or line.startswith("#"):
         return None
     steps: list[Step] = []
-    for part in line.split("&&"):
-        tokens = shlex.split(part.strip())
+    for part in _split_chained_parts(line):
+        tokens = _split_command_tokens(part.strip())
         if not tokens:
             continue
         op = tokens[0].lower()

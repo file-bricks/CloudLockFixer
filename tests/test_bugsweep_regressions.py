@@ -404,3 +404,58 @@ def test_cross_directory_move_hardlink_in_task_chain(tmp_path):
     assert not src.exists(), "Source must be unlinked"
     assert dst.exists() and dst.read_text(encoding="utf-8") == "item-content"
     assert not cleanup.exists(), "Subsequent delete step in chain must succeed"
+
+
+# ---------------------------------------------------------------------------
+# Bug #13-1: parse_txt_line beschädigt Windows-Pfade ohne Quotes und bricht bei Trailing-Backslash ab
+# ---------------------------------------------------------------------------
+
+def test_parse_txt_line_unquoted_windows_paths():
+    """Unquotierte Windows-Pfade dürfen durch shlex/Tokenizer ihre Backslashes nicht verlieren (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task_del = parse_txt_line(r"delete C:\Users\lukas\AppData\Local\Temp\file.tmp")
+    assert task_del is not None
+    assert task_del.chain[0].src == r"C:\Users\lukas\AppData\Local\Temp\file.tmp"
+
+    task_mv = parse_txt_line(r"move C:\Data\Folder D:\Target")
+    assert task_mv is not None
+    assert task_mv.chain[0].src == r"C:\Data\Folder"
+    assert task_mv.chain[0].arg == r"D:\Target"
+
+    task_ren = parse_txt_line(r"rename C:\Data\File.txt NewName.txt")
+    assert task_ren is not None
+    assert task_ren.chain[0].src == r"C:\Data\File.txt"
+    assert task_ren.chain[0].arg == "NewName.txt"
+
+
+def test_parse_txt_line_trailing_backslash_in_quotes():
+    """Pfade mit abschließendem Backslash in Anführungszeichen dürfen nicht mit 'No closing quotation' abstürzen (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task_mv = parse_txt_line(r'move "C:\Data\Folder\" "D:\Target"')
+    assert task_mv is not None
+    assert task_mv.chain[0].src == "C:\\Data\\Folder\\"
+    assert task_mv.chain[0].arg == r"D:\Target"
+
+    task_del = parse_txt_line(r'delete "C:\Temp\"')
+    assert task_del is not None
+    assert task_del.chain[0].src == "C:\\Temp\\"
+
+
+def test_parse_txt_line_chained_with_ampersand_in_quotes():
+    """Verkettete Befehle mit '&&' innerhalb von Anführungszeichen dürfen nicht zerstückelt werden (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task = parse_txt_line(r'move "C:\A && B\file.txt" "C:\Target" && delete "C:\old"')
+    assert task is not None
+    assert len(task.chain) == 2
+    assert task.chain[0].src == r"C:\A && B\file.txt"
+    assert task.chain[0].arg == r"C:\Target"
+    assert task.chain[1].src == r"C:\old"

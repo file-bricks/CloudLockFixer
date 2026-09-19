@@ -14,8 +14,11 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht):** Verankerung des standardisierten Haftungsausschlusses für unentgeltliche Open-Source-Bereitstellung in `README.de.md`.
 - **PEP 621 Projekt-URLs (`pyproject.toml`):** Ergänzung von `"Third-Party Licenses"` unter `[project.urls]`.
 - **LLM-Kontext- & Log-Synchronisation (`llms.txt`, `MARKETING-LOG.txt`):** Aktualisierung der Zeitstempel auf 2026-09-18, Nachweis der 18-Punkte-Navigationsstruktur und Registrierung des Pfad B Audits.
-- **Automatisierte Vertragstests (`tests/test_metadata.py`):** Neue Vertragstests zur kontinuierlichen Verifikation der 18-Punkte-Navigationsparität, Persona-IDs, Vergleichsmatrix, Mermaid-Syntax, SBOM-Integrität und § 521 BGB Klausel.
-- The verification contract reflects the current unreleased source state: 269 passing tests.
+- The verification contract reflects the current unreleased source state: 272 passing tests.
+
+### Bugfix & Tokenizer-Härtung (Bugsweep Lauf #13) (2026-09-19)
+- **Windows-Pfadtreue & Quote-Parsing in `parse_txt_line` (`src/cloudlockfixer/models.py`):** Ersatz des POSIX-spezifischen `shlex.split` durch dedizierte Tokenizer- und Ketten-Parser-Funktionen (`_split_chained_parts`, `_split_command_tokens`). Behebt das ersatzlose Löschen von Windows-Backslashes (`\`) in unquotierten Pfaden, Syntaxfehler (`ValueError: No closing quotation`) bei Pfadargumenten mit abschließendem Backslash in Anführungszeichen (z. B. `"C:\Data\Folder\"`) und fehlerhafte Ketten-Splits bei `&&` innerhalb von Anführungszeichen.
+- **TDD-Regressionstests (`tests/test_bugsweep_regressions.py`):** Drei automatisierte Regressionstests (`test_parse_txt_line_unquoted_windows_paths`, `test_parse_txt_line_trailing_backslash_in_quotes`, `test_parse_txt_line_chained_with_ampersand_in_quotes`) hinzugefügt.
 
 ### Repository-Hygiene & CI-Workflow-Härtung (Pfad A) (2026-09-16)
 - **CI-Workflow-Härtung (`tests.yml` & `source-platform-smoke.yml`):** Explizite `timeout-minutes: 15` auf allen Matrix-Jobs und Bestätigung von `cancel-in-progress: true` Concurrency Guardrails verankert.
