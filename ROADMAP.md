@@ -36,10 +36,10 @@
 - [x] macOS-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [ ] Plattform-Abstraktion für Prozessmanagement (Task 169)
-- [ ] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
+- [x] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
   - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
   - [x] macOS-LaunchAgent auf Source-Ebene (DONE 2026-07-22)
-  - [ ] Linux-/macOS-Kontextmenü (Task 170)
+  - [x] Linux-/macOS-Kontextmenü (DONE 2026-09-21; Nautilus-Skripte, KDE ServiceMenu, macOS Services)
 - [x] CI für Linux/macOS-Source-Smokes
 - [ ] CI/CD für native Multi-Plattform-Builds und Paketierung (Task 171)
 
@@ -49,7 +49,7 @@
 - [ ] Native macOS-App-/Paketierungsweg entscheiden (Task 171)
 - [x] Linux-XDG-Autostart auf Source-Ebene
 - [x] macOS-LaunchAgent auf Source-Ebene
-- [ ] Linux-/macOS-Kontextmenüs (Task 170)
+- [x] Linux-/macOS-Kontextmenüs (Task 170, DONE 2026-09-21)
 
 ## Verifizierter Source-Stand 2026-08-11
 

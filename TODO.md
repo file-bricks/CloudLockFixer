@@ -1,5 +1,12 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) — erledigt 2026-09-21
+
+- [x] `src/cloudlockfixer/contextmenu.py`: Plattformübergreifende Abstraktion mit Windows-Registry (`HKCU`), Linux Nautilus-Skripten (`$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/`), KDE/Dolphin KIO ServiceMenus (`$XDG_DATA_HOME/kio/servicemenus/cloudlockfixer.desktop`) und macOS Services/Quick-Actions-Workflows (`~/Library/Services/`).
+- [x] `tests/test_contextmenu_cross_platform.py`: 5 automatisierte Tests für Linux-, macOS- und Windows-Mocking-Roundtrips, Dateirechte (`0o755`), XML-Plist-Validierung via `plistlib` und saubere Deinstallation.
+- [x] `tests/source_platform_smoke.py`: Headless Linux- und macOS-CI-Smoke-Prüfungen für Kontextmenü-Roundtrips verankert.
+- [x] Dokumentation & Verträge (`README.md`, `README.de.md`, `llms.txt`, `CHANGELOG.md`, `PORTIERUNGSPLAN.md`, `ROADMAP.md`): Parität und synchroner Vertragstest für 277 Tests hergestellt.
+
 ## Repository-Hygiene & CI-Workflow-Härtung (Pfad A) — erledigt 2026-09-16
 
 - [x] `.github/workflows/`: `timeout-minutes: 15` zu `tests.yml` und `source-platform-smoke.yml` hinzugefügt; `stale.yml` (v10, timeout 10m) und `welcome.yml` (v3, timeout 5m) mit `cancel-in-progress: true` Concurrency etabliert.

@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-272%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-277%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Nicht--Erh%C3%B6ht-blue)](THIRD_PARTY_LICENSES.md)
@@ -406,15 +406,15 @@ Nach erfolgreicher Verarbeitung kommentiert der Worker erledigte Zeilen atomar m
 
 Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt CloudLockFixer eine vollständig entkoppelte Plattformarchitektur:
 - **Windows:** Native Nutzung von `HKCU`-Registry-Schlüsseln, Win32-Fehlercodes und Explorer-Rechtsklick-Integration.
-- **Linux:** Headless-Betrieb mit XDG-Basisverzeichnis-Konformität (`$XDG_DATA_HOME/CloudLockFixer`) und `.desktop`-Autostart (`~/.config/autostart`).
-- **macOS:** Headless-Betrieb mit standardisiertem `~/Library/Application Support/CloudLockFixer`-Datenverzeichnis und LaunchAgent-Plists (`~/Library/LaunchAgents`).
+- **Linux:** Headless-Betrieb mit XDG-Basisverzeichnis-Konformität (`$XDG_DATA_HOME/cloudlockfixer`), `.desktop`-Autostart (`~/.config/autostart`), GNOME/Nautilus-Skripte (`~/.local/share/nautilus/scripts/CloudLockFixer`) und KDE/Dolphin ServiceMenus (`~/.local/share/kio/servicemenus/cloudlockfixer.desktop`).
+- **macOS:** Headless-Betrieb mit standardisiertem `~/Library/Application Support/CloudLockFixer`-Datenverzeichnis, LaunchAgent-Plists (`~/Library/LaunchAgents`) und Finder Quick Actions / Services-Workflows (`~/Library/Services/`).
 
 ---
 
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 272 Tests (`pytest`, **272 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 277 Tests (`pytest`, **277 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen

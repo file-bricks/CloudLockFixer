@@ -93,18 +93,13 @@ Datei: `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist`
 </plist>
 ```
 
-## Phase 3: Kontextmenü-Abstraktion
+## Phase 3: Kontextmenü-Abstraktion (erledigt auf Source-Ebene 2026-09-21)
 
-### Linux
-
-- **GNOME/Nautilus:** Script in `~/.local/share/nautilus/scripts/`
-- **KDE/Dolphin:** .desktop-Datei in `~/.local/share/kservices5/ServiceMenus/`
-- **Nemo:** .nemo_action-Datei in `~/.local/share/nemo/actions/`
-
-### macOS
-
-- **Finder Quick Actions:** Automator-Workflow in `~/Library/Services/`
-- Alternativ: Finder-Toolbar-App oder Finder-Extension (komplexer)
+Stand 2026-09-21: `contextmenu.py` abstrahiert plattformübergreifend:
+- **Windows:** HKCU-Registry (`Directory\shell\CloudLockFixer` und `*\shell\CloudLockFixer`)
+- **Linux:** Nautilus-Skripte in `$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/` (`01_delayed_rename.sh`, `02_delayed_move.sh`, `03_delayed_delete.sh`) mit `0o755` und KDE/Dolphin ServiceMenu in `$XDG_DATA_HOME/kio/servicemenus/cloudlockfixer.desktop`.
+- **macOS:** Finder Quick Actions / Services-Workflows in `~/Library/Services/` (`CloudLockFixer - Delayed Rename.workflow`, `Move.workflow`, `Delete.workflow`) mit `Info.plist` und `document.wflow`.
+Abgedeckt durch `tests/test_contextmenu_cross_platform.py` und `tests/source_platform_smoke.py`.
 
 ## Phase 4: Pfade-Abstraktion
 
@@ -158,9 +153,8 @@ worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip und auf macOS den
 LaunchAgent-plist-Roundtrip. Kein Cloud-Client, kein GUI, kein pip-Extra (nur
 pytest). Stand: 2026-07-22.
 
-Revalidiert 2026-07-22: Die vollständige lokale Suite umfasst 164 Tests; zusätzlich
-bestand bereits ein echter Ubuntu-/WSL-Roundtrip für den Linux-XDG-Autostart.
-Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart und macOS-LaunchAgent
-auf Source-Ebene abgeschlossen. Offen bleiben native Linux-/macOS-Pakete, ein
-echter Mac-Login-/`launchctl`-/GUI-/Cloud-Client-Smoke und plattformspezifische
-Kontextmenüs.
+Revalidiert 2026-09-21: Die vollständige lokale Suite umfasst 277 Tests (100% grün).
+Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart, macOS-LaunchAgent und
+plattformübergreifende Kontextmenüs (Linux Nautilus & KDE Dolphin, macOS Services)
+auf Source-Ebene vollständig umgesetzt und abgesichert. Offen bleiben native
+Linux-/macOS-Pakete/Installer (Task 171) und ein nativer Mac-Login-/`launchctl`-Smoke.

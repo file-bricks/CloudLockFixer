@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-272%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-277%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -406,15 +406,15 @@ When processed by the background worker, completed lines are atomically commente
 
 While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer features a fully decoupled, cross-platform architecture:
 - **Windows:** Standard native runtime utilizing `HKCU` registry entries, Win32 error codes, and Explorer right-click integration.
-- **Linux:** Headless execution with XDG Base Directory specification compliance (`$XDG_DATA_HOME/CloudLockFixer`) and `.desktop` autostart entries (`~/.config/autostart`).
-- **macOS:** Headless execution with standard `~/Library/Application Support/CloudLockFixer` data directory and User LaunchAgent plists (`~/Library/LaunchAgents`).
+- **Linux:** Headless execution with XDG Base Directory specification compliance (`$XDG_DATA_HOME/cloudlockfixer`), `.desktop` autostart entries (`~/.config/autostart`), GNOME/Nautilus scripts (`~/.local/share/nautilus/scripts/CloudLockFixer`), and KDE/Dolphin ServiceMenus (`~/.local/share/kio/servicemenus/cloudlockfixer.desktop`).
+- **macOS:** Headless execution with standard `~/Library/Application Support/CloudLockFixer` data directory, User LaunchAgent plists (`~/Library/LaunchAgents`), and Finder Quick Actions / Services workflows (`~/Library/Services/`).
 
 ---
 
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 272 automated tests (`pytest`, 272 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 277 automated tests (`pytest`, 277 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

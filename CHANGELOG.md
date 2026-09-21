@@ -5,6 +5,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) (2026-09-21)
+- **Plattformübergreifende Kontextmenü-Abstraktion (`src/cloudlockfixer/contextmenu.py`):** Erweiterung des bisher Windows-spezifischen Kontextmenü-Moduls (`is_installed()`, `install()`, `uninstall()`) um native Unterstützung für Linux und macOS bei vollständiger Beibehaltung der bestehenden Windows-HKCU-Logik.
+- **Linux-Desktop-Integration (GNOME/Nautilus & KDE/Dolphin):** Erzeugung von 3 ausführbaren Shell-Skripten (`01_delayed_rename.sh`, `02_delayed_move.sh`, `03_delayed_delete.sh`) in `$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/` mit Ausführungsrechten (`0o755`) und Argument-Verarbeitung (`$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS` und `$@`) sowie Erstellung von `cloudlockfixer.desktop` unter `$XDG_DATA_HOME/kio/servicemenus/` für KDE/Dolphin mit korrekter Befehls- und Pfadquotierung.
+- **macOS-Dienste & Schnellaktionen (`~/Library/Services`):** Automatisierte Erstellung von 3 `.workflow`-Bündeln (`CloudLockFixer - Delayed Rename.workflow`, `Move.workflow`, `Delete.workflow`) mit `Contents/Info.plist` (`NSServices`, `runWorkflowAsService`) und `Contents/document.wflow` (`RunShellScript`-Automator-Aktion via `plistlib`).
+- **Automatisierte Testsuite & Smoke-Integration (`tests/test_contextmenu_cross_platform.py`, `tests/source_platform_smoke.py`):** 5 neue automatisierte Tests für Linux- und macOS-Installations-/Deinstallations-Roundtrips, Dateirechte, XML-Plist-Validierung, Exec-Quotierung und nicht-unterstützte Plattformen sowie headless Smoke-Validierung in CI-Workflows.
+- The verification contract reflects the current unreleased source state: 277 passing tests.
+
 ### Discoverability, Visual Architecture & SBOM-Audit (Pfad B) (2026-09-18)
 - **18-Punkte bilinguale Schnellnavigation & Anker-Parität (`README.md`, `README.de.md`):** Etablierung einer 1:1 symmetrischen 18-Punkte Schnellnavigation mit wechselseitigen HTML-Anker-IDs (`id="1-features"`, `id="features"` bis `id="18-security-policy--statutory-notice"`), dualer Sprachumschaltung und lückenloser Querverlinkung.
 - **Zielgruppen-Personas & High-Intent SEO:** Vollständige Dokumentation von 4 Stakeholder-Personas (`[PERSONA-01]` bis `[PERSONA-04]`) sowie zweisprachigen High-Intent-Suchbegriffen zur gezielten Auffindbarkeit bei `cldflt.sys`-, OneDrive-, Dropbox- und Cloud-Sync-Sperren.
@@ -14,7 +21,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 - **Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht):** Verankerung des standardisierten Haftungsausschlusses für unentgeltliche Open-Source-Bereitstellung in `README.de.md`.
 - **PEP 621 Projekt-URLs (`pyproject.toml`):** Ergänzung von `"Third-Party Licenses"` unter `[project.urls]`.
 - **LLM-Kontext- & Log-Synchronisation (`llms.txt`, `MARKETING-LOG.txt`):** Aktualisierung der Zeitstempel auf 2026-09-18, Nachweis der 18-Punkte-Navigationsstruktur und Registrierung des Pfad B Audits.
-- The verification contract reflects the current unreleased source state: 272 passing tests.
+- Verifikationsstand nach Pfad B: 272 bestandene Tests.
 
 ### Bugfix & Tokenizer-Härtung (Bugsweep Lauf #13) (2026-09-19)
 - **Windows-Pfadtreue & Quote-Parsing in `parse_txt_line` (`src/cloudlockfixer/models.py`):** Ersatz des POSIX-spezifischen `shlex.split` durch dedizierte Tokenizer- und Ketten-Parser-Funktionen (`_split_chained_parts`, `_split_command_tokens`). Behebt das ersatzlose Löschen von Windows-Backslashes (`\`) in unquotierten Pfaden, Syntaxfehler (`ValueError: No closing quotation`) bei Pfadargumenten mit abschließendem Backslash in Anführungszeichen (z. B. `"C:\Data\Folder\"`) und fehlerhafte Ketten-Splits bei `&&` innerhalb von Anführungszeichen.
