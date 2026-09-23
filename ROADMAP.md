@@ -29,6 +29,17 @@
 - [x] Virtual-mount Guard (kein Pause für gemountete Laufwerke)
 - [x] Multi-Provider Präventiv-Wächter
 
+## Windows Store Release-Vorbereitung (erledigt 2026-09-23)
+
+- [x] Packaging-Manifest & Identity (`store_package.json`, `Geiger.CloudLockFixer`, `0.2.3.0`, `runFullTrust`)
+- [x] Desktop Bridge Manifest (`store_package/CloudLockFixer/AppxManifest.xml`)
+- [x] Vollständiger Kachel- und Icon-Satz (`icon_44x44.png` bis `icon_310x310.png` und `StoreLogo.png`)
+- [x] Bilinguale Store-Listings mit maximal 7 Keywords nach Policy 10.1.3 (`STORE_LISTING.md`)
+- [x] Zero-Egress Datenschutzerklärung (`PRIVACY_POLICY.md`) und Support-Leitfaden (`SUPPORT.md`)
+- [x] Staging-Verzeichnis `releases/windowsstore/` mit Build- und WACK-Protokollen
+- [x] 16:9-Präsentationsscreenshot-Generator (`scripts/generate_store_screenshots.py`)
+- [x] Automatisierte Validierungs- und Test-Suite (`scripts/check_store_readiness.py`, `tests/test_store_readiness.py`)
+
 ## v2.0.0 — Cross-Platform
 
 - [x] Linux-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe

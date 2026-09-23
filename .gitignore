@@ -47,6 +47,20 @@ DIAGNOSE_REPORT.md
 
 # ---- Build-Artefakte & Releases ----
 releases/
+!releases/
+releases/*
+!releases/windowsstore/
+releases/windowsstore/*
+!releases/windowsstore/BUILD.md
+!releases/windowsstore/WACK_PROTOCOL.md
+!releases/windowsstore/store_listing_de.md
+!releases/windowsstore/store_listing_en.md
+!releases/windowsstore/store_settings.json
+!releases/windowsstore/StoreLogo.png
+!releases/windowsstore/icon_*.png
+!releases/windowsstore/screenshots/
+releases/windowsstore/screenshots/*
+!releases/windowsstore/screenshots/*.png
 *.exe
 *.msi
 *.msix

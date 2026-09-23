@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-277%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-285%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -414,7 +414,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 277 automated tests (`pytest`, 277 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 285 automated tests (`pytest`, 285 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite
@@ -469,6 +469,8 @@ CloudLockFixer integrates into the **file-bricks** and **open-bricks** desktop a
 ## 18. Security Policy & Statutory Notice
 
 CloudLockFixer operates under strict security and privacy guarantees:
-- **100% Local-First & Zero-Egress:** The tool performs no telemetry, analytics, or outbound internet communication.
+- **100% Local-First & Zero-Egress:** The tool performs no telemetry, analytics, or outbound internet communication. Details: [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md).
 - **Cryptographic Verification:** SHA-256 verification ensures that files are never lost during copy+delete fallbacks.
 - **Vulnerability SLA:** Coordinated vulnerability disclosure with a committed 48-hour initial response and 5-business-day triage SLA detailed in [`SECURITY.md`](SECURITY.md).
+- **Support & Troubleshooting:** Issue reporting guidelines and contact channels are detailed in [`SUPPORT.md`](SUPPORT.md).
+- **Windows Store & Packaging:** Preparation guide and metadata for Microsoft Store submission are documented in [`WINDOWS_STORE_PREP.md`](WINDOWS_STORE_PREP.md) and [`STORE_LISTING.md`](STORE_LISTING.md).

@@ -1,0 +1,21 @@
+{
+  "app_name": "CloudLockFixer",
+  "name": "CloudLockFixer",
+  "publisher": "CN=52596601-BAB4-4F3F-B182-E8F3F273B202",
+  "publisher_display": "Geiger",
+  "identity_name": "Geiger.CloudLockFixer",
+  "version": "0.2.3.0",
+  "description": "Windows-Tray- und Hintergrundwerkzeug zur automatischen und verzögerten Auflösung von Dateisperren in Cloud-Sync-Ordnern.",
+  "executable": "CloudLockFixer.exe",
+  "capabilities": "runFullTrust",
+  "category": "Utilities",
+  "age_rating": "3+",
+  "license": "MIT",
+  "languages": [
+    "de-DE",
+    "en-US"
+  ],
+  "privacy_url": "https://github.com/file-bricks/CloudLockFixer/blob/main/PRIVACY_POLICY.md",
+  "support_url": "https://github.com/file-bricks/CloudLockFixer/issues",
+  "execution_alias": "cloudlockfixer.exe"
+}

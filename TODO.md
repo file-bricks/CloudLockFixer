@@ -1,11 +1,22 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Windows Store Readiness & MSIX Packaging Pipeline — erledigt 2026-09-23
+
+- [x] `store_package.json`: Publisher `CN=52596601-BAB4-4F3F-B182-E8F3F273B202`, Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz, Sprachen `["de-DE", "en-US"]`, validierte HTTPS-URLs für Datenschutz und Support.
+- [x] `store_package/CloudLockFixer/AppxManifest.xml`: Kanonisches AppxManifest für Windows Desktop Bridge (TargetDeviceFamily `Windows.Desktop`, MinVersion `10.0.17763.0`, MaxVersionTested `10.0.26100.0`).
+- [x] Tile- und Logo-Assets (`store_assets/`, `store_package/CloudLockFixer/icons/`, `releases/windowsstore/`): `icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png`, `icon_310x310.png` und `StoreLogo.png` (50x50) mit validierten PNG-Signaturen und -Dimensionen.
+- [x] Store-Dokumentation & Governance: `PRIVACY_POLICY.md` (DSGVO/GDPR Zero-Egress), `SUPPORT.md`, `STORE_LISTING.md` (DE/EN mit strikt maximal 7 suchbegriffskonformen Keywords gemäß Store Policy 10.1.3), `WINDOWS_STORE_PREP.md`.
+- [x] `releases/windowsstore/` Staging-Paket: `store_settings.json`, `BUILD.md`, `WACK_PROTOCOL.md`, `store_listing_de.md`, `store_listing_en.md`, `StoreLogo.png`.
+- [x] `scripts/generate_store_screenshots.py`: 4 hochauflösende 16:9-Präsentationsscreenshots (1920x1080) unter `releases/windowsstore/screenshots/`, `screenshots/store/` und `README/screenshots/store/`.
+- [x] `scripts/check_store_readiness.py`: Vollständige Audit- und Validierungs-CLI für Repository-Materialien, Kacheln, Listings, Manifeste und optionale MSIX/WACK-Nachweise.
+- [x] `tests/test_store_readiness.py`: 8 neue automatisierte Tests (Gesamtsuite: 285/285 Tests 100% grün).
+
 ## Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) — erledigt 2026-09-21
 
 - [x] `src/cloudlockfixer/contextmenu.py`: Plattformübergreifende Abstraktion mit Windows-Registry (`HKCU`), Linux Nautilus-Skripten (`$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/`), KDE/Dolphin KIO ServiceMenus (`$XDG_DATA_HOME/kio/servicemenus/cloudlockfixer.desktop`) und macOS Services/Quick-Actions-Workflows (`~/Library/Services/`).
 - [x] `tests/test_contextmenu_cross_platform.py`: 5 automatisierte Tests für Linux-, macOS- und Windows-Mocking-Roundtrips, Dateirechte (`0o755`), XML-Plist-Validierung via `plistlib` und saubere Deinstallation.
 - [x] `tests/source_platform_smoke.py`: Headless Linux- und macOS-CI-Smoke-Prüfungen für Kontextmenü-Roundtrips verankert.
-- [x] Dokumentation & Verträge (`README.md`, `README.de.md`, `llms.txt`, `CHANGELOG.md`, `PORTIERUNGSPLAN.md`, `ROADMAP.md`): Parität und synchroner Vertragstest für 277 Tests hergestellt.
+- [x] Dokumentation & Verträge (`README.md`, `README.de.md`, `llms.txt`, `CHANGELOG.md`, `PORTIERUNGSPLAN.md`, `ROADMAP.md`): Parität und synchroner Vertragstest für 285 Tests hergestellt.
 
 ## Repository-Hygiene & CI-Workflow-Härtung (Pfad A) — erledigt 2026-09-16
 

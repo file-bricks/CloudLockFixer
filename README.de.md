@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-277%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-285%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Nicht--Erh%C3%B6ht-blue)](THIRD_PARTY_LICENSES.md)
@@ -414,7 +414,7 @@ Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt Clo
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 277 Tests (`pytest`, **277 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 285 Tests (`pytest`, **285 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen
@@ -469,9 +469,11 @@ CloudLockFixer ist Teil des **file-bricks** und **open-bricks** Desktop- und Ent
 ## 18. Sicherheitsrichtlinie & Rechtliche Hinweise
 
 CloudLockFixer garantiert höchste Standards für Sicherheit und Privatsphäre:
-- **100% Local-First & Zero-Egress:** Keine Telemetrie, Analyse-Tracker oder externe Verbindungen.
+- **100% Local-First & Zero-Egress:** Keine Telemetrie, Analyse-Tracker oder externe Verbindungen. Details in [`PRIVACY_POLICY.md`](PRIVACY_POLICY.md).
 - **Kryptografische Absicherung:** SHA-256 Prüfsummen stellen sicher, dass Dateien beim Copy+Delete-Fallback niemals verloren gehen.
 - **Sicherheits-SLA:** Koordinierte Offenlegung von Sicherheitslücken mit 48-Stunden Reaktionszeit und 5-Werktage Triage-Zusage gemäß [`SECURITY.md`](SECURITY.md).
+- **Support & Fehlerberichte:** Hilfestellungen und Richtlinien für Bugreports sind in [`SUPPORT.md`](SUPPORT.md) beschrieben.
+- **Windows Store & Paketierung:** Vorbereitungsleitfaden und Metadaten für den Microsoft Store sind in [`WINDOWS_STORE_PREP.md`](WINDOWS_STORE_PREP.md) und [`STORE_LISTING.md`](STORE_LISTING.md) dokumentiert.
 
 ### Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht)
 

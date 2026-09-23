@@ -5,6 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Windows Store Readiness & MSIX Desktop Bridge Packaging (2026-09-23)
+- **Windows Store Packaging-Manifest (`store_package.json`):** Deklaration der vollständigen Publisher-Identität (`CN=52596601-BAB4-4F3F-B182-E8F3F273B202`), Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz und validierter HTTPS-URLs für Datenschutz und Support.
+- **Desktop Bridge Manifest (`store_package/CloudLockFixer/AppxManifest.xml`):** Bereitstellung des kanonischen AppxManifest mit `TargetDeviceFamily Windows.Desktop` (10.0.17763.0 bis 10.0.26100.0), mehrsprachigen Ressourcen (`de-de`, `en-us`) und vollständigen Tile-Logos.
+- **Store-Kacheln & Logo-Assets (`store_assets/`, `store_package/`, `releases/windowsstore/`):** Bereitstellung von `icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png`, `icon_310x310.png` und `StoreLogo.png` (50x50) mit validierten PNG-Signaturen.
+- **Bilinguale Store-Listings & Microsoft Store Policy 10.1.3:** Erstellung von `STORE_LISTING.md` sowie `store_listing_de.md` und `store_listing_en.md` mit strikter Begrenzung auf maximal 7 suchbegriffskonforme Keywords ohne Fremdmarkenverletzungen.
+- **Datenschutz & Support-Governance (`PRIVACY_POLICY.md`, `SUPPORT.md`, `WINDOWS_STORE_PREP.md`):** Zero-Egress Datenschutzrichtlinie nach DSGVO, Support-Leitfaden mit Sicherheits-Reporting und WACK-Zertifizierungsprotokoll (`releases/windowsstore/WACK_PROTOCOL.md`, `BUILD.md`, `store_settings.json`).
+- **Store-Screenshot-Generator (`scripts/generate_store_screenshots.py`):** Automatisierte Erzeugung von 4 hochauflösenden 16:9-Präsentationsframes (1920x1080) für Partner Center und Dokumentation.
+- **Automatisiertes Store-Readiness-Audit & Tests (`scripts/check_store_readiness.py`, `tests/test_store_readiness.py`):** 8 neue automatisierte Tests zur Überprüfung von Dokumenten, Kachelgrößen, Manifesten, Screenshots, URLs und Richtlinien-Konformität.
+- The verification contract reflects the current unreleased source state: 285 passing tests.
+
 ### Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) (2026-09-21)
 - **Plattformübergreifende Kontextmenü-Abstraktion (`src/cloudlockfixer/contextmenu.py`):** Erweiterung des bisher Windows-spezifischen Kontextmenü-Moduls (`is_installed()`, `install()`, `uninstall()`) um native Unterstützung für Linux und macOS bei vollständiger Beibehaltung der bestehenden Windows-HKCU-Logik.
 - **Linux-Desktop-Integration (GNOME/Nautilus & KDE/Dolphin):** Erzeugung von 3 ausführbaren Shell-Skripten (`01_delayed_rename.sh`, `02_delayed_move.sh`, `03_delayed_delete.sh`) in `$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/` mit Ausführungsrechten (`0o755`) und Argument-Verarbeitung (`$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS` und `$@`) sowie Erstellung von `cloudlockfixer.desktop` unter `$XDG_DATA_HOME/kio/servicemenus/` für KDE/Dolphin mit korrekter Befehls- und Pfadquotierung.
