@@ -14,19 +14,23 @@ ist seit 2026-07-18 auf Source-Ebene umgesetzt. Plattformspezifisch sind:
 | paths.py | %LOCALAPPDATA% | ~/.local/share/ (XDG) | ~/Library/Application Support/ |
 | tray.py | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon |
 
-## Phase 1: Provider-Abstraktion (umgesetzt 2026-09-08)
+## Phase 1: Prozessmanagement- und Provider-Abstraktion (Task 169, umgesetzt 2026-09-26)
 
-Die Provider-Klassen kapseln die plattformübergreifende Prozess- und Pfadsteuerung.
-Seit 2026-09-08 ist Phase 1 auf Source-Ebene vollständig umgesetzt:
+Das Prozessmanagement ist in `src/cloudlockfixer/process.py` vollständig als eigenständige, plattformübergreifende Abstraktion gekapselt (`check_process`, `kill_process`, `launch_process`, `get_posix_patterns`, `ProcessManager`). Die Provider-Klassen in `providers.py` nutzen diese Abstraktion für die Lifecycle-Steuerung:
 
-### Prozess-Erkennung (`_check_process`)
+### Prozess-Erkennung (`check_process` / `ProcessManager.is_running`)
 - **Windows:** `tasklist /FI IMAGENAME eq <exe> /NH`
 - **Linux / macOS:** `pgrep -f <pattern>` mit Fallback auf `/proc/<pid>/cmdline` auf Linux.
 - **Pattern-Mapping:** `_PROCESS_ALIASES_POSIX` mappt Windows-Executable-Namen (z. B. `GoogleDriveFS.exe`, `cloud-drive-ui.exe`, `OneDrive.exe`) auf die jeweiligen POSIX-Prozessmuster (`Google Drive`, `synology-drive`, `onedrive`, `bird`).
 
-### Prozess-Pause / Beendigung (`_kill_process`)
+### Prozess-Pause / Beendigung (`kill_process` / `ProcessManager.terminate`)
 - **Windows:** `taskkill /F /IM <exe> /T`
 - **Linux / macOS:** `pkill -f <pattern>` mit Grace-Period und Verifikation.
+
+### Prozess-Start (`launch_process` / `ProcessManager.launch`)
+- **Windows:** Iteration über absolute Kandidatenpfade mit Argumenten.
+- **macOS:** Start via `open -a <App-Name>`.
+- **Linux:** Executable-Erkennung per `shutil.which()` mit Argumenten.
 
 ### Provider-Roots
 Vollständige Erkennung nativer Cloud-Sync-Pfade unter Linux und macOS:

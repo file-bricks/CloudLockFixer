@@ -223,3 +223,11 @@ Releaseaussagen ändern sich nicht.
   Abschnitten bleiben als Historie erhalten. Der offene Synchronisationsauftrag
   dafür ist Task 165; echte Windows-/Release-Gates sind Tasks 166–168, der
   Cross-Platform-/Roadmap-Scope Tasks 169–173.
+
+## TASK 169 STATUS — 2026-09-26
+- Task 169 (Plattform-Abstraktion für Prozessmanagement) auf Source-Ebene vollständig umgesetzt:
+  `src/cloudlockfixer/process.py` kapselt `check_process`, `kill_process`, `launch_process`,
+  `get_posix_patterns` und `ProcessManager`. `providers.py` refaktoriert. 13 neue Unit-Tests
+  in `tests/test_process_cross_platform.py` + Smoke-Test in `source_platform_smoke.py`.
+  Teststand: 298 passed.
+

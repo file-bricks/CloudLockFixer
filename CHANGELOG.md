@@ -5,6 +5,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Cross-Platform Prozessmanagement-Abstraktion (Task 169 / Phase 1) (2026-09-26)
+- **Dedizierte Prozessmanagement-Abstraktion (`src/cloudlockfixer/process.py`):** Kapselung plattformspezifischer Prozessüberwachungs-, Beendigungs- und Startmechanismen für Windows, Linux und macOS in einem eigenständigen, modularen Subsystem (`check_process`, `kill_process`, `launch_process`, `get_posix_patterns`, `ProcessManager`).
+- **Objektorientierte Fassade (`ProcessManager`):** Bereitstellung einer sauberen API für Lifecycle-Steuerung (`is_running`, `terminate`, `launch`) mit Unterstützung für Windows-Executables, macOS-Applikationen (`open -a`) und Linux-Binaries (`shutil.which`).
+- **Refaktorisierung der Sync-Provider (`src/cloudlockfixer/providers.py`):** Migration der prozessbezogenen Prüfungen und Beendigungen auf das neue `process`-Modul unter vollständiger Abwärtskompatibilität für bestehende Test-Mocks.
+- **Automatisierte Testsuite (`tests/test_process_cross_platform.py`, `tests/source_platform_smoke.py`):** 13 neue dedizierte Unit-Tests für Prozess-Erkennung, Taskkill/Pkill, Launch-Kandidaten, Proc-Fallback und Manager-Fassade sowie Smoke-Test in `source_platform_smoke.py`.
+- The verification contract reflects the current unreleased source state: 298 passing tests.
+
 ### Windows Store Readiness & MSIX Desktop Bridge Packaging (2026-09-23)
 - **Windows Store Packaging-Manifest (`store_package.json`):** Deklaration der vollständigen Publisher-Identität (`CN=52596601-BAB4-4F3F-B182-E8F3F273B202`), Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz und validierter HTTPS-URLs für Datenschutz und Support.
 - **Desktop Bridge Manifest (`store_package/CloudLockFixer/AppxManifest.xml`):** Bereitstellung des kanonischen AppxManifest mit `TargetDeviceFamily Windows.Desktop` (10.0.17763.0 bis 10.0.26100.0), mehrsprachigen Ressourcen (`de-de`, `en-us`) und vollständigen Tile-Logos.

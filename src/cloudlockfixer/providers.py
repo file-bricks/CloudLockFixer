@@ -20,6 +20,12 @@ import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from cloudlockfixer.process import (
+    check_process,
+    get_posix_patterns,
+    kill_process,
+)
+
 log = logging.getLogger("clf")
 
 WATCHER_TICK_MS = 15_000
@@ -89,99 +95,23 @@ def _gdrive_version_key(p: Path) -> tuple[int, ...]:
         return (0,)
 
 
-_PROCESS_ALIASES_POSIX: dict[str, list[str]] = {
-    "googledrivefs.exe": ["GoogleDriveFS", "Google Drive"],
-    "onedrive.exe": ["OneDrive", "onedrive"],
-    "dropbox.exe": ["Dropbox", "dropbox"],
-    "box.exe": ["Box", "box"],
-    "nextcloud.exe": ["nextcloud", "Nextcloud"],
-    "pcloud.exe": ["pCloud", "pcloud"],
-    "cloud-drive-ui.exe": ["cloud-drive-ui", "synology-drive", "Synology Drive"],
-    "synologydrive.exe": ["SynologyDrive", "synology-drive", "Synology Drive"],
-    "iclouddrive.exe": ["iCloudDrive", "bird", "cloudd"],
-    "icloud.exe": ["iCloud", "bird", "cloudd"],
-}
-
 
 def _get_posix_patterns(exe_name: str) -> list[str]:
-    key = exe_name.lower()
-    if key in _PROCESS_ALIASES_POSIX:
-        return _PROCESS_ALIASES_POSIX[key]
-    if key.endswith(".exe"):
-        return [exe_name[:-4]]
-    return [exe_name]
+    return get_posix_patterns(exe_name)
 
 
 def _check_process(exe_name: str) -> bool:
-    if sys.platform == "win32":
-        try:
-            out = subprocess.run(
-                ["tasklist", "/FI", f"IMAGENAME eq {exe_name}", "/NH"],
-                capture_output=True, text=True, timeout=10,
-                encoding="utf-8", errors="ignore",
-            ).stdout or ""
-            return exe_name.lower() in out.lower()
-        except (OSError, subprocess.SubprocessError):
-            return False
-
-    # Linux / macOS (POSIX)
-    patterns = _get_posix_patterns(exe_name)
-    for pat in patterns:
-        try:
-            res = subprocess.run(
-                ["pgrep", "-f", pat],
-                capture_output=True, text=True, timeout=10,
-                encoding="utf-8", errors="ignore",
-            )
-            if res.returncode == 0 and res.stdout.strip():
-                return True
-        except (OSError, subprocess.SubprocessError):
-            pass
-
-    # Fallback: check /proc on Linux if accessible
-    if sys.platform.startswith("linux"):
-        proc_dir = Path("/proc")
-        if proc_dir.is_dir():
-            patterns_lower = [p.lower() for p in patterns]
-            try:
-                for entry in proc_dir.iterdir():
-                    if entry.is_dir() and entry.name.isdigit():
-                        try:
-                            cmdline = (entry / "cmdline").read_bytes().replace(b"\x00", b" ").decode("utf-8", errors="ignore").lower()
-                            if any(pat in cmdline for pat in patterns_lower):
-                                return True
-                        except (OSError, PermissionError):
-                            continue
-            except (OSError, PermissionError):
-                pass
-    return False
+    return check_process(exe_name, _runner=subprocess.run, _path_cls=Path)
 
 
 def _kill_process(exe_name: str) -> bool:
-    if sys.platform == "win32":
-        try:
-            subprocess.run(["taskkill", "/F", "/IM", exe_name, "/T"],
-                           capture_output=True, text=True, timeout=15,
-                           encoding="utf-8", errors="ignore")
-            time.sleep(1.5)
-            return not _check_process(exe_name)
-        except (OSError, subprocess.SubprocessError):
-            return False
+    return kill_process(
+        exe_name,
+        _runner=subprocess.run,
+        _sleep=time.sleep,
+        _checker=_check_process,
+    )
 
-    # Linux / macOS (POSIX)
-    patterns = _get_posix_patterns(exe_name)
-    for pat in patterns:
-        try:
-            subprocess.run(
-                ["pkill", "-f", pat],
-                capture_output=True, text=True, timeout=15,
-                encoding="utf-8", errors="ignore",
-            )
-        except (OSError, subprocess.SubprocessError):
-            pass
-
-    time.sleep(1.5)
-    return not _check_process(exe_name)
 
 
 # Win32-Konstanten für die robuste Laufwerks-Abfrage.

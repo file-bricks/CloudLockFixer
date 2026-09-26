@@ -46,7 +46,7 @@
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [x] macOS-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
-- [ ] Plattform-Abstraktion für Prozessmanagement (Task 169)
+- [x] Plattform-Abstraktion für Prozessmanagement (Task 169) (DONE 2026-09-26; `src/cloudlockfixer/process.py`)
 - [x] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
   - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
   - [x] macOS-LaunchAgent auf Source-Ebene (DONE 2026-07-22)

@@ -165,6 +165,17 @@ def test_providers_cross_platform_smoke():
     assert p is None or hasattr(p, "is_running")
 
 
+def test_process_abstraction_smoke():
+    """Smoke test ensuring cross-platform process abstraction initializes without error."""
+    from cloudlockfixer.process import ProcessManager, get_posix_patterns
+    patterns = get_posix_patterns("OneDrive.exe")
+    assert "onedrive" in patterns
+    mgr = ProcessManager()
+    assert hasattr(mgr, "is_running")
+    assert hasattr(mgr, "terminate")
+    assert hasattr(mgr, "launch")
+
+
 def test_linux_contextmenu_smoke(tmp_path, monkeypatch):
     """Linux runners prove the Nautilus scripts and KDE ServiceMenus can be installed and removed."""
     import sys
