@@ -3,13 +3,15 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-298%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-306%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Nicht--Erh%C3%B6ht-blue)](THIRD_PARTY_LICENSES.md)
 [![Privacy](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
 [![Security SLA](https://img.shields.io/badge/security-48h%20SLA%20%7C%205d%20Triage-blue)](SECURITY.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
+[![Geprüft](https://img.shields.io/badge/Gepr%C3%BCft-2026--09--28-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![SBOM](https://img.shields.io/badge/SBOM-SPDX%20Auditiert-blue)](THIRD_PARTY_LICENSES.md)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
@@ -414,7 +416,7 @@ Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt Clo
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 298 Tests (`pytest`, **298 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 306 Tests (`pytest`, **306 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen

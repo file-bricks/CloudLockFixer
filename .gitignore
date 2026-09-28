@@ -79,6 +79,7 @@ logs/
 
 # ---- Betriebssystem ----
 desktop.ini
+Desktop.ini
 Thumbs.db
 .DS_Store
 ehthumbs.db
@@ -101,6 +102,12 @@ _backups/
 *-ASUS*
 *-LAPTOP*
 *-Mac Studio*
+*-MacBook*
+*-IDEAPAD*
+*_WORKSTATION*
+*_WORKSTATION-LG*
+*-WORKSTATION.*
+*-WORKSTATION-LG.*
 *-conflict-*
 *.sync-conflict-*
 *.conflict
@@ -117,6 +124,10 @@ LOCK
 LOCK.*
 *.lock
 LOCK*.txt
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
+.automation-lock
 LOCK.permissions.json
 uv.lock
 !package-lock.json
@@ -130,6 +141,9 @@ htmlcov/
 .hypothesis/
 .turbo/
 .nyc_output/
+.pytest_temp/
+.pytest_tmp*/
+.tox/
 wheelhouse/
 .wheel-smoke/
 

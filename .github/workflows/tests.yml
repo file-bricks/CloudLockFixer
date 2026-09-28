@@ -43,7 +43,7 @@ jobs:
         run: ruff check .
 
       - name: Compile Python bytecode
-        run: python -m compileall -q src tests
+        run: python -m compileall -q .
 
       - name: Run tests
         env:

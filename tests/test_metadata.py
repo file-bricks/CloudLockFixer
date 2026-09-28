@@ -66,6 +66,8 @@ def test_project_urls_integrity() -> None:
         "LLM Ready",
         "Marketing Log",
         "Third-Party Licenses",
+        "Third-Party Licenses (Text)",
+        "Notice",
     ]
     for key in expected_keys:
         assert key in urls, f"Missing project.urls entry: {key}"
@@ -177,8 +179,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-18" in text
-    assert "## Last-checked: 2026-09-18" in text
+    assert "> Last-checked: 2026-09-28" in text
+    assert "## Last-checked: 2026-09-28" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -277,7 +279,8 @@ def test_pytest_configuration_and_flags() -> None:
     pytest_ini = data.get("tool", {}).get("pytest", {}).get("ini_options", {})
     assert pytest_ini.get("testpaths") == ["tests"]
     assert pytest_ini.get("pythonpath") == ["src"]
-    assert pytest_ini.get("addopts") == "-ra -v"
+    assert pytest_ini.get("addopts") == "-ra -v --basetemp=.pytest_temp"
+    assert ".pytest_temp" in pytest_ini.get("norecursedirs", [])
 
 
 def test_ci_workflow_pytest_flags() -> None:
@@ -286,7 +289,7 @@ def test_ci_workflow_pytest_flags() -> None:
     assert workflow_path.is_file(), "tests.yml must exist"
     workflow_text = workflow_path.read_text(encoding="utf-8")
 
-    assert "python -m compileall -q src tests" in workflow_text
+    assert "python -m compileall -q ." in workflow_text
     assert "python -m pytest -ra -v" in workflow_text
 
 
@@ -356,7 +359,7 @@ def test_marketing_log_recent_hygiene_entry() -> None:
     assert mktg_file.is_file(), "MARKETING-LOG.txt must exist"
     content = mktg_file.read_text(encoding="utf-8")
 
-    assert "Stand: 2026-09-18" in content, "Recent audit date missing in MARKETING-LOG.txt"
+    assert "Stand: 2026-09-28" in content, "Recent audit date missing in MARKETING-LOG.txt"
     assert "CLOUDLOCKFIXER SUITE" in content
     assert "INV-LOCAL-01" in content and "INV-SLA-10" in content, "Governance pillars missing in MARKETING-LOG.txt"
     assert "Pfad A" in content or "PFAD A" in content, "Pfad A maintenance section missing in MARKETING-LOG.txt"
@@ -467,3 +470,134 @@ def test_changelog_recent_pfad_b_entry() -> None:
     changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     assert "Pfad B" in changelog
     assert "2026-09-18" in changelog
+
+
+def test_canonical_notice_attribution() -> None:
+    """Verify root NOTICE file exists, has canonical copyright, and references third-party licenses."""
+    notice_file = PROJECT_ROOT / "NOTICE"
+    assert notice_file.is_file(), "Root NOTICE file must exist"
+    content = notice_file.read_text(encoding="utf-8")
+
+    assert "CloudLockFixer" in content
+    assert "Copyright (c) 2026 Lukas Geiger, file-bricks" in content
+    assert "open-bricks" in content
+    assert "THIRD_PARTY_LICENSES.md" in content
+    assert "THIRD_PARTY_LICENSES.txt" in content
+
+
+def test_pyproject_license_files_and_notice_urls() -> None:
+    """Verify pyproject.toml defines license-files whitelist and Notice URLs."""
+    pyproject_path = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    project = data.get("project", {})
+
+    license_files = project.get("license-files", [])
+    assert isinstance(license_files, list), "license-files must be a list"
+    assert "LICENSE" in license_files
+    assert "NOTICE" in license_files
+    assert "THIRD_PARTY_LICENSES.md" in license_files
+    assert "THIRD_PARTY_LICENSES.txt" in license_files
+
+    urls = project.get("urls", {})
+    assert "Notice" in urls
+    assert urls["Notice"] == "https://github.com/file-bricks/CloudLockFixer/blob/main/NOTICE"
+    assert "Third-Party Licenses (Text)" in urls
+
+
+def test_pyproject_keywords_20_saturation() -> None:
+    """Verify pyproject.toml contains exactly 20 saturated keywords aligned with GitHub topics."""
+    pyproject_path = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    keywords = data.get("project", {}).get("keywords", [])
+
+    assert isinstance(keywords, list)
+    assert len(keywords) == 20, f"Expected 20 keywords, found {len(keywords)}: {keywords}"
+    expected_topics = ["cldflt", "local-first", "zero-egress", "open-bricks", "privacy-first"]
+    for topic in expected_topics:
+        assert topic in keywords, f"Missing expected topic '{topic}' in keywords"
+
+
+def test_ci_lifecycle_auto_assign_and_label_sync() -> None:
+    """Verify auto-assign.yml, label-sync.yml, and labels.yml exist with concurrency and timeouts."""
+    wf_dir = PROJECT_ROOT / ".github" / "workflows"
+    auto_assign = wf_dir / "auto-assign.yml"
+    label_sync = wf_dir / "label-sync.yml"
+    labels_file = PROJECT_ROOT / ".github" / "labels.yml"
+
+    assert auto_assign.is_file(), "auto-assign.yml must exist"
+    assert label_sync.is_file(), "label-sync.yml must exist"
+    assert labels_file.is_file(), ".github/labels.yml must exist"
+
+    auto_assign_text = auto_assign.read_text(encoding="utf-8")
+    assert "concurrency:" in auto_assign_text
+    assert "cancel-in-progress: true" in auto_assign_text
+    assert "timeout-minutes: 5" in auto_assign_text
+    assert "actions/github-script@v7" in auto_assign_text
+
+    label_sync_text = label_sync.read_text(encoding="utf-8")
+    assert "concurrency:" in label_sync_text
+    assert "cancel-in-progress: true" in label_sync_text
+    assert "timeout-minutes: 5" in label_sync_text
+    assert "EndBug/label-sync@v2" in label_sync_text
+
+    labels_text = labels_file.read_text(encoding="utf-8")
+    for lbl in ["bug", "enhancement", "good first issue", "help wanted", "documentation", "duplicate", "wontfix", "priority: high", "priority: low", "needs-triage", "stale"]:
+        assert f"name: {lbl}" in labels_text or f"name: '{lbl}'" in labels_text, f"Missing label '{lbl}'"
+
+
+def test_extended_gitignore_multihost_lock_and_cache_defense() -> None:
+    """Verify .gitignore includes extended multi-host tokens, locks, and cache patterns."""
+    gi_text = (PROJECT_ROOT / ".gitignore").read_text(encoding="utf-8")
+    required = [
+        "*-MacBook*",
+        "*-IDEAPAD*",
+        "*_WORKSTATION*",
+        "*_WORKSTATION-LG*",
+        "*-WORKSTATION.*",
+        "*-WORKSTATION-LG.*",
+        "LOCK.user.*",
+        "LOCK.until.*",
+        "LOCK.condition.*",
+        ".automation-lock",
+        ".pytest_temp/",
+        ".pytest_tmp*/",
+        ".tox/",
+        "Desktop.ini",
+    ]
+    for pat in required:
+        assert pat in gi_text, f"Missing extended pattern '{pat}' in .gitignore"
+
+
+def test_third_party_licenses_audit_recency_and_notice_crossref() -> None:
+    """Verify THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt carry 2026-09-28 audit date and NOTICE crossref."""
+    tpl_md = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
+    assert "Audit Date:** 2026-09-28" in tpl_md
+    assert "[NOTICE](NOTICE)" in tpl_md
+
+    tpl_txt = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.txt").read_text(encoding="utf-8")
+    assert "Audit Date: 2026-09-28" in tpl_txt
+    assert "Canonical Notice: NOTICE" in tpl_txt
+
+
+def test_changelog_recent_pfad_a_2026_09_28_entry() -> None:
+    """Verify CHANGELOG.md records the 2026-09-28 Pfad A hygiene entry."""
+    changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "Pfad A" in changelog
+    assert "2026-09-28" in changelog
+    assert "NOTICE" in changelog
+
+
+def test_readme_notice_attribution_and_verified_badges() -> None:
+    """Verify README files across EN, DE, and ES feature Attribution: NOTICE and Verified badges."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+
+    assert "Attribution-NOTICE-blue" in readme_en
+    assert "Verified-2026--09--28-blue" in readme_en
+
+    assert "Attribution-NOTICE-blue" in readme_de
+    assert "Gepr%C3%BCft-2026--09--28-blue" in readme_de
+
+    assert "Attribution-NOTICE-blue" in readme_es
+    assert "Verificado-2026--09--28-blue" in readme_es

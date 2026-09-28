@@ -2,6 +2,8 @@
 # Third-Party Licenses - CloudLockFixer
 # =============================================================================
 # CloudLockFixer is licensed under the MIT License.
+# Canonical Notice: NOTICE
+# Audit Date: 2026-09-28
 # This document lists third-party dependencies used during runtime, build,
 # packaging, and testing, along with their respective licenses and upstream URLs.
 # =============================================================================
