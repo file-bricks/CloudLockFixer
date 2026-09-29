@@ -10,6 +10,8 @@ DEFAULT_INTERVAL_MIN = 120  # 2 h
 # contract unless a caller deliberately supplies a finite safety limit.
 DEFAULT_MAX_RETRIES: int | None = None
 DEFAULT_NOTIFICATIONS_ENABLED: bool = True
+DEFAULT_BACKOFF_BASE_SEC: int = 60  # Basis-Backoff: 60 s
+DEFAULT_BACKOFF_MAX_SEC: int = 3600  # Maximaler Backoff: 1 h (3600 s)
 
 
 def _path():
@@ -31,6 +33,8 @@ def load() -> dict:
         "interval_min": DEFAULT_INTERVAL_MIN,
         "max_retries": DEFAULT_MAX_RETRIES,
         "notifications_enabled": DEFAULT_NOTIFICATIONS_ENABLED,
+        "backoff_base_sec": DEFAULT_BACKOFF_BASE_SEC,
+        "backoff_max_sec": DEFAULT_BACKOFF_MAX_SEC,
     }
 
 
@@ -78,5 +82,37 @@ def get_notifications_enabled(cfg: dict) -> bool:
 def set_notifications_enabled(cfg: dict, enabled: bool) -> None:
     """Set and persist whether desktop notifications / toasts are enabled."""
     cfg["notifications_enabled"] = bool(enabled)
+    save(cfg)
+
+
+def get_backoff_base(cfg: dict) -> int:
+    """Return stored backoff_base_sec or DEFAULT_BACKOFF_BASE_SEC."""
+    val = cfg.get("backoff_base_sec")
+    if isinstance(val, int) and val > 0 and not isinstance(val, bool):
+        return val
+    return DEFAULT_BACKOFF_BASE_SEC
+
+
+def set_backoff_base(cfg: dict, val: int) -> None:
+    """Set and persist backoff_base_sec (positive integer in seconds)."""
+    if not isinstance(val, int) or val <= 0 or isinstance(val, bool):
+        raise ValueError("backoff_base_sec must be a positive integer")
+    cfg["backoff_base_sec"] = val
+    save(cfg)
+
+
+def get_backoff_max(cfg: dict) -> int:
+    """Return stored backoff_max_sec or DEFAULT_BACKOFF_MAX_SEC."""
+    val = cfg.get("backoff_max_sec")
+    if isinstance(val, int) and val > 0 and not isinstance(val, bool):
+        return val
+    return DEFAULT_BACKOFF_MAX_SEC
+
+
+def set_backoff_max(cfg: dict, val: int) -> None:
+    """Set and persist backoff_max_sec (positive integer in seconds)."""
+    if not isinstance(val, int) or val <= 0 or isinstance(val, bool):
+        raise ValueError("backoff_max_sec must be a positive integer")
+    cfg["backoff_max_sec"] = val
     save(cfg)
 

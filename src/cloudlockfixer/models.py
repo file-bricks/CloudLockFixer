@@ -5,7 +5,7 @@ import json
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -48,6 +48,36 @@ class Task:
     last_error: str = ""
     last_outcome: Outcome = "retryable"
     step_index: int = 0  # nächster auszuführender Schritt (für Wiederaufnahme)
+    next_try_at: str = ""  # ISO-UTC Zeitstempel für gedeckeltes exponentielles Backoff
+
+    def is_due(self, now_dt: datetime | None = None) -> bool:
+        """Prüft, ob der Task jetzt ausgeführt werden darf (Backoff abgelaufen oder nicht gesetzt)."""
+        if not self.next_try_at:
+            return True
+        try:
+            target = datetime.fromisoformat(self.next_try_at)
+            if target.tzinfo is None:
+                target = target.replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            return True
+        current = now_dt or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        return current >= target
+
+    def compute_next_retry(
+        self,
+        base_sec: int = 60,
+        max_sec: int = 3600,
+        now_dt: datetime | None = None,
+    ) -> str:
+        """Berechnet den nächsten Retry-Zeitpunkt mit gedeckeltem exponentiellem Backoff."""
+        exponent = max(0, self.retry_count - 1)
+        delay = min(float(max_sec), float(base_sec) * (2.0 ** exponent))
+        current = now_dt or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        return (current + timedelta(seconds=delay)).isoformat()
 
     def describe(self) -> str:
         return " && ".join(s.describe() for s in self.chain)
@@ -277,7 +307,7 @@ class Queue:
         """Setzt nur fehlgeschlagene oder blockierte Tasks atomar auf 'pending' zurück.
 
         Fortschritt (step_index, Step.copied) und letzte Fehlermeldung bleiben erhalten,
-        aber retry_count wird auf 0 und last_outcome auf 'retryable' zurückgesetzt.
+        aber retry_count wird auf 0, last_outcome auf 'retryable' und next_try_at auf '' zurückgesetzt.
         """
         with self._lock:
             for t in self.tasks:
@@ -285,6 +315,7 @@ class Queue:
                     t.status = "pending"
                     t.retry_count = 0
                     t.last_outcome = "retryable"
+                    t.next_try_at = ""
                     self._save_unlocked()
                     return t
             return None
@@ -301,6 +332,7 @@ class Queue:
                 t.status = "pending"
                 t.retry_count = 0
                 t.last_outcome = "retryable"
+                t.next_try_at = ""
                 retried.append(t)
             if retried:
                 self._save_unlocked()

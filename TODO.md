@@ -1,5 +1,15 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Feature: Konfigurierbares Retry-Verhalten (exponentielles Backoff) (Task 172) — erledigt 2026-09-29
+
+- [x] `src/cloudlockfixer/settings.py`: `DEFAULT_BACKOFF_BASE_SEC = 60`, `DEFAULT_BACKOFF_MAX_SEC = 3600`, Getter/Setter `get_backoff_base()`, `set_backoff_base()`, `get_backoff_max()`, `set_backoff_max()` mit Validierung.
+- [x] `src/cloudlockfixer/models.py`: `next_try_at`-Attribut in `Task`, `is_due()`, `compute_next_retry()`, Bereinigung von `next_try_at` bei manuellem Retry in `Queue.retry_task()` und `Queue.retry_all()`.
+- [x] `src/cloudlockfixer/worker.py`: `apply_backoff` & `ignore_backoff` in `run_once()` und `_providers_to_pause()`; automatische `next_try_at`-Zuweisung bei retryfähigen Fehlern; Deferral-Tracking (`deferred`-Zähler) für noch nicht fällige Tasks; Vermeidung unnötiger Provider-Pausierung bei nicht fälligen Tasks.
+- [x] `src/cloudlockfixer/cli.py`: Anzeige des nächsten geplanten Versuchs in `clf list`; CLI-Flags `--backoff` und `--ignore-backoff` / `--force` in `clf run-now`.
+- [x] `src/cloudlockfixer/tray.py`: `run_async(force_pause, apply_backoff)` mit Backoff im periodischen Timer/Startup und Sofort-Ausführung bei Nutzer-Aktionen ("Run now", "Retry failed").
+- [x] `src/cloudlockfixer/i18n.py` & `locales/translations.json`: Vollständige Übersetzung für alle 6 Sprachen (DE, EN, ES, ZH, JA, RU), 88 Keys, 100% Parität.
+- [x] `tests/test_retry_backoff.py`: 7 neue Tests für Backoff-Kalkulation, Fälligkeit, Settings, Worker-Deferral und Provider-Pause-Ausschluss (Gesamtsuite: 313/313 Tests 100% grün).
+
 ## Windows Store Readiness & MSIX Packaging Pipeline — erledigt 2026-09-23
 
 - [x] `store_package.json`: Publisher `CN=52596601-BAB4-4F3F-B182-E8F3F273B202`, Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz, Sprachen `["de-DE", "en-US"]`, validierte HTTPS-URLs für Datenschutz und Support.

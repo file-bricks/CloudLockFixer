@@ -5,6 +5,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Konfigurierbares Retry-Verhalten mit exponentiellem Backoff (Task 172) (2026-09-29)
+- **Konfigurierbares exponentielles Backoff (`src/cloudlockfixer/settings.py`, `models.py`, `worker.py`):** Einführung von `DEFAULT_BACKOFF_BASE_SEC = 60` und `DEFAULT_BACKOFF_MAX_SEC = 3600` sowie Getter/Setter-Funktionen mit Validierung; deterministische Berechnung des nächsten Wiederholungsversuchs (`next_try_at`) mit $2^{(\text{retry\_count}-1)} \times \text{base\_sec}$, gedeckelt auf `max_sec`.
+- **Fälligkeitsprüfung & Deferral-Tracking (`is_due()`, `Queue.retry_task()`, `Queue.retry_all()`):** Nicht fällige Tasks werden im Hintergrund-Worker nicht vorzeitig wiederholt (`deferred`-Zähler) und lösen keine unnötige Provider-Pausierung aus; manuelle Retry-Befehle setzen `next_try_at` sofort zurück.
+- **CLI & Tray-Integration (`src/cloudlockfixer/cli.py`, `tray.py`):** `clf list` zeigt den nächsten geplanten Wiederholungsversuch (`nächster Versuch: ...`) an; `clf run-now` unterstützt `--backoff` und `--ignore-backoff` / `--force`; System-Tray nutzt Backoff für periodische Hintergrund-Durchläufe und führt manuelle Aktionen sofort aus.
+- **Tier-2 Mehrsprachigkeit (i18n):** Vollständige Lokalisierung aller neuen Meldungen und Parameterbeschreibungen für Deutsch, Englisch, Spanisch, Chinesisch, Japanisch und Russisch mit 100% Translations-Parität (88 Keys).
+- **Automatisierte Testsuite (`tests/test_retry_backoff.py`):** 7 neue Tests für Backoff-Berechnung, Fälligkeitsfilterung, Provider-Pause-Ausschluss, Settings-Persistenz und CLI-Flags.
+- The verification contract reflects the current unreleased source state: 313 passing tests.
+
 ### Repository-Hygiene, CI Lifecycle Workflows, Lock Defense & NOTICE Attribution (Pfad A) (2026-09-28)
 - **Kanonische NOTICE Attributionsdatei:** Root `NOTICE`-Datei formalisiert mit Urheberrechtsattribution für Lukas Geiger, file-bricks und open-bricks Umbrella unter MIT-Lizenz mit Querverweisen auf `LICENSE`, `THIRD_PARTY_LICENSES.md` und `THIRD_PARTY_LICENSES.txt`.
 - **CI/CD Lifecycle Workflows (`auto-assign.yml`, `label-sync.yml`, `.github/labels.yml`):** Bereitstellung von `.github/workflows/auto-assign.yml` (`actions/github-script@v7`, `timeout-minutes: 5`, Concurrency `cancel-in-progress: true`), `.github/workflows/label-sync.yml` (`EndBug/label-sync@v2`, `timeout-minutes: 5`) und `.github/labels.yml` mit 11 Standard-Labels gemäß GOVERNANCE.md §4.2; Härtung von `tests.yml` mit globalem Compileall-Gate (`python -m compileall -q .`).

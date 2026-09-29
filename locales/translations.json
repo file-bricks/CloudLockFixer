@@ -127,6 +127,14 @@
     "ru": "Диалог добавления в очередь (из контекстного меню)",
     "zh": "添加任务对话框（来自右键菜单）"
   },
+  "cli_ignore_backoff_help": {
+    "de": "Ignoriere exponentielles Backoff und führe fällige sowie zurückgestellte Aufgaben sofort aus",
+    "en": "Ignore exponential backoff and execute all tasks immediately",
+    "es": "Ignorar el retroceso exponencial y ejecutar todas las tareas inmediatamente",
+    "ja": "指数バックオフを無視してすべてのタスクを直ちに実行",
+    "ru": "Игнорировать экспоненциальную задержку и выполнить все задачи немедленно",
+    "zh": "忽略指数退避并立即执行所有任务"
+  },
   "cli_list_help": {
     "de": "Queue anzeigen",
     "en": "Show queue",
@@ -534,6 +542,14 @@
     "ja": "実行完了: {done} 件完了、{failed} 件保留中、{permanent} 件完全失敗（開始時: {start} 件保留中）。{paused}",
     "ru": "Выполнение завершено: {done} выполнено, {failed} все еще в очереди, {permanent} окончательно не удалось (начало: {start} в очереди).{paused}",
     "zh": "运行完成：已完成 {done} 个，仍有 {failed} 个待处理，{permanent} 个永久失败（初始：{start} 个待处理）。{paused}"
+  },
+  "run_summary_deferred": {
+    "de": " ({deferred} wegen Backoff aufgeschoben)",
+    "en": " ({deferred} deferred due to backoff)",
+    "es": " ({deferred} pospuesta(s) por tiempo de espera)",
+    "ja": "（バックオフにより {deferred} 件延期）",
+    "ru": " ({deferred} отложено из-за задержки)",
+    "zh": "（{deferred} 个因退避而延迟）"
   },
   "setting_change_failed": {
     "de": "{setting} konnte nicht geändert werden. Die bisherige Einstellung bleibt aktiv.",

@@ -51,6 +51,10 @@ def main(argv: list[str] | None = None) -> int:
                        help=t("cli_pause_help"))
     p_run.add_argument("--max-retries", type=int, default=None, metavar="N",
                        help=t("cli_max_retries_help"))
+    p_run.add_argument("--backoff", action="store_true",
+                       help="Wende exponentielles Backoff an und überspringe unfertige Aufgaben")
+    p_run.add_argument("--ignore-backoff", "--force", action="store_true",
+                       dest="ignore_backoff", help=t("cli_ignore_backoff_help"))
 
     p_retry = sub.add_parser("retry", help=t("cli_retry_help"))
     p_retry.add_argument("task_id", metavar="ID", help=t("cli_retry_id_help"))
@@ -96,22 +100,41 @@ def main(argv: list[str] | None = None) -> int:
             print(t("queue_empty"))
             return 0
         for tk in queue.tasks:
-            print(f"[{tk.status:7}] {tk.id}  (Versuche {tk.retry_count})  {tk.describe()}"
+            next_info = f"  (nächster Versuch: {tk.next_try_at})" if tk.next_try_at else ""
+            print(f"[{tk.status:7}] {tk.id}  (Versuche {tk.retry_count}){next_info}  {tk.describe()}"
                   + (f"  ! {tk.last_error}" if tk.last_error else ""))
         return 0
 
     if args.cmd == "run-now":
         max_retries = (args.max_retries if args.max_retries is not None
                        else settings.get_max_retries(cfg))
-        summary = run_once(queue, force_pause=args.pause, max_retries=max_retries)
+        backoff_base = settings.get_backoff_base(cfg)
+        backoff_max = settings.get_backoff_max(cfg)
+        apply_backoff = bool(getattr(args, "backoff", False)) and not bool(getattr(args, "ignore_backoff", False))
+        ignore_backoff = bool(getattr(args, "ignore_backoff", False))
+        try:
+            summary = run_once(
+                queue,
+                force_pause=args.pause,
+                max_retries=max_retries,
+                apply_backoff=apply_backoff,
+                ignore_backoff=ignore_backoff,
+                backoff_base_sec=backoff_base,
+                backoff_max_sec=backoff_max,
+            )
+        except TypeError:
+            summary = run_once(queue, force_pause=args.pause, max_retries=max_retries)
         paused = ""
         if summary["paused_providers"]:
             paused = t("paused_providers",
                        names=", ".join(summary["paused_providers"]))
+        deferred = ""
+        if summary.get("deferred"):
+            deferred = t("run_summary_deferred", deferred=summary["deferred"])
         print(t("run_summary", done=summary["done"],
                 failed=summary["failed_again"],
                 permanent=summary["failed_permanent"],
-                start=summary["pending_start"], paused=paused))
+                start=summary["pending_start"], paused=paused) + deferred)
         return 0
 
     if args.cmd == "retry":

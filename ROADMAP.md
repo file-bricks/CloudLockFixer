@@ -92,9 +92,9 @@
   via QSystemTrayIcon, konfigurierbar über Tray-Menü, erledigt 2026-09-11).
 - [ ] Web-Dashboard / Remote-Status
 - [ ] Plugin-System für Community-Provider
-- [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172).
-  Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
-  endliches Limit übergeben.
+- [x] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172, erledigt 2026-09-29).
+  Der Default bleibt unbegrenzt; exponentielles Backoff (`DEFAULT_BACKOFF_BASE_SEC=60`, `DEFAULT_BACKOFF_MAX_SEC=3600`)
+  verzögert wiederholte Versuche automatisch, während explizite Aufrufer Limits oder Sofort-Ausführung wählen können.
 - [x] Strukturierte Ausgänge für Worker-Fehler: retryfähige Fehler bleiben
   `pending`; deterministische Zielkonflikte werden als `blocked` gespeichert;
   ein explizites Limit bleibt `permanent`/`failed`.

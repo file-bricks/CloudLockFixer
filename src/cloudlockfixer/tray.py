@@ -84,7 +84,7 @@ class TrayApp:
         self.tray.show()
 
         self.timer = QTimer()
-        self.timer.timeout.connect(lambda: self.run_async(False))
+        self.timer.timeout.connect(lambda: self.run_async(False, apply_backoff=True))
         self._apply_interval()
 
         self.providers = available_providers()
@@ -108,7 +108,7 @@ class TrayApp:
             self.watch_timer.start(WATCHER_TICK_MS)
 
         self._refresh_status()
-        QTimer.singleShot(3000, lambda: self.run_async(False))
+        QTimer.singleShot(3000, lambda: self.run_async(False, apply_backoff=True))
 
     # ── Menü ────────────────────────────────────────────────────────
     def _build_menu(self) -> None:
@@ -120,9 +120,9 @@ class TrayApp:
         self.menu.addAction(QAction(t("add_task"), self.menu,
                                     triggered=self.add_task_dialog))
         self.menu.addAction(QAction(t("run_now"), self.menu,
-                                    triggered=lambda: self.run_async(False)))
+                                    triggered=lambda: self.run_async(False, apply_backoff=False)))
         self.menu.addAction(QAction(t("run_now_with_pause"), self.menu,
-                                    triggered=lambda: self.run_async(True)))
+                                    triggered=lambda: self.run_async(True, apply_backoff=False)))
         self.retry_failed_action = QAction(t("retry_failed_tasks"), self.menu,
                                            triggered=self._retry_failed_tasks)
         self.retry_failed_action.setEnabled(False)
@@ -282,7 +282,7 @@ class TrayApp:
                               t("queued_notification", desc=task.describe()),
                               _make_icon(), 4000)
 
-    def run_async(self, force_pause: bool) -> None:
+    def run_async(self, force_pause: bool = False, apply_backoff: bool = False) -> None:
         if self._running:
             return
         self._running = True
@@ -291,7 +291,19 @@ class TrayApp:
         def job():
             try:
                 max_retries = settings.get_max_retries(self.settings)
-                s = run_once(self.queue, force_pause=force_pause, max_retries=max_retries)
+                b_base = settings.get_backoff_base(self.settings)
+                b_max = settings.get_backoff_max(self.settings)
+                try:
+                    s = run_once(
+                        self.queue,
+                        force_pause=force_pause,
+                        max_retries=max_retries,
+                        apply_backoff=apply_backoff,
+                        backoff_base_sec=b_base,
+                        backoff_max_sec=b_max,
+                    )
+                except TypeError:
+                    s = run_once(self.queue, force_pause=force_pause, max_retries=max_retries)
             except Exception as e:  # pragma: no cover
                 s = {"error": str(e)}
             self.sig.done.emit(s)
@@ -387,7 +399,10 @@ class TrayApp:
             self.tray.showMessage("CloudLockFixer",
                                   t("retried_notification", count=len(retried)),
                                   _make_icon(), 4000)
-            self.run_async(False)
+            try:
+                self.run_async(False, apply_backoff=False)
+            except TypeError:
+                self.run_async(False)
 
     # ── P2: Kontextmenü ─────────────────────────────────────────────
     def _toggle_context(self, checked: bool) -> None:

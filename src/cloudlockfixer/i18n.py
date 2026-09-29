@@ -715,6 +715,22 @@ _CATALOG: dict[str, dict[Language, str]] = {
         'ja': 'ターゲットの競合により、{n} 件のタスクが永続的にブロックされました。',
         'ru': '{n} задач(и) окончательно заблокированы из-за конфликта целей.',
     },
+    'cli_ignore_backoff_help': {
+        'de': 'Ignoriere exponentielles Backoff und führe fällige sowie zurückgestellte Aufgaben sofort aus',
+        'en': 'Ignore exponential backoff and execute all tasks immediately',
+        'es': 'Ignorar el retroceso exponencial y ejecutar todas las tareas inmediatamente',
+        'zh': '忽略指数退避并立即执行所有任务',
+        'ja': '指数バックオフを無視してすべてのタスクを直ちに実行',
+        'ru': 'Игнорировать экспоненциальную задержку и выполнить все задачи немедленно',
+    },
+    'run_summary_deferred': {
+        'de': ' ({deferred} wegen Backoff aufgeschoben)',
+        'en': ' ({deferred} deferred due to backoff)',
+        'es': ' ({deferred} pospuesta(s) por tiempo de espera)',
+        'zh': '（{deferred} 个因退避而延迟）',
+        'ja': '（バックオフにより {deferred} 件延期）',
+        'ru': ' ({deferred} отложено из-за задержки)',
+    },
 }
 
 _current: Language = "de"
