@@ -3,6 +3,15 @@
 Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
+## [Unreleased]
+
+### Fixed / Behoben
+- Capped retry backoff no longer overflows at high persisted attempt counts.
+  The worker continues later tasks and saves pending retries with their next attempt time.
+- Gedeckeltes Retry-Backoff bleibt bei hohen persistierten Versuchszählern stabil;
+  nachfolgende Tasks werden weiterverarbeitet und Wiederholungen gespeichert.
+- The verification contract reflects the current unreleased source state: 325 passing tests.
+
 ## [0.2.3] - 2026-09-10
 
 ### Konfigurierbares Retry-Verhalten mit exponentiellem Backoff (Task 172) (2026-09-29)

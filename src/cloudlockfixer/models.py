@@ -73,7 +73,13 @@ class Task:
     ) -> str:
         """Berechnet den nächsten Retry-Zeitpunkt mit gedeckeltem exponentiellem Backoff."""
         exponent = max(0, self.retry_count - 1)
-        delay = min(float(max_sec), float(base_sec) * (2.0 ** exponent))
+        # Nach Erreichen des Caps nicht weiter potenzieren: persistierte Zähler
+        # können bei unbegrenzten Wiederholungen beliebig groß werden.
+        delay = min(base_sec, max_sec)
+        for _ in range(exponent):
+            if delay >= max_sec:
+                break
+            delay = min(max_sec, delay * 2)
         current = now_dt or datetime.now(timezone.utc)
         if current.tzinfo is None:
             current = current.replace(tzinfo=timezone.utc)

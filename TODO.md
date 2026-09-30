@@ -1,5 +1,14 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Retry-Backoff-Korrektur — 2026-09-30
+
+- [x] Overflow bei hohem persistiertem Versuchszähler verhindern: gedeckelte
+  Verdopplung ersetzt die unbegrenzte Potenzberechnung. Zwölf neue Regressionen
+  prüfen hohe Zähler, Cap-Grenzen und Queue-Persistenz mit nachfolgenden Tasks.
+- Die einmalige Migration historischer Fünfer-Cap-Fehler und die nativen
+  Windows-/Release-Gates bleiben separat offen; produktive Queues und
+  Provider-Prozesse wurden bei dieser Reparatur nicht verändert.
+
 ## Feature: Konfigurierbares Retry-Verhalten (exponentielles Backoff) (Task 172) — erledigt 2026-09-29
 
 - [x] `src/cloudlockfixer/settings.py`: `DEFAULT_BACKOFF_BASE_SEC = 60`, `DEFAULT_BACKOFF_MAX_SEC = 3600`, Getter/Setter `get_backoff_base()`, `set_backoff_base()`, `get_backoff_max()`, `set_backoff_max()` mit Validierung.
