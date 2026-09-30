@@ -7,7 +7,10 @@
   als mehrdeutig ausgewiesen. Wiederaufnahme nur über vorhandenes `retry <id>`.
 - [x] README DE/EN, DESIGN, CHANGELOG, Roadmap und LLM-Vertrag abgleichen;
   15 neue Regressionen für unveränderte Dateien und ungültige Eingaben.
-- [ ] Native Windows-Tray-/Autostart-Prüfung und neuer EXE-Build mit Release-Gates.
+- [x] Nativer Source-Tray-Smoke mit isolierter Queue und Singleton: Menü,
+  Rename/Move/Delete, Quit und unveränderte Autostart-/Kontextmenü-Registry.
+- [ ] Persönlichen EXE-Build starten und separat prüfen; native Login-/Provider-
+  Live-Interaktion und Release-Artefakt-Abnahme bleiben eigenständige Gates.
 - Produktive Queues wurden nicht migriert; Auswahl und Wiederaufnahme bleiben
   eine ausdrückliche Entscheidung des Queue-Betreibers.
 

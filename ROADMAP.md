@@ -5,7 +5,9 @@
 - [x] Gedeckeltes Backoff für hohe persistierte Versuchszähler.
 - [x] Rein lesender Review historischer Fünfer-Limit-Fehler mit ausdrücklicher
   Entscheidung über gezielte Wiederaufnahme; keine automatische Migration.
-- [ ] Native Windows-Tray-/Autostart-Abnahme und neuer EXE-Build.
+- [x] Automatisierter nativer Source-Tray-Smoke mit temporären Operationen,
+  Registry-Lesekontrolle und regulärem Quit.
+- [ ] Native Login-/Provider-Live-Abnahme und neuer EXE-Build.
 - [ ] Release-Gates einschließlich Paketierung und Veröffentlichungsnachweisen.
 
 ## v1.0.0 (erledigt)

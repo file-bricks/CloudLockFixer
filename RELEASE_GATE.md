@@ -34,6 +34,22 @@ python -m pytest tests/source_platform_smoke.py -q
 
 Zusätzlich ist auf einem echten Windows-Arbeitsplatz manuell zu protokollieren:
 
+### Automatisierter nativer Source-Smoke
+
+`PYTHONPATH=src python scripts/windows_tray_smoke.py` startet auf einem echten
+Windows-Desktop die Source-Tray-App mit eigenem temporären Datenprofil und
+einem isolierten Singleton-Schlüssel. Provider werden durch Test-Doubles ersetzt;
+Autostart und Kontextmenü werden nur gelesen. Nach dem Startup-Worker werden
+Menüeinträge, temporäre Rename-/Move-/Delete-Operationen und unveränderte
+Registry-Werte geprüft. Das Skript beendet die eigene App über die Menüaktion
+und hinterlässt `receipt.json` und `menu.png` im ausgegebenen Temp-Ordner.
+
+**Nachweis 2026-09-30:** nativer Tray verfügbar, Menü sichtbar, drei Operationen
+erfolgreich, Registry unverändert, Exit 0. Dies schließt weder echten Login,
+manuelle Tray-Bedienung noch Start/Interaktion eines Release-Artefakts ein.
+
+### Manuelle und artefaktbezogene Prüfung
+
 1. `START.bat` beziehungsweise das geprüfte PyInstaller-Artefakt startet die
    Tray-App mit genau einem Prozess und schreibt Startfehler in den vorgesehenen
    lokalen Datenordner.

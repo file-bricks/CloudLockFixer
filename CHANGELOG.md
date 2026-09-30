@@ -6,6 +6,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added / Ergänzt
+- Reproducible native Windows source-tray smoke with a private queue and
+  singleton key, temporary filesystem operations, registry readback and Quit.
+  Evidence covers source execution; login and release acceptance remain separate.
 - `clf review-legacy-retries --queue <queue.json>` reports potential historical
   five-attempt failures without loading settings, importing TXT tasks, or writing logs.
   Ambiguous legacy/default limits require an explicit decision via the existing retry command.
