@@ -723,6 +723,22 @@ _CATALOG: dict[str, dict[Language, str]] = {
         'ja': '指数バックオフを無視してすべてのタスクを直ちに実行',
         'ru': 'Игнорировать экспоненциальную задержку и выполнить все задачи немедленно',
     },
+    'cli_legacy_review_help': {
+        'de': 'Alte Fünfer-Limit-Fehler ohne Änderungen prüfen',
+        'en': 'Review old five-attempt failures without changes',
+        'es': 'Revisar errores de cinco intentos sin cambios',
+        'zh': '只读检查五次重试后失败的任务',
+        'ja': '5 回の試行で失敗したタスクを読み取り専用で確認',
+        'ru': 'Проверить ошибки после пяти попыток без изменений',
+    },
+    'cli_legacy_review_queue_help': {
+        'de': 'Zu prüfende queue.json (rein lesend)',
+        'en': 'queue.json to review (read-only)',
+        'es': 'queue.json para revisar (solo lectura)',
+        'zh': '要检查的 queue.json（只读）',
+        'ja': '確認する queue.json（読み取り専用）',
+        'ru': 'queue.json для проверки (только чтение)',
+    },
     'run_summary_deferred': {
         'de': ' ({deferred} wegen Backoff aufgeschoben)',
         'en': ' ({deferred} deferred due to backoff)',

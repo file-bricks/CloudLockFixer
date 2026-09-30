@@ -5,12 +5,19 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Added / Ergänzt
+- `clf review-legacy-retries --queue <queue.json>` reports potential historical
+  five-attempt failures without loading settings, importing TXT tasks, or writing logs.
+  Ambiguous legacy/default limits require an explicit decision via the existing retry command.
+- Rein lesender Review historischer Fünfer-Limit-Fehler mit Task-Fortschritt und
+  Queue-Hash; keine automatische Reaktivierung. 15 neue Regressionen.
+
 ### Fixed / Behoben
 - Capped retry backoff no longer overflows at high persisted attempt counts.
   The worker continues later tasks and saves pending retries with their next attempt time.
 - Gedeckeltes Retry-Backoff bleibt bei hohen persistierten Versuchszählern stabil;
   nachfolgende Tasks werden weiterverarbeitet und Wiederholungen gespeichert.
-- The verification contract reflects the current unreleased source state: 325 passing tests.
+- The verification contract reflects the current unreleased source state: 340 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

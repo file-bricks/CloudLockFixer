@@ -1,12 +1,23 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Entscheidung über historische Fünfer-Limit-Fehler — 2026-09-30
+
+- [x] Rein lesenden CLI-Review mit explizitem Queue-Pfad, Kandidaten, Fortschritt
+  und Hash ergänzen; alte Standardlimits und bewusst gesetzte Limits bleiben
+  als mehrdeutig ausgewiesen. Wiederaufnahme nur über vorhandenes `retry <id>`.
+- [x] README DE/EN, DESIGN, CHANGELOG, Roadmap und LLM-Vertrag abgleichen;
+  15 neue Regressionen für unveränderte Dateien und ungültige Eingaben.
+- [ ] Native Windows-Tray-/Autostart-Prüfung und neuer EXE-Build mit Release-Gates.
+- Produktive Queues wurden nicht migriert; Auswahl und Wiederaufnahme bleiben
+  eine ausdrückliche Entscheidung des Queue-Betreibers.
+
 ## Retry-Backoff-Korrektur — 2026-09-30
 
 - [x] Overflow bei hohem persistiertem Versuchszähler verhindern: gedeckelte
   Verdopplung ersetzt die unbegrenzte Potenzberechnung. Zwölf neue Regressionen
   prüfen hohe Zähler, Cap-Grenzen und Queue-Persistenz mit nachfolgenden Tasks.
-- Die einmalige Migration historischer Fünfer-Cap-Fehler und die nativen
-  Windows-/Release-Gates bleiben separat offen; produktive Queues und
+- Die explizite Entscheidung über historische Fünfer-Cap-Fehler ist oben
+  umgesetzt; native Windows-/Release-Gates bleiben offen. Produktive Queues und
   Provider-Prozesse wurden bei dieser Reparatur nicht verändert.
 
 ## Feature: Konfigurierbares Retry-Verhalten (exponentielles Backoff) (Task 172) — erledigt 2026-09-29

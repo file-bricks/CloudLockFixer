@@ -1,7 +1,7 @@
 # CloudLockFixer (CLF-WDAS) — Design / Spec
 
-**Stand:** 2026-08-11 · **Status:** Source-/CI-Vertrag (kein nativer Release- oder Security-Freigabestatus)
-**Prüfbasis:** Arbeitskopie `b1aa1c6` plus vorhandene lokale Änderungen; der Klon ist nicht clean.
+**Stand:** 2026-09-30 · **Status:** Source-Vertrag (native Release-Gates separat offen)
+**Prüfbasis:** Retry-Backoff und expliziter Review historischer Fünfer-Limit-Fehler.
 **Kürzel:** CLF-WDAS = CloudLockFixer *with Delayed Action Service*
 **GUI:** PySide6 · **Plattform:** Windows (Hauptziel; Linux/macOS via Source & CI-Smoke)
 
@@ -51,12 +51,13 @@ Ein Tray-Tool, in das man Ordner-/Datei-Operationen **einträgt** und das sie **
 - Beobachtet Änderungsrate in Cloud-Ordnern; bei viel Aktivität → Sync-Client automatisch pausieren; nach Cooldown ohne Änderungen → wieder starten. Fängt Locks präventiv ab.
 
 ## Fehlerbehandlung
-- `max_retries` ist standardmäßig `None`: retryfähige Tasks bleiben pending und werden weiter aufgegriffen. Ein Aufrufer kann ein endliches Limit setzen; ein persistierbares Backoff-/Retry-Profil bleibt offen.
+- `max_retries` ist standardmäßig `None`: retryfähige Tasks bleiben pending und werden weiter aufgegriffen. Ein Aufrufer oder die Einstellungen können ein endliches Limit setzen. Backoff-Basis und Obergrenze werden persistiert; automatische Läufe berücksichtigen `next_try_at`. Die gedeckelte Berechnung bleibt auch bei sehr hohen Versuchszählern stabil.
+- Historische `failed`-Tasks mit genau fünf Versuchen können vom früheren Standardlimit oder einem bewusst gesetzten Limit stammen. `clf review-legacy-retries --queue <queue.json>` liest diese Datei ohne Queue-Initialisierung, TXT-Import, Einstellungen oder Logs und liefert Kandidaten samt Fortschritt und Queue-Hash. Die Auswahl erfolgt ausdrücklich per `clf retry <id>` gegen die aktive Queue; keine automatische Migration. Retry erhält Schritt-/Kopierfortschritt und Fehlerhistorie, setzt Zähler und Backoff zurück.
 - Deterministische Ziel- oder Eingabekonflikte werden als `blocked` persistiert und nicht endlos erneut versucht. Das gilt insbesondere, wenn bei `move`/`rename` sowohl Quelle als auch Ziel fehlen. Die Provider-Eskalation ignoriert sicher fehlende aktuelle Quellen; die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und Blockierung. Vorhandene v1-Queue-Dateien werden ohne Schemawechsel beim nächsten Lauf idempotent aktualisiert. Ein explizites Retry-Limit markiert weiterhin `permanent`/`failed`.
 - Nichts Destruktives ohne erfüllte Vorbedingung. Jede Aktion geloggt (`clf.log`).
 
 ## Tests
-- `PYTHONPATH=src python -m pytest -q`: aktuell **215 Tests gesammelt** (lokaler Source-/CI-Vertrag; native GUI-/Provider-Live-Smokes bleiben offen). Abgedeckt sind Queue-Parsing (JSON+TXT), Ketten-Reihenfolge/Abbruch, copy+delete-Verify, unbegrenzter Retry-Default plus optionales Limit, persistierte Blockierung bei Zielkonflikten und fehlenden Move-/Rename-Quellen, Provider-/Virtual-Mount-Guards, Autostart-Verträge und Cross-Platform-Pfade.
+- `PYTHONPATH=src python -m pytest -q`: aktuell **340 Tests gesammelt**. Abgedeckt sind Queue-Parsing, Kettenfortschritt, copy+delete-Verify, Retry-Limits, Backoff einschließlich hoher Zähler, rein lesender Altfehler-Review, Provider-/Virtual-Mount-Guards und Autostart-/Cross-Platform-Verträge. Native Windows-Tray-/Autostart-/Provider-Live-Smokes und ein neuer EXE-Build bleiben separate Gates.
 
 ## Phasen
 - **P1 (MVP):** Core + `ops` (copy+delete) + OneDriveProvider + Worker + CLI + Tray + Autostart + Tests.

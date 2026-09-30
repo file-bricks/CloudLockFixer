@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-325%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-340%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Nicht--Erh%C3%B6ht-blue)](THIRD_PARTY_LICENSES.md)
@@ -372,6 +372,9 @@ clf list
 clf retry <task-id>
 clf retry-all
 
+# Mögliche historische Fünfer-Limit-Fehler ohne Änderungen prüfen
+clf review-legacy-retries --queue "C:\Users\NAME\AppData\Local\CloudLockFixer\queue.json"
+
 # Warteschlange sofort verarbeiten
 clf run-now
 clf run-now --pause
@@ -382,6 +385,16 @@ clf diagnose
 ```
 
 *(Entwicklungsaufruf: `PYTHONPATH=src python -m cloudlockfixer.cli ...`)*
+
+`review-legacy-retries` liest ausschließlich die angegebene JSON-Datei und zeigt
+fehlgeschlagene Tasks mit genau fünf Versuchen, ihren Fortschritt und einen
+SHA-256 der Queue. Das alte Standardlimit und ein bewusst gesetztes Fünfer-Limit
+sind anhand dieser Daten nicht unterscheidbar. Prüfe jeden Kandidaten vor
+`clf retry <task-id>` gegen die aktive Queue. Der Review liest keine `queue.txt`
+ein, lädt keine Einstellungen, schreibt keine Logs und reaktiviert keine Tasks.
+Ein gezielter Retry erhält Schritt- und Kopierfortschritt sowie den letzten
+Fehler, setzt Versuchszähler und Backoff zurück und ermöglicht dem Worker,
+die gewählte Operation fortzusetzen.
 
 ---
 
@@ -416,7 +429,7 @@ Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt Clo
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 325 Tests (`pytest`, **325 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 340 Tests (`pytest`, **340 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen

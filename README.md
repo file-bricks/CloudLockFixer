@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-325%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-340%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -372,6 +372,9 @@ clf list
 clf retry <task-id>
 clf retry-all
 
+# Review potential historical five-attempt failures without changes
+clf review-legacy-retries --queue "C:\Users\NAME\AppData\Local\CloudLockFixer\queue.json"
+
 # Execute queue immediately
 clf run-now
 clf run-now --pause
@@ -382,6 +385,15 @@ clf diagnose
 ```
 
 *(Development invocation: `PYTHONPATH=src python -m cloudlockfixer.cli ...`)*
+
+`review-legacy-retries` reads only the specified JSON file and reports failed
+tasks with exactly five attempts, their saved progress, and a queue SHA-256.
+These may originate from the old default or an intentional five-attempt limit;
+the saved data cannot distinguish them. Review each candidate before using
+`clf retry <task-id>` against the active queue. The review does not ingest
+`queue.txt`, load settings, write logs, or reactivate tasks. A selected retry
+preserves the saved step and copy progress and last error, resets the attempt
+counter and backoff, and allows the worker to resume that operation.
 
 ---
 
@@ -416,7 +428,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 325 automated tests (`pytest`, 325 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 340 automated tests (`pytest`, 340 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

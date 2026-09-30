@@ -1,5 +1,13 @@
 # CloudLockFixer — Roadmap
 
+## Aktueller Source-Ausbau — 2026-09-30
+
+- [x] Gedeckeltes Backoff für hohe persistierte Versuchszähler.
+- [x] Rein lesender Review historischer Fünfer-Limit-Fehler mit ausdrücklicher
+  Entscheidung über gezielte Wiederaufnahme; keine automatische Migration.
+- [ ] Native Windows-Tray-/Autostart-Abnahme und neuer EXE-Build.
+- [ ] Release-Gates einschließlich Paketierung und Veröffentlichungsnachweisen.
+
 ## v1.0.0 (erledigt)
 
 - Kernfunktionalität: copy+delete-Workaround für Cloud-gesperrte Dateien

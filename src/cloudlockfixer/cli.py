@@ -11,8 +11,10 @@ Beispiele:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
+from pathlib import Path
 
 from . import i18n, settings
 from .i18n import t
@@ -31,8 +33,11 @@ def _setup_logging() -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    cfg = settings.load()
-    i18n.set_language(settings.resolve_language(cfg))
+    argv = sys.argv[1:] if argv is None else argv
+    review_only = bool(argv) and argv[0] == "review-legacy-retries"
+    cfg = {} if review_only else settings.load()
+    if not review_only:
+        i18n.set_language(settings.resolve_language(cfg))
 
     parser = argparse.ArgumentParser(prog="clf", description=t("cli_desc"))
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -61,6 +66,10 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("retry-all", help=t("cli_retry_all_help"))
 
+    p_review = sub.add_parser("review-legacy-retries", help=t("cli_legacy_review_help"))
+    p_review.add_argument("--queue", type=Path, required=True, metavar="QUEUE.JSON",
+                          help=t("cli_legacy_review_queue_help"))
+
     p_ctx = sub.add_parser("context", help=t("cli_context_help"))
     gc = p_ctx.add_mutually_exclusive_group(required=True)
     gc.add_argument("--install", action="store_true")
@@ -72,6 +81,15 @@ def main(argv: list[str] | None = None) -> int:
     p_gui.add_argument("--src", required=True)
 
     args = parser.parse_args(argv)
+    if args.cmd == "review-legacy-retries":
+        from .legacy_retry import review_legacy_retries
+        try:
+            report = review_legacy_retries(args.queue)
+        except (OSError, ValueError) as error:
+            print(str(error), file=sys.stderr)
+            return 2
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
     _setup_logging()
     queue = Queue(data_dir())
 
