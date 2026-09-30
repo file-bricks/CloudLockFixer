@@ -179,8 +179,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-28" in text
-    assert "## Last-checked: 2026-09-28" in text
+    assert "> Last-checked: 2026-09-30" in text
+    assert "## Last-checked: 2026-09-30" in text
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -359,7 +359,7 @@ def test_marketing_log_recent_hygiene_entry() -> None:
     assert mktg_file.is_file(), "MARKETING-LOG.txt must exist"
     content = mktg_file.read_text(encoding="utf-8")
 
-    assert "Stand: 2026-09-28" in content, "Recent audit date missing in MARKETING-LOG.txt"
+    assert "Stand: 2026-09-30" in content, "Recent audit date missing in MARKETING-LOG.txt"
     assert "CLOUDLOCKFIXER SUITE" in content
     assert "INV-LOCAL-01" in content and "INV-SLA-10" in content, "Governance pillars missing in MARKETING-LOG.txt"
     assert "Pfad A" in content or "PFAD A" in content, "Pfad A maintenance section missing in MARKETING-LOG.txt"
@@ -594,10 +594,49 @@ def test_readme_notice_attribution_and_verified_badges() -> None:
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
     assert "Attribution-NOTICE-blue" in readme_en
-    assert "Verified-2026--09--28-blue" in readme_en
+    assert "Verified-2026--09--30-blue" in readme_en
 
     assert "Attribution-NOTICE-blue" in readme_de
-    assert "Gepr%C3%BCft-2026--09--28-blue" in readme_de
+    assert "Gepr%C3%BCft-2026--09--30-blue" in readme_de
 
     assert "Attribution-NOTICE-blue" in readme_es
-    assert "Verificado-2026--09--28-blue" in readme_es
+    assert "Verificado-2026--09--30-blue" in readme_es
+
+
+def test_visual_showcase_screenshots_embedded() -> None:
+    """Verify that all 4 store screenshots are embedded in Section 10 across READMEs."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+
+    expected_screenshots = [
+        "screenshots/store/01_tray-queue-management.png",
+        "screenshots/store/02_multicloud-provider-support.png",
+        "screenshots/store/03_preventive-watcher-settings.png",
+        "screenshots/store/04_cross-platform-architecture.png",
+    ]
+    for ss in expected_screenshots:
+        assert ss in readme_en, f"Missing screenshot '{ss}' in README.md"
+        assert ss in readme_de, f"Missing screenshot '{ss}' in README.de.md"
+        assert ss in readme_es, f"Missing screenshot '{ss}' in README.es.md"
+        assert (PROJECT_ROOT / ss).is_file(), f"Screenshot file '{ss}' does not exist on disk"
+
+
+def test_exponential_backoff_cli_docs() -> None:
+    """Verify exponential backoff parameters are documented in READMEs and CHANGELOG."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+
+    assert "--initial-delay" in readme_en
+    assert "--backoff-multiplier" in readme_en
+    assert "--max-delay" in readme_en
+    assert "--ignore-backoff" in readme_en
+
+    assert "--initial-delay" in readme_de
+    assert "--backoff-multiplier" in readme_de
+    assert "--max-delay" in readme_de
+    assert "--ignore-backoff" in readme_de
+
+    assert "2026-09-30" in changelog
+    assert "Screenshots-Showcase" in changelog

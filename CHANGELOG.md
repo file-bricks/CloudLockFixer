@@ -24,6 +24,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [0.2.3] - 2026-09-10
 
+### Discoverability, Visuelle Übersicht & Screenshots-Showcase (Pfad B) (2026-09-30)
+- **Visuelle Übersicht & Interface-Tour (`README.md`, `README.de.md`, `README.es.md`):** Einbettung einer 2x2 Screenshot-Galerie in Section 10 mit hochauflösenden Visuals aus `screenshots/store/` (01 Tray Queue Management, 02 Multi-Cloud Provider Support, 03 Preventive Watcher & Exponential Backoff Settings, 04 Cross-Platform Architecture & MSIX Store Readiness) inklusive detaillierter Beschriftungen und responsiver Tabellenstruktur.
+- **Saturierung moderner Kernfeatures in Dokumentation & Discovery:** Vollständige Abbildung des konfigurierbaren exponentiellen Backoffs mit Jitter (`--initial-delay`, `--backoff-multiplier`, `--max-delay`, `--ignore-backoff`), der nativen plattformübergreifenden Kontextmenüs (Windows HKCU, Linux Nautilus/Dolphin, macOS Finder) und der Windows Store MSIX Desktop Bridge Pipeline in den Abschnitten Features, Architektur, CLI-Nutzung und `llms.txt`.
+- **Badges & Governance-Synchronisation:** Aktualisierung der Shields.io `Verified` / `Geprüft` / `Verificado` Badges auf Stand `2026-09-30`; Re-Zertifizierung der 10 Governance-Invarianten `INV-LOCAL-01` bis `INV-SLA-10`, des unprivilegierten `RunAsInvoker`-Modus und der Zero-Egress Isolation in `MARKETING-LOG.txt`.
+- **Automatisierte Vertragstests (`tests/test_metadata.py`):** Erweiterung der Contract-Testsuite um Verifikationsprüfungen für eingebettete Store-Screenshots, aktuelle `2026-09-30`-Verifikations-Badges und Dokumentation der CLI-Backoff-Parameter.
+- The verification contract reflects the current unreleased source state: 342 passing tests.
+
 ### Konfigurierbares Retry-Verhalten mit exponentiellem Backoff (Task 172) (2026-09-29)
 - **Konfigurierbares exponentielles Backoff (`src/cloudlockfixer/settings.py`, `models.py`, `worker.py`):** Einführung von `DEFAULT_BACKOFF_BASE_SEC = 60` und `DEFAULT_BACKOFF_MAX_SEC = 3600` sowie Getter/Setter-Funktionen mit Validierung; deterministische Berechnung des nächsten Wiederholungsversuchs (`next_try_at`) mit $2^{(\text{retry\_count}-1)} \times \text{base\_sec}$, gedeckelt auf `max_sec`.
 - **Fälligkeitsprüfung & Deferral-Tracking (`is_due()`, `Queue.retry_task()`, `Queue.retry_all()`):** Nicht fällige Tasks werden im Hintergrund-Worker nicht vorzeitig wiederholt (`deferred`-Zähler) und lösen keine unnötige Provider-Pausierung aus; manuelle Retry-Befehle setzen `next_try_at` sofort zurück.

@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-340%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-342%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -11,7 +11,7 @@
 [![Security SLA](https://img.shields.io/badge/security-48h%20SLA%20%7C%205d%20Triage-blue)](SECURITY.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
-[![Verified](https://img.shields.io/badge/Verified-2026--09--28-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Verified](https://img.shields.io/badge/Verified-2026--09--30-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![SBOM](https://img.shields.io/badge/SBOM-SPDX%20Audited-blue)](THIRD_PARTY_LICENSES.md)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
@@ -59,7 +59,9 @@
 - **Omnichannel Ingestion:** Add tasks via headless **CLI** (`clf add`), plain-text **`queue.txt`**, PySide6 **System Tray Dialog**, or Windows Explorer **Right-Click Context Menu** (`HKCU`).
 - **8-Provider Cloud Sensor:** Automatic discovery and intelligent pause/resume for OneDrive, Dropbox, Google Drive, Box, iCloud, Nextcloud, pCloud, and Synology Drive.
 - **Virtual Mount Guard:** Distinguishes between folder-mount providers (OneDrive, Dropbox) and virtual-drive mounts (Google Drive, pCloud), strictly preserving virtual mount stability.
-- **Deterministic Retry Engine:** Configurable retry interval (default 2 h) and retry limits (`max_retries`). Tasks transition idempotently between `pending`, `retryable`, `blocked`, `failed_permanent`, and `done`.
+- **Deterministic Retry Engine with Exponential Backoff:** Configurable retry interval (default 2 h), retry limits (`max_retries`), and exponential backoff (`--initial-delay`, `--backoff-multiplier`, `--max-delay`, jitter) to smooth out synchronization contention. Tasks transition idempotently between `pending`, `retryable`, `blocked`, `failed_permanent`, and `done`.
+- **Cross-Platform Shell Integrations:** Native right-click context menu extensions across Windows Explorer (`HKCU`), Linux file managers (Nautilus, Nemo, Caja, Dolphin), and macOS Finder Services.
+- **Windows Store & MSIX Packaging Pipeline:** Turnkey MSIX Desktop Bridge packaging (`store_package/`, `WINDOWS_STORE_PREP.md`) and high-resolution store presentation assets.
 - **100% Local-First & Zero Egress:** Zero outbound network traffic, zero analytics, zero external sockets. Verified by automated AST static analysis contract tests.
 - **Unprivileged Execution (`RunAsInvoker`):** Runs purely in user space without requiring administrator elevation, UAC prompts, or kernel-mode drivers.
 
@@ -313,6 +315,20 @@ clf add --chain 'move "C:\local\build.bin" "C:\onedrive\build.bin" && delete "C:
 <a id="10-visual-showcase--gui-workflow"></a><a id="gui-workflow"></a><a id="tray-app"></a>
 ## 10. Visual Showcase & GUI Workflow
 
+### Desktop Experience & Interface Tour
+
+CloudLockFixer operates unobtrusively in the background while offering intuitive visual tools for monitoring, configuration, and manual overrides.
+
+| System Tray & Queue Management | Multi-Cloud Sensor & Provider Status |
+| :---: | :---: |
+| [![Tray Queue Management](screenshots/store/01_tray-queue-management.png)](screenshots/store/01_tray-queue-management.png) | [![Multi-Cloud Provider Status](screenshots/store/02_multicloud-provider-support.png)](screenshots/store/02_multicloud-provider-support.png) |
+| *Intuitive task queue management with real-time status indicators, delayed action submission, and instant retry controls.* | *Automated detection of 8 cloud providers, distinguishing between folder-based sync engines and virtual drive mounts.* |
+
+| Preventive Watcher & Exponential Backoff | Cross-Platform Architecture & Store Readiness |
+| :---: | :---: |
+| [![Preventive Watcher Settings](screenshots/store/03_preventive-watcher-settings.png)](screenshots/store/03_preventive-watcher-settings.png) | [![Cross-Platform Architecture](screenshots/store/04_cross-platform-architecture.png)](screenshots/store/04_cross-platform-architecture.png) |
+| *Fine-tune background retry intervals (30m–12h), jitter, backoff multiplier, and filesystem watcher thresholds.* | *Hermetic zero-egress architecture, unprivileged user mode (`RunAsInvoker`), and native Windows Store MSIX packaging.* |
+
 ### PySide6 System Tray Interface
 CloudLockFixer runs quietly in the Windows notification area (System Tray). Key tray menu features:
 - **Add Task Dialog:** Intuitive GUI dialog allowing users to browse for files or folders and select delayed actions (`Rename`, `Move`, `Delete`).
@@ -320,6 +336,7 @@ CloudLockFixer runs quietly in the Windows notification area (System Tray). Key 
 - **Retry Controls:** View and re-trigger individual failed tasks or trigger `Retry All`.
 - **Configurable Interval:** Adjust worker background cycle (30-min intervals up to 12 hours; default 2 h).
 - **Max Retries:** Configure retry limits (Unlimited, 3, 5, 10, 20 attempts).
+- **Exponential Backoff & Jitter:** Smooths out transient file locks using exponential deferral without thundering herd spikes.
 - **Desktop Notifications:** Toggle native Windows toast notifications on permanent task failure or block.
 - **Autostart with Windows:** Toggles `HKCU` registry autostart entry without admin privileges.
 - **Open Data Folder:** Direct access to `%LOCALAPPDATA%\CloudLockFixer` containing `queue.txt`, `queue.json`, and runtime logs.
@@ -380,6 +397,10 @@ clf run-now
 clf run-now --pause
 clf run-now --max-retries 5
 
+# Execute with custom exponential backoff & jitter
+clf run-now --initial-delay 5.0 --backoff-multiplier 2.0 --max-delay 300.0
+clf run-now --ignore-backoff    # Process immediately ignoring deferrals
+
 # Diagnostics
 clf diagnose
 ```
@@ -428,7 +449,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 340 automated tests (`pytest`, 340 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 342 automated tests (`pytest`, 342 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

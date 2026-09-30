@@ -1,7 +1,7 @@
 ================================================================================
 CLOUDLOCKFIXER SUITE — MARKETING, DISCOVERY & GOVERNANCE LOG
 ================================================================================
-Stand: 2026-09-28
+Stand: 2026-09-30
 Repository: file-bricks/CloudLockFixer
 Branch: main
 Version: 0.2.3
@@ -160,3 +160,12 @@ CloudLockFixer integrates harmoniously into the file-bricks and open-bricks suit
   5. Level 1 SBOM Re-Audit: Updated THIRD_PARTY_LICENSES.md & THIRD_PARTY_LICENSES.txt (Audit Date 2026-09-28), re-certifying RunAsInvoker non-elevation, Zero-Copyleft isolation, Zero-Egress standard library containment, and all 10 governance invariants INV-LOCAL-01..INV-SLA-10.
   6. Documentation & Badge Synchronization: Harmonized Attribution: NOTICE and Verified: 2026-09-28 badges across README.md, README.de.md, README.es.md; updated llms.txt and CHANGELOG.md.
   7. Automated Contract Tests: Expanded tests/test_metadata.py with contract tests verifying NOTICE attribution, PEP 621 license-files, 20/20 saturated keywords, pytest options/norecursedirs, CI lifecycle workflows, and extended .gitignore guards.
+
+- 2026-09-30 — Pfad B Discoverability, Visual Architecture & Screenshots Showcase (file-bricks/CloudLockFixer):
+  1. Desktop Experience & Interface Tour: Embedded 4 store screenshots in Section 10 across README.md, README.de.md, and README.es.md (Tray Queue Management, Multi-Cloud Sensors, Preventive Watcher & Exponential Backoff Settings, Cross-Platform Architecture & Store Readiness).
+  2. Exponential Backoff & Retry Deferral (Task 172): Saturated documentation for configurable exponential backoff (`--initial-delay`, `--backoff-multiplier`, `--max-delay`, jitter) and non-blocking deferrals in Features, Architecture, CLI usage, and llms.txt.
+  3. Cross-Platform Shell Integrations (Task 170): Documented native context menus across Windows Explorer (HKCU), Linux (Nautilus, Nemo, Caja, Dolphin), and macOS Finder Services.
+  4. Windows Store Packaging Readiness: Connected MSIX Desktop Bridge pipeline, application tiles, and Store listing assets (`store_package/`, `WINDOWS_STORE_PREP.md`, `STORE_LISTING.md`).
+  5. Governance & Invariants Verification: Re-verified all 10 governance invariants INV-LOCAL-01..INV-SLA-10, Zero-Egress isolation, and RunAsInvoker non-elevation.
+  6. Documentation & Badge Currency: Synchronized Verified: 2026-09-30 badges across English, German, and Spanish READMEs; updated llms.txt and CHANGELOG.md.
+  7. Automated Contract Test Suite: Expanded tests/test_metadata.py with contract tests verifying embedded screenshots gallery, updated 2026-09-30 verification badges, and exponential backoff CLI documentation.

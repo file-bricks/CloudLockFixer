@@ -1,6 +1,6 @@
 # CloudLockFixer
 
-> Last-checked: 2026-09-28
+> Last-checked: 2026-09-30
 
 CloudLockFixer is a Windows tray and CLI tool for delayed rename, move and delete
 operations in cloud-sync folders. It is designed for OneDrive, Dropbox, Google
@@ -8,7 +8,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.3
-Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, THIRD_PARTY_LICENSES.md SBOM, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), with 340 passing tests.
+Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, THIRD_PARTY_LICENSES.md SBOM, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), embedded store screenshots visual showcase (Pfad B), with 342 passing tests.
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
 Primary interfaces:
@@ -78,7 +78,7 @@ ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
 a local-first delayed action queue for rename, move and delete operations that
 fail because Windows Cloud Files providers temporarily lock paths.
 
-## Last-checked: 2026-09-28
+## Last-checked: 2026-09-30
 
 ## Scoped source update: 2026-09-30
 

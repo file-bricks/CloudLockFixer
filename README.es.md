@@ -3,14 +3,14 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Estado de Pytest](https://img.shields.io/badge/tests-313%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Estado de Pytest](https://img.shields.io/badge/tests-315%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Versión de Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Plataforma](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacidad](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
 [![Política de Seguridad](https://img.shields.io/badge/security-Policy%20%7C%20SHA--256%20Verificado-blue)](SECURITY.md)
 [![Licencia](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Atribución](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
-[![Verificado](https://img.shields.io/badge/Verificado-2026--09--28-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Verificado](https://img.shields.io/badge/Verificado-2026--09--30-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Ecosistema](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
 [![Versión](https://img.shields.io/badge/version-0.2.3-blue)](pyproject.toml)
@@ -215,6 +215,18 @@ El controlador `cldflt.sys` (instalado por OneDrive, Dropbox, Google Drive, iClo
    `PYTHONPATH=src python -m cloudlockfixer`
 
 ## Guía de uso
+
+### Muestra visual e interfaz
+
+| Gestión de cola en la bandeja | Sensores multi-nube y estado de proveedores |
+| :---: | :---: |
+| [![Gestión de cola](screenshots/store/01_tray-queue-management.png)](screenshots/store/01_tray-queue-management.png) | [![Estado de proveedores](screenshots/store/02_multicloud-provider-support.png)](screenshots/store/02_multicloud-provider-support.png) |
+| *Gestión intuitiva de cola de tareas con indicadores de estado en tiempo real, registro de acciones diferidas y control de reintentos.* | *Detección automática de 8 proveedores de nube con separación clara entre motores basados en carpetas y unidades virtuales.* |
+
+| Vigilante preventivo y retroceso exponencial | Arquitectura multiplataforma y preparación para Store |
+| :---: | :---: |
+| [![Ajustes del vigilante preventivo](screenshots/store/03_preventive-watcher-settings.png)](screenshots/store/03_preventive-watcher-settings.png) | [![Arquitectura multiplataforma](screenshots/store/04_cross-platform-architecture.png)](screenshots/store/04_cross-platform-architecture.png) |
+| *Ajuste preciso de intervalos de fondo (30 min a 12 h), jitter, multiplicadores de retroceso y umbrales de eventos del sistema de archivos.* | *Arquitectura hermética sin salidas de red (Zero-Egress), modo usuario sin privilegios (`RunAsInvoker`) y empaquetado nativo MSIX.* |
 
 ### Aplicación en la bandeja del sistema
 Se inicia con Windows cuando el inicio automático está activado. Menú de la bandeja: *Añadir tarea…*, *Ejecutar ahora* (también *con pausa de OneDrive*), *Intervalo* (pasos de 30 min, por defecto 2 h), *Iniciar con Windows*, *Abrir carpeta de datos*. Esta opción abre la carpeta local de la aplicación con `queue.txt` y los archivos de registro. El diálogo para añadir tareas permite elegir si el origen es un archivo o una carpeta.
