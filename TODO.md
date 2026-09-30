@@ -9,8 +9,11 @@
   15 neue Regressionen für unveränderte Dateien und ungültige Eingaben.
 - [x] Nativer Source-Tray-Smoke mit isolierter Queue und Singleton: Menü,
   Rename/Move/Delete, Quit und unveränderte Autostart-/Kontextmenü-Registry.
-- [ ] Persönlichen EXE-Build starten und separat prüfen; native Login-/Provider-
-  Live-Interaktion und Release-Artefakt-Abnahme bleiben eigenständige Gates.
+- [x] Persönlicher EXE-Build auf ASUS-GEI aus `1d79531` lokal gebaut:
+  Altfehler-Review mit gültigem JSON ohne Änderungen, temporäre Umbenennung und
+  „Läuft bereits.“-Dialog bei bestehender Instanz geprüft, jeweils Exit 0.
+- [ ] Neues EXE-Tray bei freiem Singleton, native Login-/Provider-Live-Interaktion
+  und Release-Artefakt-Abnahme bleiben eigenständige Gates.
 - Produktive Queues wurden nicht migriert; Auswahl und Wiederaufnahme bleiben
   eine ausdrückliche Entscheidung des Queue-Betreibers.
 

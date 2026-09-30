@@ -72,6 +72,14 @@ manuelle Tray-Bedienung noch Start/Interaktion eines Release-Artefakts ein.
 
 ## Freigabegrenzen
 
+**Persönlicher Build 2026-09-30 (ASUS-GEI):** Aus sauberem `1d79531` mit dem
+zentralen Personal-Build-Werkzeug und 14 Scanner-Excludes lokal gebaut. Das
+konkrete Artefakt liefert gültiges Review-JSON ohne Queue-Änderung, verarbeitet
+eine temporäre Umbenennung und weist einen zweiten GUI-Start mit „Läuft bereits.“
+zurück (Exit 0). Die bestehende Instanz wurde nicht beendet. Artefakt und
+Quittungen bleiben außerhalb von Repository, OneDrive und Release-Ablagen.
+Dies belegt keinen neuen EXE-Tray bei freiem Singleton und keine Veröffentlichung.
+
 Die folgenden Nachweise bleiben bis zu ihrer separaten Bestätigung offen:
 
 - native PyInstaller-Build-/Startprüfung des konkreten Release-Artefakts;
