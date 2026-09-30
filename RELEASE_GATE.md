@@ -1,14 +1,14 @@
 # CloudLockFixer — Windows-Release-Gate
 
 **Status:** nicht als Release freigegeben
-**Kanonische Source-Version:** `0.2.2`
+**Kanonische Source-Version:** `0.2.3`
 **Baseline-Tag:** `v0.2.2`
 **Historischer Initial-Tag:** `v1.0.0`
 
 ## Versions- und Release-Vertrag
 
 `pyproject.toml` (`project.version`) und `cloudlockfixer.__version__` sind die
-kanonische Source-Version und müssen beide `0.2.2` ergeben. `v1.0.0` bezeichnet
+kanonische Source-Version und müssen beide `0.2.3` ergeben. `v1.0.0` bezeichnet
 den historischen Initial-Tag; er darf nicht als Freigabe des aktuellen HEAD
 oder der unreleased Änderungen interpretiert werden. Der aktuelle Source-Stand
 bleibt bis zum Abschluss dieses Gates `unreleased`.

@@ -47,6 +47,20 @@ DIAGNOSE_REPORT.md
 
 # ---- Build-Artefakte & Releases ----
 releases/
+!releases/
+releases/*
+!releases/windowsstore/
+releases/windowsstore/*
+!releases/windowsstore/BUILD.md
+!releases/windowsstore/WACK_PROTOCOL.md
+!releases/windowsstore/store_listing_de.md
+!releases/windowsstore/store_listing_en.md
+!releases/windowsstore/store_settings.json
+!releases/windowsstore/StoreLogo.png
+!releases/windowsstore/icon_*.png
+!releases/windowsstore/screenshots/
+releases/windowsstore/screenshots/*
+!releases/windowsstore/screenshots/*.png
 *.exe
 *.msi
 *.msix
@@ -65,6 +79,7 @@ logs/
 
 # ---- Betriebssystem ----
 desktop.ini
+Desktop.ini
 Thumbs.db
 .DS_Store
 ehthumbs.db
@@ -79,3 +94,65 @@ clf.log
 # Bugsweep-/Session-Backups
 *.bak
 _backups/
+
+# ---- Cloud-Sync Konfliktmuster & Multi-Host Hygiene ----
+*-WORKSTATION-LG*
+*-ASUS-GEI*
+*-WORKSTATION*
+*-ASUS*
+*-LAPTOP*
+*-Mac Studio*
+*-MacBook*
+*-IDEAPAD*
+*_WORKSTATION*
+*_WORKSTATION-LG*
+*-WORKSTATION.*
+*-WORKSTATION-LG.*
+*-conflict-*
+*.sync-conflict-*
+*.conflict
+*-CONFLIT-*
+*.sync-temp-*
+* (kopie)*
+* (copy)*
+* (Kopie)*
+* (Copy)*
+*conflicted copy*
+
+# ---- Multi-Agent Locks & State ----
+LOCK
+LOCK.*
+*.lock
+LOCK*.txt
+LOCK.user.*
+LOCK.until.*
+LOCK.condition.*
+.automation-lock
+LOCK.permissions.json
+uv.lock
+!package-lock.json
+
+# ---- Test-, Coverage- & Packaging-Caches ----
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+.ruff_cache/
+.hypothesis/
+.turbo/
+.nyc_output/
+.pytest_temp/
+.pytest_tmp*/
+.tox/
+wheelhouse/
+.wheel-smoke/
+
+# ---- Temporäre Dateien & Editor-Backups ----
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+*.log
+*.orig
+*.rej

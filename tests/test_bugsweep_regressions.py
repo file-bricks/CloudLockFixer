@@ -228,3 +228,234 @@ def test_worker_executes_case_only_rename_task(tmp_path):
     assert summary["done"] == 1
     assert q.tasks[0].status == "done"
     assert (tmp_path / "QUEUE_FILE.TXT").resolve().name == "QUEUE_FILE.TXT"
+
+
+# ---------------------------------------------------------------------------
+# Bug #12-1: Unset APPDATA / LOCALAPPDATA creates relative CWD candidate paths,
+# and non-existent sync roots are erroneously accepted without validation
+# ---------------------------------------------------------------------------
+
+def test_unset_appdata_does_not_probe_relative_cwd_configs(tmp_path, monkeypatch):
+    """Unset APPDATA/LOCALAPPDATA must not probe relative CWD directories (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import (
+        DropboxProvider,
+        NextcloudProvider,
+        _read_synology_custom_roots,
+    )
+
+    fake_sync = tmp_path / "CwdSyncDir"
+    fake_sync.mkdir()
+
+    # Create CWD folders that would be scanned if relative paths were constructed
+    cwd_db = tmp_path / "Dropbox"
+    cwd_db.mkdir()
+    (cwd_db / "info.json").write_text(
+        '{"personal": {"path": "' + str(fake_sync).replace("\\", "\\\\") + '"}}',
+        encoding="utf-8",
+    )
+
+    cwd_nc = tmp_path / "Nextcloud"
+    cwd_nc.mkdir()
+    (cwd_nc / "nextcloud.cfg").write_text(
+        f"0\\Folders\\1\\localPath={fake_sync.as_posix()}\n",
+        encoding="utf-8",
+    )
+
+    cwd_syno = tmp_path / "SynologyDrive" / "config"
+    cwd_syno.mkdir(parents=True)
+    (cwd_syno / "settings.conf").write_text(
+        f'local_path="{fake_sync.as_posix()}"\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("APPDATA", raising=False)
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+
+    db_roots = DropboxProvider()._detect_roots()
+    assert fake_sync not in db_roots, "DropboxProvider should not scan relative CWD info.json"
+
+    nc_roots = NextcloudProvider()._detect_roots()
+    assert fake_sync not in nc_roots, "NextcloudProvider should not scan relative CWD nextcloud.cfg"
+
+    syno_roots = _read_synology_custom_roots()
+    assert fake_sync not in syno_roots, "SynologyDrive should not scan relative CWD SynologyDrive"
+
+
+def test_nonexistent_sync_roots_are_filtered(tmp_path, monkeypatch):
+    """Sync roots from configs or environment must be absolute and actually exist (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import (
+        DropboxProvider,
+        NextcloudProvider,
+        OneDriveProvider,
+    )
+
+    appdata = tmp_path / "AppData" / "Roaming"
+    appdata.mkdir(parents=True)
+    monkeypatch.setenv("APPDATA", str(appdata))
+
+    missing_nc = tmp_path / "NonexistentNextcloudSync"
+    nc_cfg_dir = appdata / "Nextcloud"
+    nc_cfg_dir.mkdir(parents=True)
+    (nc_cfg_dir / "nextcloud.cfg").write_text(
+        f"0\\Folders\\1\\localPath={missing_nc.as_posix()}\n",
+        encoding="utf-8",
+    )
+
+    missing_db = tmp_path / "NonexistentDropboxSync"
+    db_info_dir = appdata / "Dropbox"
+    db_info_dir.mkdir(parents=True)
+    (db_info_dir / "info.json").write_text(
+        '{"personal": {"path": "' + str(missing_db).replace("\\", "\\\\") + '"}}',
+        encoding="utf-8",
+    )
+
+    missing_od = tmp_path / "NonexistentOneDriveCommercial"
+    monkeypatch.setenv("OneDriveCommercial", str(missing_od))
+
+    nc_roots = NextcloudProvider()._detect_roots()
+    assert missing_nc not in nc_roots, "NextcloudProvider must filter non-existent sync roots"
+
+    db_roots = DropboxProvider()._detect_roots()
+    assert missing_db not in db_roots, "DropboxProvider must filter non-existent sync roots"
+
+    od_roots = OneDriveProvider()._detect_roots()
+    assert missing_od not in od_roots, "OneDriveProvider must filter non-existent sync roots"
+
+
+def test_windows_resume_exe_candidates_are_strictly_absolute(monkeypatch):
+    """Executable candidates in resume() must be strictly absolute paths (Bug #12-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.providers import OneDriveProvider
+
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+    monkeypatch.delenv("APPDATA", raising=False)
+
+    prov = OneDriveProvider()
+    for exe in prov._exe_candidates:
+        assert exe.is_absolute(), f"Candidate {exe} must be an absolute path, not relative to CWD"
+
+
+# ---------------------------------------------------------------------------
+# Bug #12-2: Cross-Directory Move of Hardlinks / Shared Inodes incorrectly
+# skipped as 'bereits am Ziel' without unlinking the source path
+# ---------------------------------------------------------------------------
+
+def test_cross_directory_move_hardlink_unlinks_source(tmp_path):
+    """Moving a hardlinked file across directories must unlink the source (Bug #12-2)."""
+    import os
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.ops import move_path
+
+    dir1 = tmp_path / "source_dir"
+    dir2 = tmp_path / "target_dir"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    src = dir1 / "payload.bin"
+    dst = dir2 / "payload.bin"
+    src.write_bytes(b"shared-hardlink-content-12345")
+    os.link(src, dst)
+
+    assert src.samefile(dst), "Precondition: files must share same inode/file-index"
+    assert src.resolve() != dst.resolve(), "Precondition: files must be in different directories"
+
+    ok, msg = move_path(src, dst)
+    assert ok, f"move_path failed: {msg}"
+    assert not src.exists(), f"Source file {src} must be unlinked/deleted after move, but still exists!"
+    assert dst.exists(), f"Destination file {dst} must exist after move!"
+    assert dst.read_bytes() == b"shared-hardlink-content-12345"
+
+
+def test_cross_directory_move_hardlink_in_task_chain(tmp_path):
+    """Task chain with cross-directory move of hardlink must succeed and remove source (Bug #12-2)."""
+    import os
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import Step, Task
+    from cloudlockfixer.ops import execute_chain
+
+    dir1 = tmp_path / "d1"
+    dir2 = tmp_path / "d2"
+    dir1.mkdir()
+    dir2.mkdir()
+
+    src = dir1 / "item.txt"
+    dst = dir2 / "item.txt"
+    cleanup = dir1 / "marker.tmp"
+    src.write_text("item-content", encoding="utf-8")
+    cleanup.write_text("marker", encoding="utf-8")
+    os.link(src, dst)
+
+    task = Task(chain=[
+        Step(op="move", src=str(src), arg=str(dst)),
+        Step(op="delete", src=str(cleanup)),
+    ])
+
+    success = execute_chain(task)
+    assert success, f"execute_chain failed: {task.last_error}"
+    assert task.status == "done"
+    assert not src.exists(), "Source must be unlinked"
+    assert dst.exists() and dst.read_text(encoding="utf-8") == "item-content"
+    assert not cleanup.exists(), "Subsequent delete step in chain must succeed"
+
+
+# ---------------------------------------------------------------------------
+# Bug #13-1: parse_txt_line beschädigt Windows-Pfade ohne Quotes und bricht bei Trailing-Backslash ab
+# ---------------------------------------------------------------------------
+
+def test_parse_txt_line_unquoted_windows_paths():
+    """Unquotierte Windows-Pfade dürfen durch shlex/Tokenizer ihre Backslashes nicht verlieren (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task_del = parse_txt_line(r"delete C:\Users\lukas\AppData\Local\Temp\file.tmp")
+    assert task_del is not None
+    assert task_del.chain[0].src == r"C:\Users\lukas\AppData\Local\Temp\file.tmp"
+
+    task_mv = parse_txt_line(r"move C:\Data\Folder D:\Target")
+    assert task_mv is not None
+    assert task_mv.chain[0].src == r"C:\Data\Folder"
+    assert task_mv.chain[0].arg == r"D:\Target"
+
+    task_ren = parse_txt_line(r"rename C:\Data\File.txt NewName.txt")
+    assert task_ren is not None
+    assert task_ren.chain[0].src == r"C:\Data\File.txt"
+    assert task_ren.chain[0].arg == "NewName.txt"
+
+
+def test_parse_txt_line_trailing_backslash_in_quotes():
+    """Pfade mit abschließendem Backslash in Anführungszeichen dürfen nicht mit 'No closing quotation' abstürzen (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task_mv = parse_txt_line(r'move "C:\Data\Folder\" "D:\Target"')
+    assert task_mv is not None
+    assert task_mv.chain[0].src == "C:\\Data\\Folder\\"
+    assert task_mv.chain[0].arg == r"D:\Target"
+
+    task_del = parse_txt_line(r'delete "C:\Temp\"')
+    assert task_del is not None
+    assert task_del.chain[0].src == "C:\\Temp\\"
+
+
+def test_parse_txt_line_chained_with_ampersand_in_quotes():
+    """Verkettete Befehle mit '&&' innerhalb von Anführungszeichen dürfen nicht zerstückelt werden (Bug #13-1)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from cloudlockfixer.models import parse_txt_line
+
+    task = parse_txt_line(r'move "C:\A && B\file.txt" "C:\Target" && delete "C:\old"')
+    assert task is not None
+    assert len(task.chain) == 2
+    assert task.chain[0].src == r"C:\A && B\file.txt"
+    assert task.chain[0].arg == r"C:\Target"
+    assert task.chain[1].src == r"C:\old"

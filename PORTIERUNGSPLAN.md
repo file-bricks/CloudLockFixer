@@ -8,56 +8,46 @@ ist seit 2026-07-18 auf Source-Ebene umgesetzt. Plattformspezifisch sind:
 
 | Modul | Windows | Linux | macOS |
 |-------|---------|-------|-------|
-| providers.py | tasklist/taskkill | `pgrep`/`kill` | `pgrep`/`kill`, `launchctl` |
+| providers.py | tasklist/taskkill | `pgrep`/`pkill` (umgesetzt) | `pgrep`/`pkill`, `open` (umgesetzt) |
 | autostart.py | Registry HKCU\Run | ~/.config/autostart/*.desktop | ~/Library/LaunchAgents/*.plist |
 | contextmenu.py | Registry Shell-Extension | Nautilus-Scripts / Nemo-Actions | Finder Quick Actions / Automator |
 | paths.py | %LOCALAPPDATA% | ~/.local/share/ (XDG) | ~/Library/Application Support/ |
 | tray.py | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon | PySide6 QSystemTrayIcon |
 
-## Phase 1: Provider-Abstraktion (Vorarbeit in v1.2.0)
+## Phase 1: Prozessmanagement- und Provider-Abstraktion (Task 169, umgesetzt 2026-09-26)
 
-Die Provider-Klassen kapseln bereits die Prozesssteuerung. Für Cross-Platform:
+Das Prozessmanagement ist in `src/cloudlockfixer/process.py` vollständig als eigenständige, plattformübergreifende Abstraktion gekapselt (`check_process`, `kill_process`, `launch_process`, `get_posix_patterns`, `ProcessManager`). Die Provider-Klassen in `providers.py` nutzen diese Abstraktion für die Lifecycle-Steuerung:
 
-### Prozess-Erkennung
+### Prozess-Erkennung (`check_process` / `ProcessManager.is_running`)
+- **Windows:** `tasklist /FI IMAGENAME eq <exe> /NH`
+- **Linux / macOS:** `pgrep -f <pattern>` mit Fallback auf `/proc/<pid>/cmdline` auf Linux.
+- **Pattern-Mapping:** `_PROCESS_ALIASES_POSIX` mappt Windows-Executable-Namen (z. B. `GoogleDriveFS.exe`, `cloud-drive-ui.exe`, `OneDrive.exe`) auf die jeweiligen POSIX-Prozessmuster (`Google Drive`, `synology-drive`, `onedrive`, `bird`).
 
-```python
-# Windows (aktuell)
-subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {exe}", "/NH"])
+### Prozess-Pause / Beendigung (`kill_process` / `ProcessManager.terminate`)
+- **Windows:** `taskkill /F /IM <exe> /T`
+- **Linux / macOS:** `pkill -f <pattern>` mit Grace-Period und Verifikation.
 
-# Linux / macOS
-subprocess.run(["pgrep", "-f", exe_pattern])
-```
-
-### Prozess-Pause/Kill
-
-```python
-# Windows (aktuell)
-subprocess.run(["taskkill", "/F", "/IM", exe, "/T"])
-
-# Linux
-subprocess.run(["kill", "-SIGSTOP", pid])  # Pause (SIGSTOP)
-subprocess.run(["kill", "-SIGCONT", pid])  # Resume (SIGCONT)
-# Alternativ: kill -9 für Terminate
-
-# macOS
-subprocess.run(["kill", "-SIGSTOP", pid])  # Pause
-subprocess.run(["kill", "-SIGCONT", pid])  # Resume
-# Alternativ via launchctl:
-subprocess.run(["launchctl", "stop", service_label])
-subprocess.run(["launchctl", "start", service_label])
-```
-
-**Vorteil Linux/macOS:** SIGSTOP/SIGCONT pausiert den Prozess OHNE ihn zu beenden.
-Das ist sicherer als Windows taskkill (wo es keinen echten Pause-Mechanismus gibt).
+### Prozess-Start (`launch_process` / `ProcessManager.launch`)
+- **Windows:** Iteration über absolute Kandidatenpfade mit Argumenten.
+- **macOS:** Start via `open -a <App-Name>`.
+- **Linux:** Executable-Erkennung per `shutil.which()` mit Argumenten.
 
 ### Provider-Roots
-
+Vollständige Erkennung nativer Cloud-Sync-Pfade unter Linux und macOS:
 | Provider | Linux | macOS |
 |----------|-------|-------|
-| OneDrive | ~/OneDrive (onedrive-Client/rclone) | ~/Library/CloudStorage/OneDrive-*/ |
-| Google Drive | Kein offizieller Client; rclone/Insync | ~/Library/CloudStorage/GoogleDrive-*/ |
-| Dropbox | ~/Dropbox | ~/Dropbox oder ~/Library/CloudStorage/Dropbox/ |
-| iCloud | Nicht verfügbar | ~/Library/Mobile Documents/com~apple~CloudDocs/ |
+| OneDrive | ~/OneDrive (onedrive Client) | ~/Library/CloudStorage/OneDrive-*/ |
+| Google Drive | Insync / rclone | ~/Library/CloudStorage/GoogleDrive-*/ |
+| Dropbox | ~/.dropbox/info.json, ~/Dropbox | ~/Library/Application Support/Dropbox/info.json, ~/Library/CloudStorage/Dropbox/ |
+| Box | ~/Box | ~/Library/CloudStorage/Box-*/ |
+| Nextcloud | ~/.config/Nextcloud/nextcloud.cfg | ~/Library/Preferences/Nextcloud/nextcloud.cfg |
+| pCloud | ~/pCloudDrive | ~/pCloudDrive |
+| Synology Drive | ~/.SynologyDrive | ~/Library/Application Support/SynologyDrive |
+| iCloud | N/A | ~/Library/Mobile Documents/com~apple~CloudDocs/ |
+
+### Provider-Resume
+- **macOS:** `open -a <App-Name>` für alle Desktop-Clients.
+- **Linux:** Executable-Erkennung per `shutil.which()` mit `--background` bzw. `start` Flags.
 
 ## Phase 2: Autostart-Abstraktion
 
@@ -107,18 +97,13 @@ Datei: `~/Library/LaunchAgents/com.cloudlockfixer.agent.plist`
 </plist>
 ```
 
-## Phase 3: Kontextmenü-Abstraktion
+## Phase 3: Kontextmenü-Abstraktion (erledigt auf Source-Ebene 2026-09-21)
 
-### Linux
-
-- **GNOME/Nautilus:** Script in `~/.local/share/nautilus/scripts/`
-- **KDE/Dolphin:** .desktop-Datei in `~/.local/share/kservices5/ServiceMenus/`
-- **Nemo:** .nemo_action-Datei in `~/.local/share/nemo/actions/`
-
-### macOS
-
-- **Finder Quick Actions:** Automator-Workflow in `~/Library/Services/`
-- Alternativ: Finder-Toolbar-App oder Finder-Extension (komplexer)
+Stand 2026-09-21: `contextmenu.py` abstrahiert plattformübergreifend:
+- **Windows:** HKCU-Registry (`Directory\shell\CloudLockFixer` und `*\shell\CloudLockFixer`)
+- **Linux:** Nautilus-Skripte in `$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/` (`01_delayed_rename.sh`, `02_delayed_move.sh`, `03_delayed_delete.sh`) mit `0o755` und KDE/Dolphin ServiceMenu in `$XDG_DATA_HOME/kio/servicemenus/cloudlockfixer.desktop`.
+- **macOS:** Finder Quick Actions / Services-Workflows in `~/Library/Services/` (`CloudLockFixer - Delayed Rename.workflow`, `Move.workflow`, `Delete.workflow`) mit `Info.plist` und `document.wflow`.
+Abgedeckt durch `tests/test_contextmenu_cross_platform.py` und `tests/source_platform_smoke.py`.
 
 ## Phase 4: Pfade-Abstraktion
 
@@ -172,9 +157,9 @@ worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip und auf macOS den
 LaunchAgent-plist-Roundtrip. Kein Cloud-Client, kein GUI, kein pip-Extra (nur
 pytest). Stand: 2026-07-22.
 
-Revalidiert 2026-07-22: Die vollständige lokale Suite umfasst 164 Tests; zusätzlich
-bestand bereits ein echter Ubuntu-/WSL-Roundtrip für den Linux-XDG-Autostart.
-Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart und macOS-LaunchAgent
-auf Source-Ebene abgeschlossen. Offen bleiben native Linux-/macOS-Pakete, ein
-echter Mac-Login-/`launchctl`-/GUI-/Cloud-Client-Smoke und plattformspezifische
-Kontextmenüs.
+Revalidiert 2026-09-23: Die vollständige lokale Suite umfasst 285 Tests (100% grün).
+Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart, macOS-LaunchAgent und
+plattformübergreifende Kontextmenüs (Linux Nautilus & KDE Dolphin, macOS Services)
+sowie Windows Store Readiness (MSIX Desktop Bridge, Kacheln, Listings, Validierungs-Suite)
+auf Source-Ebene vollständig umgesetzt und abgesichert. Offen bleiben native
+Linux-/macOS-Pakete/Installer (Task 171) und ein nativer Mac-Login-/`launchctl`-Smoke.

@@ -3,12 +3,145 @@
 Alle wesentlichen Änderungen an diesem Projekt werden hier dokumentiert.
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
-## [Unreleased]
+## [0.2.3] - 2026-09-10
+
+### Konfigurierbares Retry-Verhalten mit exponentiellem Backoff (Task 172) (2026-09-29)
+- **Konfigurierbares exponentielles Backoff (`src/cloudlockfixer/settings.py`, `models.py`, `worker.py`):** Einführung von `DEFAULT_BACKOFF_BASE_SEC = 60` und `DEFAULT_BACKOFF_MAX_SEC = 3600` sowie Getter/Setter-Funktionen mit Validierung; deterministische Berechnung des nächsten Wiederholungsversuchs (`next_try_at`) mit $2^{(\text{retry\_count}-1)} \times \text{base\_sec}$, gedeckelt auf `max_sec`.
+- **Fälligkeitsprüfung & Deferral-Tracking (`is_due()`, `Queue.retry_task()`, `Queue.retry_all()`):** Nicht fällige Tasks werden im Hintergrund-Worker nicht vorzeitig wiederholt (`deferred`-Zähler) und lösen keine unnötige Provider-Pausierung aus; manuelle Retry-Befehle setzen `next_try_at` sofort zurück.
+- **CLI & Tray-Integration (`src/cloudlockfixer/cli.py`, `tray.py`):** `clf list` zeigt den nächsten geplanten Wiederholungsversuch (`nächster Versuch: ...`) an; `clf run-now` unterstützt `--backoff` und `--ignore-backoff` / `--force`; System-Tray nutzt Backoff für periodische Hintergrund-Durchläufe und führt manuelle Aktionen sofort aus.
+- **Tier-2 Mehrsprachigkeit (i18n):** Vollständige Lokalisierung aller neuen Meldungen und Parameterbeschreibungen für Deutsch, Englisch, Spanisch, Chinesisch, Japanisch und Russisch mit 100% Translations-Parität (88 Keys).
+- **Automatisierte Testsuite (`tests/test_retry_backoff.py`):** 7 neue Tests für Backoff-Berechnung, Fälligkeitsfilterung, Provider-Pause-Ausschluss, Settings-Persistenz und CLI-Flags.
+- The verification contract reflects the current unreleased source state: 313 passing tests.
+
+### Repository-Hygiene, CI Lifecycle Workflows, Lock Defense & NOTICE Attribution (Pfad A) (2026-09-28)
+- **Kanonische NOTICE Attributionsdatei:** Root `NOTICE`-Datei formalisiert mit Urheberrechtsattribution für Lukas Geiger, file-bricks und open-bricks Umbrella unter MIT-Lizenz mit Querverweisen auf `LICENSE`, `THIRD_PARTY_LICENSES.md` und `THIRD_PARTY_LICENSES.txt`.
+- **CI/CD Lifecycle Workflows (`auto-assign.yml`, `label-sync.yml`, `.github/labels.yml`):** Bereitstellung von `.github/workflows/auto-assign.yml` (`actions/github-script@v7`, `timeout-minutes: 5`, Concurrency `cancel-in-progress: true`), `.github/workflows/label-sync.yml` (`EndBug/label-sync@v2`, `timeout-minutes: 5`) und `.github/labels.yml` mit 11 Standard-Labels gemäß GOVERNANCE.md §4.2; Härtung von `tests.yml` mit globalem Compileall-Gate (`python -m compileall -q .`).
+- **Multi-Host Cloud-Sync-, Lock- und Cache-Schutz in `.gitignore`:** Erweiterung um Multi-Host Sync-Muster (`*-MacBook*`, `*-IDEAPAD*`, `*_WORKSTATION*`, `*_WORKSTATION-LG*`, `*-WORKSTATION.*`, `*-WORKSTATION-LG.*`), kanonische Locks (`LOCK.user.*`, `LOCK.until.*`, `LOCK.condition.*`, `.automation-lock`), Test- und Coverage-Caches (`.pytest_temp/`, `.pytest_tmp*/`, `.tox/`) und OS-Dateien (`Desktop.ini`).
+- **PEP 621 Standardisierung in `pyproject.toml`:** 20/20 gesättigte Keywords synchron mit GitHub-Topics; `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]`; URLs für `Notice` und `Third-Party Licenses (Text)` in `[project.urls]` registriert; `[tool.pytest.ini_options]` mit `addopts = "-ra -v --basetemp=.pytest_temp"` und gehärtetem `norecursedirs` mit `.pytest_temp`, `.hypothesis`, `.turbo`, `.nyc_output`, `.tox`.
+- **Level 1 SBOM & Lizenzaudit in `THIRD_PARTY_LICENSES.md` & `THIRD_PARTY_LICENSES.txt`:** Re-Audit Stand 2026-09-28 mit formalem Querverweis auf `NOTICE`, Bestätigung aller 10 Governance-Invarianten `INV-LOCAL-01` bis `INV-SLA-10`, unprivilegierter `RunAsInvoker` Non-Elevation Zertifizierung und 100% permissiver/LGPL dynamischer Verlinkungsisolation.
+- **Dokumentations- und Kontext-Parität (`README.md`, `README.de.md`, `README.es.md`, `llms.txt`, `MARKETING-LOG.txt`):** Shields.io Badges für `Attribution: NOTICE` und `Verified: 2026-09-28` / `Geprüft: 2026-09-28` harmonisiert; `llms.txt` aktualisiert; `MARKETING-LOG.txt` Pfad A Revisionsbericht Stand 2026-09-28 ergänzt.
+- **Automatisierte Vertragstests (`tests/test_metadata.py`):** Erweiterung um dedizierte Contract-Tests für kanonische NOTICE-Attribution, PEP 621 license-files und 20/20 Keywords, pytest Optionen und norecursedirs, erweiterte .gitignore Multi-Host/Lock-Muster, auto-assign und label-sync Workflows Concurrency/Timeouts/Permissions sowie Level 1 SBOM Recency und Querverweis.
+- The verification contract reflects the current unreleased source state: 306 passing tests.
+
+### Cross-Platform Prozessmanagement-Abstraktion (Task 169 / Phase 1) (2026-09-26)
+- **Dedizierte Prozessmanagement-Abstraktion (`src/cloudlockfixer/process.py`):** Kapselung plattformspezifischer Prozessüberwachungs-, Beendigungs- und Startmechanismen für Windows, Linux und macOS in einem eigenständigen, modularen Subsystem (`check_process`, `kill_process`, `launch_process`, `get_posix_patterns`, `ProcessManager`).
+- **Objektorientierte Fassade (`ProcessManager`):** Bereitstellung einer sauberen API für Lifecycle-Steuerung (`is_running`, `terminate`, `launch`) mit Unterstützung für Windows-Executables, macOS-Applikationen (`open -a`) und Linux-Binaries (`shutil.which`).
+- **Refaktorisierung der Sync-Provider (`src/cloudlockfixer/providers.py`):** Migration der prozessbezogenen Prüfungen und Beendigungen auf das neue `process`-Modul unter vollständiger Abwärtskompatibilität für bestehende Test-Mocks.
+- **Automatisierte Testsuite (`tests/test_process_cross_platform.py`, `tests/source_platform_smoke.py`):** 13 neue dedizierte Unit-Tests für Prozess-Erkennung, Taskkill/Pkill, Launch-Kandidaten, Proc-Fallback und Manager-Fassade sowie Smoke-Test in `source_platform_smoke.py`.
+- The verification contract reflects the current unreleased source state: 298 passing tests.
+
+### Windows Store Readiness & MSIX Desktop Bridge Packaging (2026-09-23)
+- **Windows Store Packaging-Manifest (`store_package.json`):** Deklaration der vollständigen Publisher-Identität (`CN=52596601-BAB4-4F3F-B182-E8F3F273B202`), Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz und validierter HTTPS-URLs für Datenschutz und Support.
+- **Desktop Bridge Manifest (`store_package/CloudLockFixer/AppxManifest.xml`):** Bereitstellung des kanonischen AppxManifest mit `TargetDeviceFamily Windows.Desktop` (10.0.17763.0 bis 10.0.26100.0), mehrsprachigen Ressourcen (`de-de`, `en-us`) und vollständigen Tile-Logos.
+- **Store-Kacheln & Logo-Assets (`store_assets/`, `store_package/`, `releases/windowsstore/`):** Bereitstellung von `icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png`, `icon_310x310.png` und `StoreLogo.png` (50x50) mit validierten PNG-Signaturen.
+- **Bilinguale Store-Listings & Microsoft Store Policy 10.1.3:** Erstellung von `STORE_LISTING.md` sowie `store_listing_de.md` und `store_listing_en.md` mit strikter Begrenzung auf maximal 7 suchbegriffskonforme Keywords ohne Fremdmarkenverletzungen.
+- **Datenschutz & Support-Governance (`PRIVACY_POLICY.md`, `SUPPORT.md`, `WINDOWS_STORE_PREP.md`):** Zero-Egress Datenschutzrichtlinie nach DSGVO, Support-Leitfaden mit Sicherheits-Reporting und WACK-Zertifizierungsprotokoll (`releases/windowsstore/WACK_PROTOCOL.md`, `BUILD.md`, `store_settings.json`).
+- **Store-Screenshot-Generator (`scripts/generate_store_screenshots.py`):** Automatisierte Erzeugung von 4 hochauflösenden 16:9-Präsentationsframes (1920x1080) für Partner Center und Dokumentation.
+- **Automatisiertes Store-Readiness-Audit & Tests (`scripts/check_store_readiness.py`, `tests/test_store_readiness.py`):** 8 neue automatisierte Tests zur Überprüfung von Dokumenten, Kachelgrößen, Manifesten, Screenshots, URLs und Richtlinien-Konformität.
+- The verification contract reflects the current unreleased source state: 285 passing tests.
+
+### Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) (2026-09-21)
+- **Plattformübergreifende Kontextmenü-Abstraktion (`src/cloudlockfixer/contextmenu.py`):** Erweiterung des bisher Windows-spezifischen Kontextmenü-Moduls (`is_installed()`, `install()`, `uninstall()`) um native Unterstützung für Linux und macOS bei vollständiger Beibehaltung der bestehenden Windows-HKCU-Logik.
+- **Linux-Desktop-Integration (GNOME/Nautilus & KDE/Dolphin):** Erzeugung von 3 ausführbaren Shell-Skripten (`01_delayed_rename.sh`, `02_delayed_move.sh`, `03_delayed_delete.sh`) in `$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/` mit Ausführungsrechten (`0o755`) und Argument-Verarbeitung (`$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS` und `$@`) sowie Erstellung von `cloudlockfixer.desktop` unter `$XDG_DATA_HOME/kio/servicemenus/` für KDE/Dolphin mit korrekter Befehls- und Pfadquotierung.
+- **macOS-Dienste & Schnellaktionen (`~/Library/Services`):** Automatisierte Erstellung von 3 `.workflow`-Bündeln (`CloudLockFixer - Delayed Rename.workflow`, `Move.workflow`, `Delete.workflow`) mit `Contents/Info.plist` (`NSServices`, `runWorkflowAsService`) und `Contents/document.wflow` (`RunShellScript`-Automator-Aktion via `plistlib`).
+- **Automatisierte Testsuite & Smoke-Integration (`tests/test_contextmenu_cross_platform.py`, `tests/source_platform_smoke.py`):** 5 neue automatisierte Tests für Linux- und macOS-Installations-/Deinstallations-Roundtrips, Dateirechte, XML-Plist-Validierung, Exec-Quotierung und nicht-unterstützte Plattformen sowie headless Smoke-Validierung in CI-Workflows.
+- The verification contract reflects the current unreleased source state: 277 passing tests.
+
+### Discoverability, Visual Architecture & SBOM-Audit (Pfad B) (2026-09-18)
+- **18-Punkte bilinguale Schnellnavigation & Anker-Parität (`README.md`, `README.de.md`):** Etablierung einer 1:1 symmetrischen 18-Punkte Schnellnavigation mit wechselseitigen HTML-Anker-IDs (`id="1-features"`, `id="features"` bis `id="18-security-policy--statutory-notice"`), dualer Sprachumschaltung und lückenloser Querverlinkung.
+- **Zielgruppen-Personas & High-Intent SEO:** Vollständige Dokumentation von 4 Stakeholder-Personas (`[PERSONA-01]` bis `[PERSONA-04]`) sowie zweisprachigen High-Intent-Suchbegriffen zur gezielten Auffindbarkeit bei `cldflt.sys`-, OneDrive-, Dropbox- und Cloud-Sync-Sperren.
+- **10-Dimensionen Vergleichsmatrix:** Strukturierte Differenzierung gegenüber 4 Alternativen (Windows Explorer/PowerShell, Kernel-Unlocker wie LockHunter/Unlocker, Ad-hoc-Skripte, Cloud-Web-UIs) mit direkter Zuordnung zu den Invarianten `INV-LOCAL-01` bis `INV-SLA-10`.
+- **Duale Mermaid-Diagramme:** Ausbau des Systemarchitektur-Flussdiagramms (`flowchart TD`) und des End-to-End Task-Lifecycle-Sequenzdiagramms (`sequenceDiagram`) mit automatischer Nummerierung, Erkennung von `cldflt`-Treiber-Sperren, SHA-256 Digest-Abgleich und selektiver Provider-Pause/Resume-Logik.
+- **SBOM & Drittanbieter-Lizenzinventar (`THIRD_PARTY_LICENSES.md`):** Erstellung eines vollständigen Software Bill of Materials (SBOM) mit SPDX-Identifikatoren für PySide6 (LGPL-3.0-only), shiboken6, PyInstaller, Pillow, pytest und ruff. Zertifizierung der dynamischen Bindung, des unprivilegierten Betriebs (`RunAsInvoker`) und der Zero-Copyleft-Isolation.
+- **Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht):** Verankerung des standardisierten Haftungsausschlusses für unentgeltliche Open-Source-Bereitstellung in `README.de.md`.
+- **PEP 621 Projekt-URLs (`pyproject.toml`):** Ergänzung von `"Third-Party Licenses"` unter `[project.urls]`.
+- **LLM-Kontext- & Log-Synchronisation (`llms.txt`, `MARKETING-LOG.txt`):** Aktualisierung der Zeitstempel auf 2026-09-18, Nachweis der 18-Punkte-Navigationsstruktur und Registrierung des Pfad B Audits.
+- Verifikationsstand nach Pfad B: 272 bestandene Tests.
+
+### Bugfix & Tokenizer-Härtung (Bugsweep Lauf #13) (2026-09-19)
+- **Windows-Pfadtreue & Quote-Parsing in `parse_txt_line` (`src/cloudlockfixer/models.py`):** Ersatz des POSIX-spezifischen `shlex.split` durch dedizierte Tokenizer- und Ketten-Parser-Funktionen (`_split_chained_parts`, `_split_command_tokens`). Behebt das ersatzlose Löschen von Windows-Backslashes (`\`) in unquotierten Pfaden, Syntaxfehler (`ValueError: No closing quotation`) bei Pfadargumenten mit abschließendem Backslash in Anführungszeichen (z. B. `"C:\Data\Folder\"`) und fehlerhafte Ketten-Splits bei `&&` innerhalb von Anführungszeichen.
+- **TDD-Regressionstests (`tests/test_bugsweep_regressions.py`):** Drei automatisierte Regressionstests (`test_parse_txt_line_unquoted_windows_paths`, `test_parse_txt_line_trailing_backslash_in_quotes`, `test_parse_txt_line_chained_with_ampersand_in_quotes`) hinzugefügt.
+
+### Repository-Hygiene & CI-Workflow-Härtung (Pfad A) (2026-09-16)
+- **CI-Workflow-Härtung (`tests.yml` & `source-platform-smoke.yml`):** Explizite `timeout-minutes: 15` auf allen Matrix-Jobs und Bestätigung von `cancel-in-progress: true` Concurrency Guardrails verankert.
+- **Automatisierte Stale- & Welcome-Workflows (`stale.yml` & `welcome.yml`):** Tägliche Stale-Automation (`actions/stale@v10`, 30 Tage Inaktivität, 7 Tage Gnadenfrist, least-privilege `issues: write`, `pull-requests: write`, `timeout-minutes: 10`) und Begrüßungsworkflow (`actions/first-interaction@v3`, `timeout-minutes: 5`) mit Concurrency-Cancellation eingerichtet.
+- **Erweiterte Multi-Host- & Cloud-Sync-Absicherung (`.gitignore`):** Zusätzliche Ignoriermuster für Windows-, Linux- & macOS-Konfliktdateien (`*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`, `*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`), Editor- und Merge-Backups (`*.orig`, `*.rej`), Test- & Tool-Caches (`.hypothesis/`, `.turbo/`, `.nyc_output/`) sowie Lock-Preservation (`!package-lock.json`).
+- **PEP 621 Metadaten- & Tool-Standardisierung (`pyproject.toml`):** `[project.urls]` um `"LLM Ready"` und `"Marketing Log"` erweitert; `[tool.pytest.ini_options]` um `minversion = "7.0"` und `norecursedirs = [".git", ".pytest_cache", "__pycache__", "build", "dist"]` ergänzt.
+- **Marketing- & Governance-Register (`MARKETING-LOG.txt`):** Kanonisches Marketing-, Discovery- und Governance-Register nach file-bricks Standard mit 4 Ziel-Personas, High-Intent-Suchbegriffen (EN/DE), 10 Governance- & Laufzeit-Invarianten (INV-LOCAL-01 bis INV-SLA-10) und aktuellem Pfad A Audit-Log (Stand 2026-09-16) etabliert.
+- **Metadaten- & Kontext-Parität (`llms.txt`, `README.md`, `README.de.md`, `README.es.md`):** `llms.txt` Last-checked Timestamp auf 2026-09-16 synchronisiert, Test-Badges und Dokumentationsangaben auf 262 bestandene Tests angeglichen und `MARKETING-LOG.txt` verlinkt.
+- **Automatisierte Vertragstests erweitert (`tests/test_metadata.py`):** 3 neue Vertragstests für CI-Workflow-Timeouts & Concurrency (`test_ci_concurrency_and_timeout_guardrails`), erweiterte `.gitignore` Multi-Host Schutzmuster (`test_gitignore_multihost_and_lock_defense`) und `MARKETING-LOG.txt` Governance-Integrität (`test_marketing_log_recent_hygiene_entry`) verankert.
+- The verification contract reflects the current unreleased source state: 262 passing tests.
+
+### GitHub- & Upstream-Synchronisation [SOFTWARE_GITHUB] (2026-09-14)
+- **Upstream Fast-Forward (PR #1):** PR #1 (`5f030f5`) von `origin/main` via `git pull --ff-only` übernommen; Dokumentation der Arbeitsbaum-Historie und Taskwriter-Review in `ROADMAP.md` und `TODO.md` integriert.
+- **Privacy- & Secret-Audit:** Verifikation von 0 hardcodierten Benutzerpfaden (`C:\Users\lukas`, `/home/lukas`), 0 API-Keys/Tokens/Secrets und sauberem Git-Tracking über alle Projektdateien.
+- **Repository- & Metadatenpflege:** `llms.txt` Last-checked auf 2026-09-14 aktualisiert und Vertragstest in `tests/test_metadata.py` angeglichen.
+- **Test- & Qualitätsverifikation:** 259/259 Pytest-Tests grün (100 %), `ruff check .` 0 Warnungen, Bytecode-Kompilierung fehlerfrei.
+- The verification contract reflects the current unreleased source state: 259 passing tests.
+
+### Bugfix Dateisystem-Operationen (Bug #12-2) (2026-09-12)
+- **Hardlink-Move über Verzeichnisgrenzen hinweg (`ops.py`):** In `_do_move` prüfte die Case-Only-Rename-Erkennung fälschlicherweise nur `src.samefile(dst) and src.resolve().name == dst.name`. Bei Hardlinks in unterschiedlichen Ordnern mit gleichem Dateinamen führte dies dazu, dass der Move vorzeitig mit `"bereits am Ziel"` abbrach und die Quelle nicht entfernt wurde. Die Bedingung wurde präzise auf denselben kanonischen Pfad `src.resolve() == dst.resolve()` eingegrenzt, sodass dateisystemübergreifende Moves via `_verify_copy` verifiziert und die Quelle sauber unlinked wird.
+- **Automatisierte Regressionstests (`tests/test_bugsweep_regressions.py`):** 2 neue Tests für Cross-Directory Hardlink Unlink und Task-Chain-Ausführung hinzugefügt.
+- The verification contract reflects the current unreleased source state: 259 passing tests.
+
+### Retry-Limit-Konfiguration & System-Toast-Benachrichtigungen (2026-09-11)
+- **Konfigurierbare Retry-Limits (`settings.py` / `worker.py` / `cli.py` / `tray.py`):** Persistierbare Begrenzung von Wiederholungsversuchen (`max_retries`) in `settings.json` mit Hilfsfunktionen `get_max_retries()` und `set_max_retries()`. Standardmäßig unbegrenzt (Fire-and-Forget). CLI-Unterstützung via `clf run-now --max-retries N` und dynamisches Tray-Menü ("Max. Wiederholungen" mit Optionen Unbegrenzt, 3, 5, 10, 20).
+- **System-Toast-Benachrichtigungen bei Dauerfehlern (`tray.py`):** Native Benachrichtigungen bei dauerhaft fehlgeschlagenen Tasks (`failed_permanent` nach Erreichen des Retry-Limits) und blockierten Tasks (`blocked` wegen Zielkonflikten). Konfigurierbar und persistierbar über Tray-Menü ("Desktop-Benachrichtigungen", `notifications_enabled`).
+- **Tier-2 i18n-Erweiterung (`i18n.py` / `locales/translations.json`):** 7 neue Übersetzungsschlüssel für Benachrichtigungen, Menüeinträge und CLI-Hilfetexte mit 100 % Parität über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU).
+- **Automatisierte Vertragstests erweitert (`tests/test_notifications_and_retries.py`):** 8 neue automatisierte Unittests für Retry-Defaults, Persistenz, Validierung, Benachrichtigungs-Trigger, Unterdrückung bei Deaktivierung und CLI-Integration.
+
+### Internationalisierung & Tier-2-Expansion (P-006) (2026-09-10)
+- **4-stufige deterministische Fallback-Kette (`i18n.py`):** `t()` auf den Standard `target -> en -> de -> key` gemäß Policy P-006 erweitert. Export der kanonischen Konstanten `SUPPORTED_LANGUAGES`, `DEFAULT_LANGUAGE`, `FALLBACK_CHAIN` und `LANGUAGE_DISPLAY_NAMES`.
+- **Translations-Manager & CI-Auditor (`manage_translations.py`):** Neuer CLI- und CI-Scanner zur automatischen Konsistenz- und Paritätsprüfung über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit `--check` und `--export-json`.
+- **JSON-Katalog (`locales/translations.json`):** Maschinell lesbarer Übersetzungskatalog mit 100 % Parität für alle 79 Schlüssel exportiert und verifiziert.
+- **Spanische Gesamtdokumentation (`README.es.md`):** Vollständige spanische Dokumentation mit 1:1 struktureller Parität, übersetzten Mermaid-Diagrammen und Ökosystem-Matrix (Tier-2).
+- **Mehrsprachige Umschalter:** Sprachleiste in `README.md`, `README.de.md` und `README.es.md` auf `English | Deutsch | Español` standardisiert; `llms.txt` aktualisiert.
+- **Automatisierte Vertragstests erweitert (`tests/test_i18n.py`):** 5 neue Tests für 4-Stufen-Fallback, Konstanten, JSON-Parität, Auditor-Check und spanische Dokumentations-Parität hinzugefügt.
+- Verifikationsstand nach Tier-2-Expansion: 249 bestandene Tests.
+
+### Technische Hygiene & CI-Härtung (Pfad A) (2026-09-10)
+- **Patch-Versionsanhebung:** Version auf `0.2.3` angehoben und repositoryweit synchronisiert (`pyproject.toml`, `cloudlockfixer.__version__`, `RELEASE_GATE.md`, `README.md`, `README.de.md`, `llms.txt`).
+- **Standardisierung der Pytest-Optionen:** `pyproject.toml` auf `addopts = "-ra -v"` standardisiert für detaillierte und reproduzierbare Testzusammenfassungen.
+- **CI-Workflow-Härtung (`tests.yml`):** Bytecode-Kompilierungsschritt (`python -m compileall -q src tests`) integriert und Pytest-Aufruf auf `-ra -v` standardisiert.
+- **Sicherheitsrichtlinie & SLA präzisiert (`SECURITY.md`):** Zweisprachige 48-Stunden-Reaktionszeit um eine verbindliche Triage-Zusage innerhalb von 5 Werktagen geschärft.
+- **Versionskontroll-Härtung (`.gitignore`):** Multi-Host-Sync-Konfliktmuster (`*-WORKSTATION*`, `*-conflict-*`, `*.sync-conflict-*`, `* (kopie)*`, `* (copy)*`), Multi-Agent-Locks (`LOCK`, `LOCK.*`, `uv.lock`) sowie Coverage- und Cache-Artefakte (`.coverage.*`, `.wheel-smoke/`, `wheelhouse/`) abgesichert.
+- **Automatisierte Vertragstests erweitert (`tests/test_metadata.py`):** 4 neue automatisierte Vertragstests für `.gitignore`-Hygiene, Pytest-Flags, CI-Compileall-Schritte und Changelog-Pfad-A-Eintrag verankert.
+
+### Bugfix: Provider-Pfad-Sicherheit & Existenzprüfung (Bug #12-1) (2026-09-09)
+- **Verhinderung relativer CWD-Pfade bei fehlendem APPDATA/LOCALAPPDATA (`providers.py`):** Behebung einer Schwachstelle (CWE-426 Untrusted Search Path), bei der nicht gesetzte Umgebungsvariablen `APPDATA`/`LOCALAPPDATA` zu relativen Pfaden führten und versehentlich Dateien im aktuellen Arbeitsverzeichnis als Provider-Konfigurationen geladen oder relative Binaries ausgeführt werden konnten.
+- **Validierung und Filterung von Sync-Roots (`providers.py`):** `NextcloudProvider`, `DropboxProvider` und `OneDriveProvider` validieren nun gefundene Verzeichnisse strikt auf `p.is_absolute() and p.exists()`, um veraltete oder gelöschte Pfade nicht mehr als aktive Sync-Roots zu registrieren.
+- **Regressionstest-Suite erweitert (`tests/test_bugsweep_regressions.py`):** 3 neue Regressionstests gegen relative CWD-Pfadübernahmen, nicht-existente Sync-Roots und relative Resume-Binaries verankert.
+- Verifikationsstand nach Bugfix #12-1: 240 bestandene Tests.
+
+### Plattform-Transfer: Provider-Abstraktion Linux & macOS (Phase 1) (2026-09-08)
+- **Plattformübergreifende Prozessverwaltung (`providers.py`):** `_check_process()` und `_kill_process()` von reinem Windows-`tasklist`/`taskkill` auf Cross-Platform-Erkennung (`pgrep -f`, POSIX `/proc` Fallback, `pkill -f` mit Timeout und Verifikation) und Namens-Aliase für Linux/macOS umgestellt.
+- **Provider-Erkennung auf macOS & Linux (`providers.py`):** Native Pfaderkennung für macOS (`~/Library/CloudStorage/` für OneDrive, Google Drive, Box, Dropbox; `~/Library/Mobile Documents/com~apple~CloudDocs` für iCloud; `~/Library/Preferences/Nextcloud/nextcloud.cfg` für Nextcloud; `~/Library/Application Support/` für Dropbox & Synology Drive) und Linux (`~/.config/Nextcloud/nextcloud.cfg`, `~/.dropbox/info.json`, `~/.SynologyDrive`, `~/pCloudDrive`) implementiert.
+- **Plattformübergreifendes Resume:** Native Relaunch-Mechanismen für macOS (`open -a`) und Linux (Executable-Suche per `shutil.which`) für alle unterstützten Provider verankert.
+- **Cross-Platform Vertragstests (`tests/test_providers_cross_platform.py` & `tests/source_platform_smoke.py`):** 17 neue Vertragstests für Prozessabstraktion, POSIX-Signalbehandlung, Pfad-Erkennung und Resume-Mechanismen implementiert.
+
+### Standard-App-Icons, Multi-Layer ICO & Store-Readiness (2026-09-08)
+- **Multi-Layer Windows-Icon & Desktop-Parität:** Hochauflösendes 7-Layer Windows ICO (`CloudLockFixer.ico`, `DesktopIcon.ico`, `resources/icon.ico`, `assets/icon.ico`) mit Standardauflösungen 16x16, 24x24, 32x32, 48x48, 64x64, 128x128 und 256x256 sowie Master-PNGs (1024x1024) in Root, `resources/` und `assets/` bereitgestellt.
+- **PWA- & Mobile-Iconsuite (`mobile_icons/`):** Vollständige Mobile-/PWA-Icons (`icon-192.png`, `icon-512.png`, `icon-maskable-192.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon.png`, `favicon.ico`) inklusive standardkonformer `manifest.json`.
+- **Windows Store Readiness Assets (`store_assets/`):** Standardkachel- und Store-Icons (`icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png` [Breitkachel], `icon_310x310.png` [Großkachel]) nach Windows-Store-Spezifikation erzeugt.
+- **Vertragstestsuite für Icons & Assets (`tests/test_assets_and_icons.py`):** 5 neue Vertragstests für Master-Icons, Multi-Layer-ICO-Parität, PWA-Manifest und Store-Asset-Dimensionen verankert.
+
+### Sicherheits- & Lizenzaudit (Software Security & License Audit) (2026-09-08)
+- **Abhängigkeits-Schwellenwerte gehärtet (Vulnerability Floors):** Build-Abhängigkeit `Pillow` auf `>=12.3.0` angehoben (behebt 26 bekannte Sicherheitslücken in <=12.2.0, u. a. OS Command Injection via `WindowsViewer.get_command()` GHSA-4x4j-2g7c-83w6 und Decompression-Bomb-Bypass GHSA-45hq-cxwh-f6vc). `PySide6` auf `>=6.7.0` vereinheitlicht. `pyproject.toml` um `[project.optional-dependencies]` für `test` (`pytest>=9.1.1` gegen CVE-2025-7117 / GHSA-6w46-j5rx-g56g), `lint` (`ruff>=0.9.0`) und `build` (`PyInstaller>=6.0`, `Pillow>=12.3.0`) ergänzt.
+- **Vollständiges Drittanbieter-Lizenzinventar (`THIRD_PARTY_LICENSES.txt`):** Drittanbieter-Inventar von 4 Zeilen auf alle direkten und transitiven Laufzeit-, Build-, Test- und Lint-Abhängigkeiten (`PySide6`, `shiboken6`, `PyInstaller`, `Pillow`, `altgraph`, `pyinstaller-hooks-contrib`, `packaging`, `pytest`, `pluggy`, `iniconfig`, `ruff`) erweitert, inklusive Upstream-URLs, Lizenztyp und MIT-Gültigkeitsgrenzen (LGPL-3.0 dynamische Bindung, PyInstaller Special Exception).
+- **Härtung der Versionskontrolle (`.gitignore`):** Cloud-Sync-Konfliktkopienmuster (`*-WORKSTATION-LG*`, `*-ASUS-GEI*`, `*.conflict`, `*.sync-conflict-*`) explizit in `.gitignore` verankert.
+- **Sicherheits- & Lizenzvertrags-Testsuite (`tests/test_security_license_contract.py`):** 6 neue Vertragstests für Schwachstellenschwellenwerte, Lizenzvollständigkeit, `.gitignore`-Muster, Ausschluss von Hardcoded-Entwicklerpfaden/Secrets, Zero-Egress-Offline-Hermetizität und zweisprachige 48h-SLA-Sicherheitsrichtlinie.
+
+### Marketing, Design & Auffindbarkeit (Pfad B) (2026-09-06)
+- **Interaktive Mermaid-Architektur- und Ablaufdiagramme:** Aufnahme zweier interaktiver Mermaid-Diagramme (`flowchart TD` für Ingestion-Kanäle, Queue-Orchestrierung, Cloud-Provider-Sensorik und Ausführung mit SHA-256-Kopieüberprüfung; `sequenceDiagram` für End-to-End-Tasklebenszyklus, Sperrerkennung und Fallback-Auflösung) in `README.md` und `README.de.md`.
+- **Zweisprachige Schnellnavigation & Kernfähigkeiten-Tabelle:** 14-Punkte-Schnellnavigation mit Direktankern sowie tabellarische Übersicht der Kernfähigkeiten und Governance-/Sicherheitsgarantien (`copy+delete`-Fallback, atomare Mehrschrittketten, Multi-Cloud-Provider-Sensorik, Zero-Egress, Least Privilege und idempotente Retry-Engine).
+- **Geschwister-Ökosystem-Matrix:** Verknüpfungsmatrix zu Partner-Repositories innerhalb von `file-bricks`, `open-bricks`, `ellmos-ai`, `dev-bricks` und `doc-bricks`.
+- **Sicherheitsrichtlinie & Unterstützte Versionen:** Aufnahme der formalen Versionstabelle (`0.2.x`, `< 0.2.0`) in `SECURITY.md` in Deutsch und Englisch.
+- **Metadaten- & Vertragstestsuite erweitert:** 4 neue Vertragstests in `tests/test_metadata.py` für Mermaid-Diagramme, Geschwister-Ökosystem, Schnellnavigation und Versionstabelle.
+- The verification contract reflects the current unreleased source state: 215 passing tests.
 
 ### Behoben / Fixed (2026-08-29)
 - **Terminal fehlende Move-/Rename-Quellen:** Sicher fehlende aktuelle Quellen werden aus der Provider-Eskalation ausgeschlossen. Die normale Ausführung entscheidet danach race-sicher zwischen idempotentem Erfolg und terminaler Blockierung. Bestehende v1-Queues werden beim nächsten Lauf ohne Schemawechsel idempotent aktualisiert.
 - **Provider-Eskalation:** Für die Pause werden nur noch Pfade des aktuell anstehenden Kettenschritts betrachtet. Erfolgreiche Move-/Delete-Abläufe und retryfähige Cloud-Sperren behalten ihr bisheriges Verhalten.
-- The verification contract reflects the current unreleased source state: 205 passing tests.
 
 ### Behoben / Fixed (Bugsweep 2026-08-24)
 - **Case-Only Rename/Move auf case-insensitiven Dateisystemen (`ops.py`):** Behebung eines Fehlers, bei dem reine Groß-/Kleinschreibungsänderungen (z. B. `foo.txt` → `FOO.TXT` oder `dir` → `DIR`) auf NTFS/macOS fälschlich als `bereits am Ziel` bewertet wurden, ohne die Namensschreibweise auf dem Datenträger zu aktualisieren. `_do_move` unterscheidet nun echten Gleichstand von Case-Only-Umbenennungen und wendet die Umbenennung direkt via `os.replace` bzw. über einen zweistufigen Zwischenschritt an.

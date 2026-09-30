@@ -17,6 +17,13 @@ Wenn Sie eine Sicherheitslücke finden, melden Sie diese bitte verantwortungsvol
 3. Reichen Sie die Meldung privat ein
 4. Alternativ können Sie Sicherheitsbedenken per E-Mail an `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com` oder `info@file-bricks.org` senden.
 
+### Unterstützte Versionen / Supported Versions
+
+| Version | Unterstützt | Anmerkung |
+|---------|-------------|-----------|
+| `0.2.x` | :white_check_mark: | Aktiver Entwicklungszweig / Active development |
+| `< 0.2.0` | :x: | Veraltet / Unsupported |
+
 ### Sicherheits- & Datenschutzgarantien (Zero-Egress & Local-First)
 
 - **100% Zero-Egress & Local-First:** CloudLockFixer enthält keinerlei Telemetrie, Analytics, Tracking oder Netzwerk-Sockets. Alle Operationen, Queues (`queue.txt`, `queue.json`) und Logs verbleiben ausschließlich lokal auf Ihrem System.
@@ -39,7 +46,7 @@ Sync-Clients. Sicherheitsrelevant sind insbesondere:
 
 ### Reaktionszeit
 
-Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet und priorisiert behandelt. Bitte geben Sie ausreichend Zeit zur Behebung, bevor Sie Details öffentlich machen.
+Sicherheitsrelevante Meldungen werden innerhalb von 48 Stunden gesichtet, mit einer formalen Eingangsbestätigung beantwortet und innerhalb von 5 Werktagen einer verbindlichen Triage unterzogen. Bitte geben Sie ausreichend Zeit zur Behebung, bevor Sie Details öffentlich machen.
 
 ---
 
@@ -59,6 +66,13 @@ If you find a security vulnerability, please report it responsibly:
 2. Fill in the title, description, severity, and affected versions
 3. Submit the report privately
 4. Alternatively, email security concerns directly to `security@ellmos.ai`, `lukas@open-bricks.org`, `support@lukasgeiger.com`, or `info@file-bricks.org`.
+
+### Supported Versions
+
+| Version | Supported | Notes |
+|---------|-----------|-------|
+| `0.2.x` | :white_check_mark: | Active development branch |
+| `< 0.2.0` | :x: | End of life / Unsupported |
 
 ### Security & Privacy Guarantees (Zero-Egress & Local-First)
 
@@ -82,4 +96,4 @@ clients. Security-relevant areas include:
 
 ### Response Time
 
-Security-relevant reports are acknowledged within 48 hours and prioritized for rapid resolution. Please allow reasonable time before public disclosure.
+Security-relevant reports are acknowledged within 48 hours and prioritized for rapid resolution with a formal triage commitment within 5 business days. Please allow reasonable time before public disclosure.

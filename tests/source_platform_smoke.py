@@ -6,8 +6,8 @@ Prüft auf Linux und macOS (und Windows) ohne Cloud-Sync-Client oder GUI:
 - models: parse_txt_line, Queue-Persistenz
 - paths: data_dir cross-platform
 - worker: run_once ohne Cloud-Provider
-- Linux: XDG-Autostart anlegen, validieren und entfernen
-- macOS: LaunchAgent-plist anlegen, validieren und entfernen
+- Linux: XDG-Autostart und Kontextmenü anlegen, validieren und entfernen
+- macOS: LaunchAgent-plist und Services-Workflows anlegen, validieren und entfernen
 """
 from __future__ import annotations
 
@@ -152,3 +152,72 @@ def test_macos_launch_agent_roundtrip(tmp_path, monkeypatch):
 
     assert autostart.disable()
     assert not launch_agent.exists()
+
+
+def test_providers_cross_platform_smoke():
+    """Smoke test ensuring provider discovery and abstraction initialize without error."""
+    from cloudlockfixer.providers import available_providers, provider_for
+    provs = available_providers()
+    assert isinstance(provs, list)
+    assert len(provs) >= 1
+    # Check that query methods work safely
+    p = provider_for(Path.home() / "nonexistent_cloud_test_file.txt")
+    assert p is None or hasattr(p, "is_running")
+
+
+def test_process_abstraction_smoke():
+    """Smoke test ensuring cross-platform process abstraction initializes without error."""
+    from cloudlockfixer.process import ProcessManager, get_posix_patterns
+    patterns = get_posix_patterns("OneDrive.exe")
+    assert "onedrive" in patterns
+    mgr = ProcessManager()
+    assert hasattr(mgr, "is_running")
+    assert hasattr(mgr, "terminate")
+    assert hasattr(mgr, "launch")
+
+
+def test_linux_contextmenu_smoke(tmp_path, monkeypatch):
+    """Linux runners prove the Nautilus scripts and KDE ServiceMenus can be installed and removed."""
+    import sys
+
+    import pytest
+
+    if not sys.platform.startswith("linux"):
+        pytest.skip("Linux context menu smoke")
+
+    from cloudlockfixer import contextmenu
+
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
+    nautilus_dir = tmp_path / "data" / "nautilus" / "scripts" / "CloudLockFixer"
+    kio_desktop = tmp_path / "data" / "kio" / "servicemenus" / "cloudlockfixer.desktop"
+
+    assert contextmenu.install()
+    assert contextmenu.is_installed()
+    assert nautilus_dir.is_dir()
+    assert (nautilus_dir / "01_delayed_rename.sh").exists()
+    assert kio_desktop.is_file()
+
+    assert contextmenu.uninstall()
+    assert not contextmenu.is_installed()
+
+
+def test_macos_contextmenu_smoke(tmp_path, monkeypatch):
+    """macOS runners prove the Services workflows can be installed and removed."""
+    import sys
+
+    import pytest
+
+    if sys.platform != "darwin":
+        pytest.skip("macOS context menu smoke")
+
+    from cloudlockfixer import contextmenu
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    services_dir = tmp_path / "Library" / "Services"
+
+    assert contextmenu.install()
+    assert contextmenu.is_installed()
+    assert (services_dir / "CloudLockFixer - Delayed Rename.workflow").is_dir()
+
+    assert contextmenu.uninstall()
+    assert not contextmenu.is_installed()

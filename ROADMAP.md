@@ -29,17 +29,28 @@
 - [x] Virtual-mount Guard (kein Pause für gemountete Laufwerke)
 - [x] Multi-Provider Präventiv-Wächter
 
+## Windows Store Release-Vorbereitung (erledigt 2026-09-23)
+
+- [x] Packaging-Manifest & Identity (`store_package.json`, `Geiger.CloudLockFixer`, `0.2.3.0`, `runFullTrust`)
+- [x] Desktop Bridge Manifest (`store_package/CloudLockFixer/AppxManifest.xml`)
+- [x] Vollständiger Kachel- und Icon-Satz (`icon_44x44.png` bis `icon_310x310.png` und `StoreLogo.png`)
+- [x] Bilinguale Store-Listings mit maximal 7 Keywords nach Policy 10.1.3 (`STORE_LISTING.md`)
+- [x] Zero-Egress Datenschutzerklärung (`PRIVACY_POLICY.md`) und Support-Leitfaden (`SUPPORT.md`)
+- [x] Staging-Verzeichnis `releases/windowsstore/` mit Build- und WACK-Protokollen
+- [x] 16:9-Präsentationsscreenshot-Generator (`scripts/generate_store_screenshots.py`)
+- [x] Automatisierte Validierungs- und Test-Suite (`scripts/check_store_readiness.py`, `tests/test_store_readiness.py`)
+
 ## v2.0.0 — Cross-Platform
 
 - [x] Linux-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
 - [x] macOS-Source-Support auf Smoke-/CI-Niveau (DONE 2026-07-06; siehe
   `PORTIERUNGSPLAN.md` und `tests/source_platform_smoke.py`)
-- [ ] Plattform-Abstraktion für Prozessmanagement (Task 169)
-- [ ] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
+- [x] Plattform-Abstraktion für Prozessmanagement (Task 169) (DONE 2026-09-26; `src/cloudlockfixer/process.py`)
+- [x] Plattform-Abstraktion für Autostart/Kontextmenü (Task 170)
   - [x] Linux-XDG-Autostart auf Source-Ebene (DONE 2026-07-18)
   - [x] macOS-LaunchAgent auf Source-Ebene (DONE 2026-07-22)
-  - [ ] Linux-/macOS-Kontextmenü (Task 170)
+  - [x] Linux-/macOS-Kontextmenü (DONE 2026-09-21; Nautilus-Skripte, KDE ServiceMenu, macOS Services)
 - [x] CI für Linux/macOS-Source-Smokes
 - [ ] CI/CD für native Multi-Plattform-Builds und Paketierung (Task 171)
 
@@ -49,7 +60,7 @@
 - [ ] Native macOS-App-/Paketierungsweg entscheiden (Task 171)
 - [x] Linux-XDG-Autostart auf Source-Ebene
 - [x] macOS-LaunchAgent auf Source-Ebene
-- [ ] Linux-/macOS-Kontextmenüs (Task 170)
+- [x] Linux-/macOS-Kontextmenüs (Task 170, DONE 2026-09-21)
 
 ## Historischer verifizierter Source-Stand — 2026-08-11
 
@@ -81,13 +92,18 @@
   - Nextcloud erledigt 2026-06-16
   - pCloud erledigt 2026-06-28
   - Synology Drive erledigt 2026-06-30
-- [ ] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172).
-  Der aktuelle Default bleibt unbegrenzt; ein Aufrufer kann bereits ein
-  endliches Limit übergeben.
+- [x] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit)
+  in settings.py / worker.py / cli.py / tray.py. Der Default bleibt
+  unbegrenzt; persistierbares Limit per Tray und CLI `--max-retries`
+  (erledigt 2026-09-11).
 - [x] Strukturierte Ausgänge für Worker-Fehler: retryfähige Fehler bleiben
   `pending`; deterministische Zielkonflikte werden als `blocked` gespeichert;
   ein explizites Limit bleibt `permanent`/`failed`.
-- [ ] Benachrichtigungen (System-Toast bei Dauerfehler) (Task 173)
+- [x] Benachrichtigungen (System-Toast bei Dauerfehler und blockierten Tasks
+  via QSystemTrayIcon, konfigurierbar über Tray-Menü, erledigt 2026-09-11).
+- [x] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172, erledigt 2026-09-29).
+  Der Default bleibt unbegrenzt; exponentielles Backoff (`DEFAULT_BACKOFF_BASE_SEC=60`, `DEFAULT_BACKOFF_MAX_SEC=3600`)
+  verzögert wiederholte Versuche automatisch, während explizite Aufrufer Limits oder Sofort-Ausführung wählen können.
 - [ ] Web-Dashboard / Remote-Status (Task 173)
 - [ ] Plugin-System für Community-Provider (Task 173)
 

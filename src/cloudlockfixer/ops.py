@@ -184,7 +184,10 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
         return False, f"Quelle fehlt: {src}", False
     if dst.exists():
         try:
-            if src.samefile(dst):
+            # Case-Only Rename oder selbes Ziel: src und dst müssen denselben Dateisystempfad referenzieren.
+            # Bei Hardlinks in unterschiedlichen Verzeichnissen (src.samefile(dst) ist True, aber
+            # src.resolve() != dst.resolve()) muss die Quelle regulär entfernt / unlinked werden.
+            if src.resolve() == dst.resolve():
                 # Prüfen, ob die Datei/der Ordner auf der Festplatte bereits exakt denselben Namen hat
                 # oder ob es sich um eine reine Groß-/Kleinschreibungsänderung (Case-Only Rename) handelt.
                 if src.resolve().name == dst.name:

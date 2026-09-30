@@ -6,10 +6,25 @@ für die Laufzeit konstant.
 """
 from __future__ import annotations
 
+import json
 import locale
+from pathlib import Path
 from typing import Literal
 
 Language = Literal["de", "en", "es", "zh", "ja", "ru"]
+
+SUPPORTED_LANGUAGES: tuple[Language, ...] = ("de", "en", "es", "zh", "ja", "ru")
+DEFAULT_LANGUAGE: Language = "de"
+FALLBACK_CHAIN: tuple[str, ...] = ("en", "de")
+
+LANGUAGE_DISPLAY_NAMES: dict[Language, str] = {
+    "de": "Deutsch",
+    "en": "English",
+    "es": "Español",
+    "zh": "中文 (简体)",
+    "ja": "日本語",
+    "ru": "Русский",
+}
 
 _CATALOG: dict[str, dict[Language, str]] = {
     'status_no_tasks': {
@@ -644,6 +659,78 @@ _CATALOG: dict[str, dict[Language, str]] = {
         'ja': '{count} 件のタスクを再試行用にキューしました。',
         'ru': '{count} задач(и) поставлено в очередь на повтор.',
     },
+    'cli_max_retries_help': {
+        'de': 'Maximale Wiederholungen für fehlgeschlagene Tasks (Standard: unbegrenzt oder aus settings.json)',
+        'en': 'Maximum retries for failing tasks (default: unlimited or from settings.json)',
+        'es': 'Reintentos máximos para tareas fallidas (por defecto: ilimitado o de settings.json)',
+        'zh': '失败任务的最大重试次数（默认：无限制或来自 settings.json）',
+        'ja': '失敗したタスクの最大再試行回数（デフォルト：無制限、または settings.json より）',
+        'ru': 'Максимальное количество повторов для сбойных задач (по умолчанию: без ограничений или из settings.json)',
+    },
+    'max_retries_menu': {
+        'de': 'Max. Wiederholungen',
+        'en': 'Max retries',
+        'es': 'Reintentos máximos',
+        'zh': '最大重试次数',
+        'ja': '最大再試行回数',
+        'ru': 'Макс. количество повторов',
+    },
+    'max_retries_unlimited': {
+        'de': 'Unbegrenzt (Standard)',
+        'en': 'Unlimited (default)',
+        'es': 'Ilimitado (por defecto)',
+        'zh': '无限制（默认）',
+        'ja': '無制限（デフォルト）',
+        'ru': 'Без ограничений (по умолчанию)',
+    },
+    'notifications_label': {
+        'de': 'Desktop-Benachrichtigungen',
+        'en': 'Desktop notifications',
+        'es': 'Notificaciones de escritorio',
+        'zh': '桌面通知',
+        'ja': 'デスクトップ通知',
+        'ru': 'Уведомления на рабочем столе',
+    },
+    'tasks_failed_and_blocked_toast': {
+        'de': '{count} Aufgabe(n) dauerhaft fehlgeschlagen ({permanent} Max-Retries, {blocked} blockiert).',
+        'en': '{count} task(s) permanently failed ({permanent} max retries, {blocked} blocked).',
+        'es': '{count} tarea(s) fallaron permanentemente ({permanent} reintentos máx., {blocked} bloqueadas).',
+        'zh': '{count} 个任务永久失败（{permanent} 次达重试上限，{blocked} 个被阻止）。',
+        'ja': '{count} 件のタスクが永続的に失敗しました（最大再試行 {permanent} 件、ブロック {blocked} 件）。',
+        'ru': 'Не удалось выполнить {count} задач(и) ({permanent} превысили лимит повторов, {blocked} заблокировано).',
+    },
+    'tasks_failed_permanent_toast': {
+        'de': '{n} Aufgabe(n) nach maximalen Wiederholungen fehlgeschlagen.',
+        'en': '{n} task(s) failed after maximum retries.',
+        'es': '{n} tarea(s) fallaron tras el número máximo de reintentos.',
+        'zh': '{n} 个任务在达到最大重试次数后失败。',
+        'ja': '最大再試行回数に達したため、{n} 件のタスクが失敗しました。',
+        'ru': '{n} задач(и) завершились ошибкой после максимального числа повторов.',
+    },
+    'tasks_blocked_toast': {
+        'de': '{n} Aufgabe(n) durch Zielkonflikt dauerhaft blockiert.',
+        'en': '{n} task(s) permanently blocked due to target conflict.',
+        'es': '{n} tarea(s) bloqueadas permanentemente por conflicto de destino.',
+        'zh': '{n} 个任务因目标冲突而被永久阻止。',
+        'ja': 'ターゲットの競合により、{n} 件のタスクが永続的にブロックされました。',
+        'ru': '{n} задач(и) окончательно заблокированы из-за конфликта целей.',
+    },
+    'cli_ignore_backoff_help': {
+        'de': 'Ignoriere exponentielles Backoff und führe fällige sowie zurückgestellte Aufgaben sofort aus',
+        'en': 'Ignore exponential backoff and execute all tasks immediately',
+        'es': 'Ignorar el retroceso exponencial y ejecutar todas las tareas inmediatamente',
+        'zh': '忽略指数退避并立即执行所有任务',
+        'ja': '指数バックオフを無視してすべてのタスクを直ちに実行',
+        'ru': 'Игнорировать экспоненциальную задержку и выполнить все задачи немедленно',
+    },
+    'run_summary_deferred': {
+        'de': ' ({deferred} wegen Backoff aufgeschoben)',
+        'en': ' ({deferred} deferred due to backoff)',
+        'es': ' ({deferred} pospuesta(s) por tiempo de espera)',
+        'zh': '（{deferred} 个因退避而延迟）',
+        'ja': '（バックオフにより {deferred} 件延期）',
+        'ru': ' ({deferred} отложено из-за задержки)',
+    },
 }
 
 _current: Language = "de"
@@ -684,11 +771,18 @@ def get_language() -> Language:
 
 
 def t(key: str, **kwargs: object) -> str:
-    """Übersetze einen Schlüssel in die aktive Sprache."""
+    """Übersetze einen Schlüssel in die aktive Sprache mit deterministischer 4-stufiger Fallback-Kette.
+
+    Fallback-Kette (Policy P-006):
+    1. Aktive Zielsprache (_current)
+    2. Englisch ('en') als universelle Zwischenstufe
+    3. Deutsch ('de') als Primärsprache des Ökosystems
+    4. Key selbst
+    """
     entry = _CATALOG.get(key)
     if entry is None:
         return key
-    text = entry.get(_current) or entry.get("de") or key
+    text = entry.get(_current) or entry.get("en") or entry.get("de") or key
     if kwargs:
         try:
             return text.format(**kwargs)
@@ -699,3 +793,15 @@ def t(key: str, **kwargs: object) -> str:
 
 def available_keys() -> list[str]:
     return sorted(_CATALOG.keys())
+
+
+def export_catalog_json(target_path: Path | str | None = None) -> Path:
+    """Exportiert den Übersetzungskatalog nach locales/translations.json für Ökosystem-Parität."""
+    if target_path is None:
+        target_path = Path(__file__).resolve().parents[2] / "locales" / "translations.json"
+    else:
+        target_path = Path(target_path)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(_CATALOG, f, indent=2, ensure_ascii=False, sort_keys=True)
+    return target_path

@@ -17,6 +17,7 @@ permissions:
 jobs:
   tests:
     runs-on: windows-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -41,11 +42,14 @@ jobs:
       - name: Lint with ruff
         run: ruff check .
 
+      - name: Compile Python bytecode
+        run: python -m compileall -q .
+
       - name: Run tests
         env:
           PYTHONPATH: src
           PYTHONIOENCODING: utf-8
-        run: python -m pytest -q
+        run: python -m pytest -ra -v
 
       - name: Verify packaging dependencies
         run: python -c "import PyInstaller, PIL; print('packaging dependencies available')"

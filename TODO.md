@@ -1,5 +1,51 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Feature: Konfigurierbares Retry-Verhalten (exponentielles Backoff) (Task 172) — erledigt 2026-09-29
+
+- [x] `src/cloudlockfixer/settings.py`: `DEFAULT_BACKOFF_BASE_SEC = 60`, `DEFAULT_BACKOFF_MAX_SEC = 3600`, Getter/Setter `get_backoff_base()`, `set_backoff_base()`, `get_backoff_max()`, `set_backoff_max()` mit Validierung.
+- [x] `src/cloudlockfixer/models.py`: `next_try_at`-Attribut in `Task`, `is_due()`, `compute_next_retry()`, Bereinigung von `next_try_at` bei manuellem Retry in `Queue.retry_task()` und `Queue.retry_all()`.
+- [x] `src/cloudlockfixer/worker.py`: `apply_backoff` & `ignore_backoff` in `run_once()` und `_providers_to_pause()`; automatische `next_try_at`-Zuweisung bei retryfähigen Fehlern; Deferral-Tracking (`deferred`-Zähler) für noch nicht fällige Tasks; Vermeidung unnötiger Provider-Pausierung bei nicht fälligen Tasks.
+- [x] `src/cloudlockfixer/cli.py`: Anzeige des nächsten geplanten Versuchs in `clf list`; CLI-Flags `--backoff` und `--ignore-backoff` / `--force` in `clf run-now`.
+- [x] `src/cloudlockfixer/tray.py`: `run_async(force_pause, apply_backoff)` mit Backoff im periodischen Timer/Startup und Sofort-Ausführung bei Nutzer-Aktionen ("Run now", "Retry failed").
+- [x] `src/cloudlockfixer/i18n.py` & `locales/translations.json`: Vollständige Übersetzung für alle 6 Sprachen (DE, EN, ES, ZH, JA, RU), 88 Keys, 100% Parität.
+- [x] `tests/test_retry_backoff.py`: 7 neue Tests für Backoff-Kalkulation, Fälligkeit, Settings, Worker-Deferral und Provider-Pause-Ausschluss (Gesamtsuite: 313/313 Tests 100% grün).
+
+## Windows Store Readiness & MSIX Packaging Pipeline — erledigt 2026-09-23
+
+- [x] `store_package.json`: Publisher `CN=52596601-BAB4-4F3F-B182-E8F3F273B202`, Identity `Geiger.CloudLockFixer`, Version `0.2.3.0`, `runFullTrust`-Capability, MIT-Lizenz, Sprachen `["de-DE", "en-US"]`, validierte HTTPS-URLs für Datenschutz und Support.
+- [x] `store_package/CloudLockFixer/AppxManifest.xml`: Kanonisches AppxManifest für Windows Desktop Bridge (TargetDeviceFamily `Windows.Desktop`, MinVersion `10.0.17763.0`, MaxVersionTested `10.0.26100.0`).
+- [x] Tile- und Logo-Assets (`store_assets/`, `store_package/CloudLockFixer/icons/`, `releases/windowsstore/`): `icon_44x44.png`, `icon_50x50.png`, `icon_150x150.png`, `icon_310x150.png`, `icon_310x310.png` und `StoreLogo.png` (50x50) mit validierten PNG-Signaturen und -Dimensionen.
+- [x] Store-Dokumentation & Governance: `PRIVACY_POLICY.md` (DSGVO/GDPR Zero-Egress), `SUPPORT.md`, `STORE_LISTING.md` (DE/EN mit strikt maximal 7 suchbegriffskonformen Keywords gemäß Store Policy 10.1.3), `WINDOWS_STORE_PREP.md`.
+- [x] `releases/windowsstore/` Staging-Paket: `store_settings.json`, `BUILD.md`, `WACK_PROTOCOL.md`, `store_listing_de.md`, `store_listing_en.md`, `StoreLogo.png`.
+- [x] `scripts/generate_store_screenshots.py`: 4 hochauflösende 16:9-Präsentationsscreenshots (1920x1080) unter `releases/windowsstore/screenshots/`, `screenshots/store/` und `README/screenshots/store/`.
+- [x] `scripts/check_store_readiness.py`: Vollständige Audit- und Validierungs-CLI für Repository-Materialien, Kacheln, Listings, Manifeste und optionale MSIX/WACK-Nachweise.
+- [x] `tests/test_store_readiness.py`: 8 neue automatisierte Tests (Gesamtsuite: 285/285 Tests 100% grün).
+
+## Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) — erledigt 2026-09-21
+
+- [x] `src/cloudlockfixer/contextmenu.py`: Plattformübergreifende Abstraktion mit Windows-Registry (`HKCU`), Linux Nautilus-Skripten (`$XDG_DATA_HOME/nautilus/scripts/CloudLockFixer/`), KDE/Dolphin KIO ServiceMenus (`$XDG_DATA_HOME/kio/servicemenus/cloudlockfixer.desktop`) und macOS Services/Quick-Actions-Workflows (`~/Library/Services/`).
+- [x] `tests/test_contextmenu_cross_platform.py`: 5 automatisierte Tests für Linux-, macOS- und Windows-Mocking-Roundtrips, Dateirechte (`0o755`), XML-Plist-Validierung via `plistlib` und saubere Deinstallation.
+- [x] `tests/source_platform_smoke.py`: Headless Linux- und macOS-CI-Smoke-Prüfungen für Kontextmenü-Roundtrips verankert.
+- [x] Dokumentation & Verträge (`README.md`, `README.de.md`, `llms.txt`, `CHANGELOG.md`, `PORTIERUNGSPLAN.md`, `ROADMAP.md`): Parität und synchroner Vertragstest für 285 Tests hergestellt.
+
+## Repository-Hygiene & CI-Workflow-Härtung (Pfad A) — erledigt 2026-09-16
+
+- [x] `.github/workflows/`: `timeout-minutes: 15` zu `tests.yml` und `source-platform-smoke.yml` hinzugefügt; `stale.yml` (v10, timeout 10m) und `welcome.yml` (v3, timeout 5m) mit `cancel-in-progress: true` Concurrency etabliert.
+- [x] `.gitignore`: Umfassende Multi-Host- (`*-ASUS*`, `*-LAPTOP*`, `*-Mac Studio*`, `*conflicted copy*`, `* (Kopie)*`, `* (Copy)*`), Lock- (`!package-lock.json`), Backup- (`*.orig`, `*.rej`) und Test-Cache-Muster (`.hypothesis/`, `.turbo/`, `.nyc_output/`) gehärtet.
+- [x] `pyproject.toml`: `"LLM Ready"` und `"Marketing Log"` URLs ergänzt; `[tool.pytest.ini_options]` mit `minversion = "7.0"` und `norecursedirs` standardisiert.
+- [x] `MARKETING-LOG.txt`: Kanonisches Marketing- und Governance-Register (INV-LOCAL-01 bis INV-SLA-10, 4 Personas, Suchanfragen, Pfad A Audit) angelegt.
+- [x] `llms.txt`, `README.md`, `README.de.md`, `README.es.md`: Metadaten- und Dokumentationsparität auf Stand 2026-09-16 und 262 bestandene Tests aktualisiert.
+- [x] `tests/test_metadata.py`: 3 neue automatisierte Vertragstests für CI-Guardrails, .gitignore-Muster und Marketing-Log verankert (Gesamtsuite: 262/262 Tests grün).
+
+## Feature: Konfigurierbare Retry-Limits & System-Toast-Benachrichtigungen — erledigt 2026-09-11
+
+- [x] `src/cloudlockfixer/settings.py`: `get_max_retries()`, `set_max_retries()`, `get_notifications_enabled()`, `set_notifications_enabled()` implementiert.
+- [x] `src/cloudlockfixer/cli.py`: `--max-retries N` zu `clf run-now` hinzugefügt, Fallback auf `settings.json`.
+- [x] `src/cloudlockfixer/tray.py`: Menü für Max. Wiederholungen (Unbegrenzt, 3, 5, 10, 20) und Checkbox für Desktop-Benachrichtigungen integriert; System-Toasts bei Dauerfehlern (`failed_permanent`) und Blockaden (`blocked`) via `showMessage()` implementiert.
+- [x] `src/cloudlockfixer/i18n.py` & `locales/translations.json`: 7 neue Keys über alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit 100 % Parität.
+- [x] `tests/test_notifications_and_retries.py`: 8 Unittests für Settings, CLI und Tray-Benachrichtigungen hinzugefügt.
+- [x] Gesamtsuite auf 259 bestandene Tests gehärtet; Dokumentation und Verträge synchronisiert.
+
 ## Software-Review-Loop 2026-07-12 (Fable) — zurückgestellt (brauchen echtes Gerät/Recherche)
 
 - [x] P2: Synology pause/resume-Asymmetrie prüfen (providers.py):
@@ -179,3 +225,11 @@ Releaseaussagen ändern sich nicht.
   Abschnitten bleiben als Historie erhalten. Der offene Synchronisationsauftrag
   dafür ist Task 165; echte Windows-/Release-Gates sind Tasks 166–168, der
   Cross-Platform-/Roadmap-Scope Tasks 169–173.
+
+## TASK 169 STATUS — 2026-09-26
+- Task 169 (Plattform-Abstraktion für Prozessmanagement) auf Source-Ebene vollständig umgesetzt:
+  `src/cloudlockfixer/process.py` kapselt `check_process`, `kill_process`, `launch_process`,
+  `get_posix_patterns` und `ProcessManager`. `providers.py` refaktoriert. 13 neue Unit-Tests
+  in `tests/test_process_cross_platform.py` + Smoke-Test in `source_platform_smoke.py`.
+  Teststand: 298 passed.
+

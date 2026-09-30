@@ -2,6 +2,7 @@
 from cloudlockfixer.i18n import (
     _CATALOG, available_keys, detect_language, get_language,
     set_language, t,
+    SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE, FALLBACK_CHAIN, LANGUAGE_DISPLAY_NAMES,
 )
 from cloudlockfixer.settings import resolve_language
 
@@ -185,3 +186,82 @@ def test_resolve_language_explicit():
 
 def test_resolve_language_default():
     assert resolve_language({}) in LANGUAGES
+
+
+def test_i18n_constants_and_displays():
+    assert SUPPORTED_LANGUAGES == ("de", "en", "es", "zh", "ja", "ru")
+    assert DEFAULT_LANGUAGE == "de"
+    assert FALLBACK_CHAIN == ("en", "de")
+    for lang in SUPPORTED_LANGUAGES:
+        assert lang in LANGUAGE_DISPLAY_NAMES
+        assert len(LANGUAGE_DISPLAY_NAMES[lang]) > 0
+
+
+def test_four_stage_fallback_chain(monkeypatch):
+    """Testet die 4-stufige Kette: target -> en -> de -> key."""
+    fake_catalog = {
+        "full_key": {"de": "DE-Text", "en": "EN-Text", "es": "ES-Text"},
+        "missing_es": {"de": "DE-Fallback", "en": "EN-Fallback"},
+        "missing_es_and_en": {"de": "DE-Nur"},
+    }
+    monkeypatch.setattr("cloudlockfixer.i18n._CATALOG", fake_catalog)
+
+    set_language("es")
+    # 1. Target vorhanden
+    assert t("full_key") == "ES-Text"
+    # 2. Target fehlt -> Fallback auf en
+    assert t("missing_es") == "EN-Fallback"
+    # 3. Target und en fehlen -> Fallback auf de
+    assert t("missing_es_and_en") == "DE-Nur"
+    # 4. Key existiert gar nicht -> Key selbst
+    assert t("completely_unknown_key") == "completely_unknown_key"
+
+    # Reset
+    set_language("de")
+
+
+def test_translations_json_parity():
+    """Stellt sicher, dass locales/translations.json existiert und mit _CATALOG übereinstimmt."""
+    import json
+    from pathlib import Path
+
+    json_path = Path(__file__).resolve().parents[1] / "locales" / "translations.json"
+    assert json_path.is_file(), "locales/translations.json muss existieren"
+
+    data = json.loads(json_path.read_text(encoding="utf-8"))
+    assert set(data.keys()) == set(_CATALOG.keys())
+    for key, val in _CATALOG.items():
+        assert data[key] == val
+
+
+def test_manage_translations_check_audit():
+    """Prüft, ob manage_translations.py im Check-Modus 0 zurückgibt."""
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root))
+    import manage_translations
+
+    assert manage_translations.audit_catalog(check_mode=True) == 0
+
+
+def test_readme_spanish_tier2_parity():
+    """Prüft strukturelle Parität von README.es.md gemäß Policy P-006."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    readme_es = root / "README.es.md"
+    assert readme_es.is_file(), "README.es.md muss existieren"
+
+    text = readme_es.read_text(encoding="utf-8")
+    assert len(text) >= 4000
+    assert "assets/banner.svg" in text
+    assert "README.md" in text
+    assert "README.de.md" in text
+    assert "docs/DESIGN.md" in text
+    assert "LICENSE" in text
+    assert "```mermaid" in text
+    assert "flowchart TD" in text
+    assert "sequenceDiagram" in text
+    assert "file-bricks/SoftwareCenter" in text

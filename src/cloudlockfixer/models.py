@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import json
-import shlex
 import threading
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -49,6 +48,36 @@ class Task:
     last_error: str = ""
     last_outcome: Outcome = "retryable"
     step_index: int = 0  # nächster auszuführender Schritt (für Wiederaufnahme)
+    next_try_at: str = ""  # ISO-UTC Zeitstempel für gedeckeltes exponentielles Backoff
+
+    def is_due(self, now_dt: datetime | None = None) -> bool:
+        """Prüft, ob der Task jetzt ausgeführt werden darf (Backoff abgelaufen oder nicht gesetzt)."""
+        if not self.next_try_at:
+            return True
+        try:
+            target = datetime.fromisoformat(self.next_try_at)
+            if target.tzinfo is None:
+                target = target.replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
+            return True
+        current = now_dt or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        return current >= target
+
+    def compute_next_retry(
+        self,
+        base_sec: int = 60,
+        max_sec: int = 3600,
+        now_dt: datetime | None = None,
+    ) -> str:
+        """Berechnet den nächsten Retry-Zeitpunkt mit gedeckeltem exponentiellem Backoff."""
+        exponent = max(0, self.retry_count - 1)
+        delay = min(float(max_sec), float(base_sec) * (2.0 ** exponent))
+        current = now_dt or datetime.now(timezone.utc)
+        if current.tzinfo is None:
+            current = current.replace(tzinfo=timezone.utc)
+        return (current + timedelta(seconds=delay)).isoformat()
 
     def describe(self) -> str:
         return " && ".join(s.describe() for s in self.chain)
@@ -73,6 +102,70 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _split_chained_parts(line: str) -> list[str]:
+    """Teilt eine Zeile an '&&' auf, ignoriert aber '&&' innerhalb von Anführungszeichen."""
+    parts: list[str] = []
+    current: list[str] = []
+    in_quote: str | None = None
+    i = 0
+    n = len(line)
+    while i < n:
+        ch = line[i]
+        if ch in ('"', "'"):
+            if in_quote is None:
+                in_quote = ch
+            elif in_quote == ch:
+                in_quote = None
+            current.append(ch)
+            i += 1
+        elif in_quote is None and line[i:i + 2] == "&&":
+            parts.append("".join(current))
+            current = []
+            i += 2
+        else:
+            current.append(ch)
+            i += 1
+    if current:
+        parts.append("".join(current))
+    return parts
+
+
+def _split_command_tokens(part: str) -> list[str]:
+    """Teilt einen Befehlsabschnitt in Tokens auf.
+
+    Unterstützt Pfade mit und ohne Anführungszeichen, erhält Windows-Backslashes
+    vollständig (kein POSIX-Escape-Verlust von \\) und erlaubt Trailing Backslashes
+    in Pfaden wie 'C:\\Folder\\'.
+    """
+    s = part.strip()
+    tokens: list[str] = []
+    i = 0
+    n = len(s)
+
+    while i < n:
+        while i < n and s[i].isspace():
+            i += 1
+        if i >= n:
+            break
+
+        quote_char = s[i]
+        if quote_char in ('"', "'"):
+            close_idx = s.find(quote_char, i + 1)
+            if close_idx == -1:
+                raise ValueError(f"Nicht geschlossene Anführungszeichen in: {part!r}")
+            tokens.append(s[i + 1:close_idx])
+            i = close_idx + 1
+        else:
+            start = i
+            while i < n and not s[i].isspace():
+                if s[i] in ('"', "'"):
+                    break
+                i += 1
+            tokens.append(s[start:i])
+
+    return tokens
+
+
 def parse_txt_line(line: str) -> Task | None:
     """Parst eine queue.txt-Zeile in einen Task.
 
@@ -87,8 +180,8 @@ def parse_txt_line(line: str) -> Task | None:
     if not line or line.startswith("#"):
         return None
     steps: list[Step] = []
-    for part in line.split("&&"):
-        tokens = shlex.split(part.strip())
+    for part in _split_chained_parts(line):
+        tokens = _split_command_tokens(part.strip())
         if not tokens:
             continue
         op = tokens[0].lower()
@@ -214,7 +307,7 @@ class Queue:
         """Setzt nur fehlgeschlagene oder blockierte Tasks atomar auf 'pending' zurück.
 
         Fortschritt (step_index, Step.copied) und letzte Fehlermeldung bleiben erhalten,
-        aber retry_count wird auf 0 und last_outcome auf 'retryable' zurückgesetzt.
+        aber retry_count wird auf 0, last_outcome auf 'retryable' und next_try_at auf '' zurückgesetzt.
         """
         with self._lock:
             for t in self.tasks:
@@ -222,6 +315,7 @@ class Queue:
                     t.status = "pending"
                     t.retry_count = 0
                     t.last_outcome = "retryable"
+                    t.next_try_at = ""
                     self._save_unlocked()
                     return t
             return None
@@ -238,6 +332,7 @@ class Queue:
                 t.status = "pending"
                 t.retry_count = 0
                 t.last_outcome = "retryable"
+                t.next_try_at = ""
                 retried.append(t)
             if retried:
                 self._save_unlocked()
