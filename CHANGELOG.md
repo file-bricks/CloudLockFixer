@@ -16,11 +16,15 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   Queue-Hash; keine automatische Reaktivierung. 15 neue Regressionen.
 
 ### Fixed / Behoben
+- Hardened file operations (`delete`, `move`, `rename`), TXT parser, and CLI against empty paths,
+  current working directory (`.`, `""`), and filesystem root anchors to prevent catastrophic directory deletion.
+- Pfad-Resilienz und Eingabe-Validierung für Dateisystem-Operationen (`delete`, `move`, `rename`),
+  TXT-Parser und CLI gehärtet gegen leere Pfade, CWD-Auflösung und Dateisystem-Wurzeln.
 - Capped retry backoff no longer overflows at high persisted attempt counts.
   The worker continues later tasks and saves pending retries with their next attempt time.
 - Gedeckeltes Retry-Backoff bleibt bei hohen persistierten Versuchszählern stabil;
   nachfolgende Tasks werden weiterverarbeitet und Wiederholungen gespeichert.
-- The verification contract reflects the current unreleased source state: 340 passing tests.
+- The verification contract reflects the current unreleased source state: 350 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

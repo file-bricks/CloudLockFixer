@@ -196,10 +196,21 @@ def parse_txt_line(line: str) -> Task | None:
         if op == "delete":
             if len(tokens) != 2:
                 raise ValueError(f"'delete' braucht genau einen Pfad: {part!r}")
+            if not tokens[1].strip():
+                raise ValueError(f"'delete' Pfad darf nicht leer sein in: {part!r}")
+            if tokens[1].strip() in (".", "./", ".\\"):
+                raise ValueError(f"'delete' darf nicht das Arbeitsverzeichnis löschen in: {part!r}")
             steps.append(Step(op="delete", src=tokens[1]))
         else:
             if len(tokens) != 3:
                 raise ValueError(f"'{op}' braucht Quelle und Ziel/Name: {part!r}")
+            if not tokens[1].strip() or not tokens[2].strip():
+                raise ValueError(f"'{op}' Pfade dürfen nicht leer sein in: {part!r}")
+            if op == "rename":
+                if "/" in tokens[2] or "\\" in tokens[2]:
+                    raise ValueError(f"'rename' neuer Name darf keinen Pfad enthalten in: {part!r}")
+                if tokens[2].strip() in (".", ".."):
+                    raise ValueError(f"'rename' neuer Name darf kein relativer Pfadbezeichner sein in: {part!r}")
             steps.append(Step(op=op, src=tokens[1], arg=tokens[2]))  # type: ignore[arg-type]
     if not steps:
         return None
@@ -268,13 +279,19 @@ class Queue:
             else:
                 out.append(line)
         if changed:
+            tmp = self.txt_path.with_suffix(".txt.tmp")
             try:
-                tmp = self.txt_path.with_suffix(".txt.tmp")
+                self._save_unlocked()
                 tmp.write_text("\n".join(out) + "\n", encoding="utf-8")
                 tmp.replace(self.txt_path)
-                self._save_unlocked()
             except OSError:
                 pass  # best-effort; nächster load()-Aufruf wiederholt den Versuch
+            finally:
+                if tmp.exists():
+                    try:
+                        tmp.unlink()
+                    except OSError:
+                        pass
 
     def add(self, task: Task) -> Task:
         with self._lock:
@@ -352,9 +369,16 @@ class Queue:
         payload = {"version": 1, "saved_at": _now(),
                    "tasks": [t.to_dict() for t in self.tasks]}
         tmp = self.json_path.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
-                       encoding="utf-8")
-        tmp.replace(self.json_path)
+        try:
+            tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
+                           encoding="utf-8")
+            tmp.replace(self.json_path)
+        finally:
+            if tmp.exists():
+                try:
+                    tmp.unlink()
+                except OSError:
+                    pass
 
 
 def _txt_header() -> str:

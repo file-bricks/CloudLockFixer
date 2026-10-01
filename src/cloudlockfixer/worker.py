@@ -32,7 +32,11 @@ def _task_paths(task: Task) -> list[Path]:
     s = task.chain[task.step_index]
     if s.op not in ("rename", "move", "delete"):
         return []
-    if s.op == "rename" and ("/" in s.arg or "\\" in s.arg):
+    if not s.src or not s.src.strip() or s.src.strip() in (".", "./", ".\\"):
+        return []
+    if s.op == "rename" and (not s.arg or not s.arg.strip() or s.arg.strip() in (".", "..") or "/" in s.arg or "\\" in s.arg):
+        return []
+    if s.op == "move" and (not s.arg or not s.arg.strip() or s.arg.strip() in (".", "./", ".\\")):
         return []
 
     src = Path(s.src)

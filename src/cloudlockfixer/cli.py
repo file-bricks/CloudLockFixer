@@ -95,10 +95,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "add":
         if args.rename:
+            src_val, arg_val = args.rename[0].strip(), args.rename[1].strip()
+            if not src_val or not arg_val:
+                print(t("invalid_chain") + ": Quelle und neuer Name dürfen nicht leer sein", file=sys.stderr)
+                return 2
+            if "/" in arg_val or "\\" in arg_val or arg_val in (".", ".."):
+                print(t("invalid_chain") + ": Neuer Name darf keinen Pfad enthalten", file=sys.stderr)
+                return 2
             task = Task(chain=[Step(op="rename", src=args.rename[0], arg=args.rename[1])])
         elif args.move:
+            src_val, arg_val = args.move[0].strip(), args.move[1].strip()
+            if not src_val or not arg_val:
+                print(t("invalid_chain") + ": Quelle und Ziel dürfen nicht leer sein", file=sys.stderr)
+                return 2
             task = Task(chain=[Step(op="move", src=args.move[0], arg=args.move[1])])
         elif args.delete:
+            src_val = args.delete[0].strip()
+            if not src_val or src_val in (".", "./", ".\\"):
+                print(t("invalid_chain") + ": Ungültiger Pfad zum Löschen (Pfad darf nicht leer sein)", file=sys.stderr)
+                return 2
             task = Task(chain=[Step(op="delete", src=args.delete[0])])
         else:
             try:

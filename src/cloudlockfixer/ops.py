@@ -97,7 +97,29 @@ def _verify_copy(src: Path, dst: Path) -> bool:
         return False
 
 
+def _is_forbidden_target(p: Path, action: str = "löschen") -> tuple[bool, str]:
+    """Prüft auf leere Pfade, das aktuelle Arbeitsverzeichnis oder Dateisystem-Wurzeln."""
+    raw = str(p).strip()
+    if not raw:
+        return True, "Ungültiger Pfad: Pfad darf nicht leer sein"
+    norm = raw.replace("\\", "/")
+    if norm in (".", "./", ".\\"):
+        return True, f"Ungültiger Pfad: Arbeitsverzeichnis darf nicht als Ziel für '{action}' genutzt werden"
+    try:
+        resolved = p.resolve()
+        if resolved == Path.cwd().resolve():
+            return True, f"Ungültiger Pfad: Arbeitsverzeichnis darf nicht als Ziel für '{action}' genutzt werden"
+        if resolved == Path(resolved.anchor) or str(resolved) in ("/", "\\") or str(resolved) == resolved.anchor:
+            return True, f"Wurzelverzeichnis darf nicht für '{action}' genutzt werden: {p}"
+    except (OSError, ValueError):
+        pass
+    return False, ""
+
+
 def _delete_path(p: Path) -> tuple[bool, str]:
+    forbidden, err = _is_forbidden_target(p, action="Löschen")
+    if forbidden:
+        return False, err
     try:
         if not p.exists():
             return True, "bereits gelöscht"
@@ -178,6 +200,12 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
     """Verschiebt src -> dst. Rückgabe: (ok, msg, copied).
     `copied`=True heißt: dst ist vollständig erstellt (egal ob Quelle schon weg).
     Ziel-existiert (mit anderem Inhalt als 'schon erledigt') = Konflikt -> Fehler."""
+    forbidden_src, err_src = _is_forbidden_target(src, action="Verschieben (Quelle)")
+    if forbidden_src:
+        return False, err_src, False
+    forbidden_dst, err_dst = _is_forbidden_target(dst, action="Verschieben (Ziel)")
+    if forbidden_dst:
+        return False, err_dst, False
     if not src.exists() and dst.exists():
         return True, "bereits verschoben", True
     if not src.exists():
@@ -256,15 +284,26 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
 # ── Standalone-API (fuer direkte Nutzung/Tests) ─────────────────────
 
 def move_path(src: Path | str, dst: Path | str) -> tuple[bool, str]:
+    if not str(src).strip():
+        return False, "Quellpfad darf nicht leer sein"
+    if not str(dst).strip():
+        return False, "Zielpfad darf nicht leer sein"
     ok, msg, _ = _do_move(Path(src), Path(dst))
     return ok, msg
 
 
 def rename_path(src: Path | str, new_name: str) -> tuple[bool, str]:
-    if "/" in new_name or "\\" in new_name:
+    if not str(src).strip():
+        return False, "Quellpfad darf nicht leer sein"
+    if not str(new_name).strip():
+        return False, "Neuer Name darf nicht leer sein"
+    clean_name = str(new_name).strip()
+    if clean_name in (".", ".."):
+        return False, "Neuer Name ist ungültig (relativer Pfadbezeichner)"
+    if "/" in clean_name or "\\" in clean_name:
         return False, "Neuer Name darf keinen Pfad enthalten"
     src = Path(src)
-    ok, msg, _ = _do_move(src, src.parent / new_name)
+    ok, msg, _ = _do_move(src, src.parent / clean_name)
     return ok, msg
 
 
@@ -286,12 +325,25 @@ def _move_step(step: Step, dst: Path) -> tuple[bool, str]:
 
 def execute_step(step: Step) -> tuple[bool, str]:
     if step.op == "rename":
-        if "/" in step.arg or "\\" in step.arg:
+        if not step.src or not step.src.strip():
+            return False, "Quellpfad darf nicht leer sein"
+        if not step.arg or not step.arg.strip():
+            return False, "Neuer Name darf nicht leer sein"
+        clean_arg = step.arg.strip()
+        if clean_arg in (".", ".."):
+            return False, "Neuer Name ist ungültig (relativer Pfadbezeichner)"
+        if "/" in clean_arg or "\\" in clean_arg:
             return False, "Neuer Name darf keinen Pfad enthalten"
-        return _move_step(step, Path(step.src).parent / step.arg)
+        return _move_step(step, Path(step.src).parent / clean_arg)
     if step.op == "move":
+        if not step.src or not step.src.strip():
+            return False, "Quellpfad darf nicht leer sein"
+        if not step.arg or not step.arg.strip():
+            return False, "Zielpfad darf nicht leer sein"
         return _move_step(step, Path(step.arg))
     if step.op == "delete":
+        if not step.src or not step.src.strip():
+            return False, "Quellpfad darf nicht leer sein"
         return _delete_path(Path(step.src))
     return False, f"Unbekannte Operation: {step.op}"
 
@@ -302,6 +354,12 @@ def _outcome_for_error(message: str) -> Outcome:
         "Quelle fehlt:",
         "Ziel existiert bereits (Konflikt):",
         "Neuer Name darf keinen Pfad enthalten",
+        "Neuer Name darf nicht leer sein",
+        "Neuer Name ist ungültig",
+        "Quellpfad darf nicht leer sein",
+        "Zielpfad darf nicht leer sein",
+        "Ungültiger Pfad:",
+        "Wurzelverzeichnis darf nicht",
         "Unbekannte Operation:",
     )
     return "blocked" if message.startswith(blocked_prefixes) else "retryable"
