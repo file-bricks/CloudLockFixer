@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-350%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-353%20gr%C3%BCn%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Nicht--Erh%C3%B6ht-blue)](THIRD_PARTY_LICENSES.md)
@@ -11,7 +11,8 @@
 [![Security SLA](https://img.shields.io/badge/security-48h%20SLA%20%7C%205d%20Triage-blue)](SECURITY.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
-[![Geprüft](https://img.shields.io/badge/Gepr%C3%BCft-2026--09--30-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Mitwirken](https://img.shields.io/badge/Mitwirken-Leitfaden-blue)](CONTRIBUTING.md#deutsch)
+[![Geprüft](https://img.shields.io/badge/Gepr%C3%BCft-2026--10--03-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![SBOM](https://img.shields.io/badge/SBOM-SPDX%20Auditiert-blue)](THIRD_PARTY_LICENSES.md)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
@@ -248,6 +249,61 @@ sequenceDiagram
     end
 ```
 
+### ASCII-Architektur-Topologie (Projektion in vier Sichten)
+
+```text
+========================================================================================
+                 CloudLockFixer: Architektur-Topologie in vier Sichten
+========================================================================================
+
+[SICHT 1: AUFRUFER-LAUFZEITEN, BENUTZERINTERAKTION & INGESTION-KANÄLE]
+  +----------------------------------------------------------------------------------+
+  | Ingestion, Desktop-Integration & Aufruferschnittstellen                          |
+  | - Headless CLI: 'clf add --chain "rename A->B && delete C" | run-now | list'     |
+  | - PySide6 System-Tray: Single-Instance-Daemon, Task-Dialog, Queue-Übersicht      |
+  | - Shell-Kontextmenüs: Windows Explorer (HKCU), Linux (Nautilus/Dolphin), macOS   |
+  | - Warteschlangendatei-Wächter: Textdatei %LOCALAPPDATA%/CloudLockFixer/queue.txt |
+  | - Shell-Injection-Schutz: argv-Array-Isolation; 100% unprivilegierter Nutzermodus|
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (Aufnahme -> Validierung -> Übergabe)
+                                           v
+[SICHT 2: CLOUDLOCKFIXER SOUVERÄNE ENGINE & QUEUE-ORCHESTRATOR]
+  +----------------------------------------------------------------------------------+
+  | Task-Dispatch, Cloud-Sensor & Robuste Ausführungs-Engine                         |
+  | - Mehrschritt-Ketten: 1-4 atomare Schritte (rename, move, delete) mit Stop-on-Err|
+  | - Cloud-Provider-Sensor: 8 Engines (OneDrive, Dropbox, Google Drive, Box etc.)   |
+  | - Virtueller Mount-Wächter: selektive Sync-Pause nur für Ordner, nie virtuelle LW|
+  | - Backoff-Scheduler: konfigurierbarer exponentieller Backoff, Jitter & Aufschub  |
+  | - Fallback-Engine: Streaming-Kopie + SHA-256-Abgleich + defensives Quell-Unlink  |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (Zustandsübergänge / Persistenz)
+                                           v
+[SICHT 3: LAUFZEIT-PERSISTENZ, NACHWEIS-LEDGER & SPEICHER-EBENEN]
+  +----------------------------------------------------------------------------------+
+  | Lokaler Zustandsspeicher & Audit-Integrität (%LOCALAPPDATA% / Benutzerbereich)   |
+  | - Robuster Zustandsspeicher: %LOCALAPPDATA%/CloudLockFixer/queue.json            |
+  | - Zustandsübergänge: pending -> retryable -> blocked -> failed_permanent -> done|
+  | - Kryptographische Verifikation: Bit-genauer SHA-256-Digest-Nachweis-Ledger      |
+  | - Multi-Host-Konfliktabwehr: .gitignore-Filterung für *-conflict-*, LOCK.*       |
+  | - Lokale Protokollierung: %LOCALAPPDATA%/CloudLockFixer/clf.log mit Rotation     |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (Air-Gap Isolationsperimeter)
+                                           v
+[SICHT 4: AIR-GAP SCHUTZPERIMETER, RUNASINVOKER & ZERO-EGRESS GRENZE]
+  +----------------------------------------------------------------------------------+
+  | Sicherheit, Privatsphäre & Laufzeit-Isolationsinvarianten                        |
+  | - RunAsInvoker Nicht-Erhöhung: strikt unprivilegierter Nutzermodus (INV-PRIV-02) |
+  | - 100% Local-First & Zero Egress: 0 Netzwerk-Sockets, 0 HTTP, 0 Telemetrie       |
+  | - Dynamische Bindung: PySide6 LGPL-3.0 § 4 Shared-Library-Laufzeitumgebung       |
+  | - Zero-Copyleft-Isolation: 100% permissiver MIT-Anwendungskern                   |
+  | - Level 1 SBOM Invarianten: INV-LOCAL-01..INV-SLA-10 verifiziert                 |
+  +----------------------------------------------------------------------------------+
+========================================================================================
+```
+
 ---
 
 <a id="6-governance--laufzeitinvarianten"></a><a id="6-governance--runtime-invariants"></a><a id="governance-invariants"></a><a id="kernfähigkeiten--governance-garantien"></a>
@@ -450,7 +506,7 @@ Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt Clo
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 350 Tests (`pytest`, **350 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 353 Tests (`pytest`, **353 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen
@@ -509,6 +565,7 @@ CloudLockFixer garantiert höchste Standards für Sicherheit und Privatsphäre:
 - **Kryptografische Absicherung:** SHA-256 Prüfsummen stellen sicher, dass Dateien beim Copy+Delete-Fallback niemals verloren gehen.
 - **Sicherheits-SLA:** Koordinierte Offenlegung von Sicherheitslücken mit 48-Stunden Reaktionszeit und 5-Werktage Triage-Zusage gemäß [`SECURITY.md`](SECURITY.md).
 - **Support & Fehlerberichte:** Hilfestellungen und Richtlinien für Bugreports sind in [`SUPPORT.md`](SUPPORT.md) beschrieben.
+- **Mitwirken & Richtlinien:** Entwicklungs-Workflows, Plan-D-Klon-Verfahren und Invarianten-Checklisten sind in [`CONTRIBUTING.md`](CONTRIBUTING.md) dokumentiert.
 - **Windows Store & Paketierung:** Vorbereitungsleitfaden und Metadaten für den Microsoft Store sind in [`WINDOWS_STORE_PREP.md`](WINDOWS_STORE_PREP.md) und [`STORE_LISTING.md`](STORE_LISTING.md) dokumentiert.
 
 ### Gesetzlicher Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht)

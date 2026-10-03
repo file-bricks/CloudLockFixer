@@ -83,6 +83,10 @@ Repository = "https://github.com/file-bricks/CloudLockFixer.git"
 "Marketing Log" = "https://github.com/file-bricks/CloudLockFixer/blob/main/MARKETING-LOG.txt"
 "Third-Party Licenses" = "https://github.com/file-bricks/CloudLockFixer/blob/main/THIRD_PARTY_LICENSES.md"
 "Third-Party Licenses (Text)" = "https://github.com/file-bricks/CloudLockFixer/blob/main/THIRD_PARTY_LICENSES.txt"
+"Level 1 SBOM" = "https://github.com/file-bricks/CloudLockFixer/blob/main/THIRD_PARTY_LICENSES.md#level-1-sbom-invariant-cross-reference-matrix"
+"Level 1 SBOM (Text)" = "https://github.com/file-bricks/CloudLockFixer/blob/main/THIRD_PARTY_LICENSES.txt"
+Contributing = "https://github.com/file-bricks/CloudLockFixer/blob/main/CONTRIBUTING.md"
+"Plain-Text License" = "https://github.com/file-bricks/CloudLockFixer/blob/main/LICENSE"
 Notice = "https://github.com/file-bricks/CloudLockFixer/blob/main/NOTICE"
 
 [project.scripts]

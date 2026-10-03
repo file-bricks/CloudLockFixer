@@ -3,14 +3,15 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Estado de Pytest](https://img.shields.io/badge/tests-315%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Estado de Pytest](https://img.shields.io/badge/tests-353%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Versión de Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Plataforma](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacidad](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
 [![Política de Seguridad](https://img.shields.io/badge/security-Policy%20%7C%20SHA--256%20Verificado-blue)](SECURITY.md)
 [![Licencia](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Atribución](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
-[![Verificado](https://img.shields.io/badge/Verificado-2026--09--30-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Contribuir](https://img.shields.io/badge/Contribuir-Gu%C3%ADa-blue)](CONTRIBUTING.md#english)
+[![Verificado](https://img.shields.io/badge/Verificado-2026--10--03-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Ecosistema](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
 [![Versión](https://img.shields.io/badge/version-0.2.3-blue)](pyproject.toml)
@@ -158,6 +159,61 @@ sequenceDiagram
     else Conflicto de destino irrecuperable
         Worker->>User: Marcar tarea bloqueada (estado: blocked, conserva datos)
     end
+```
+
+### Topología Arquitectónica ASCII (Proyección en Cuatro Vistas)
+
+```text
+========================================================================================
+             CloudLockFixer: Topología Arquitectónica en Cuatro Vistas
+========================================================================================
+
+[VISTA 1: TIEMPOS DE EJECUCIÓN, INTERACCIÓN DEL USUARIO Y CANALES DE ENTRADA]
+  +----------------------------------------------------------------------------------+
+  | Interfaces de Entrada, Integración de Escritorio y LLM                           |
+  | - CLI Headless: 'clf add --chain "rename A->B && delete C" | run-now | list'     |
+  | - Bandeja del Sistema PySide6: Demonio único, Diálogo de Tareas, Vista de Cola   |
+  | - Menús Contextuales: Windows Explorer (HKCU), Linux (Nautilus/Dolphin), macOS   |
+  | - Monitor de Archivo de Cola: %LOCALAPPDATA%/CloudLockFixer/queue.txt            |
+  | - Protección contra Inyecciones: Aislamiento argv; modo usuario no privilegiado  |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (ingesta -> parseo -> validación)
+                                           v
+[VISTA 2: MOTOR SOBERANO CLOUDLOCKFIXER Y ORQUESTADOR DE COLAS]
+  +----------------------------------------------------------------------------------+
+  | Despacho de Tareas, Sensor Cloud y Motor de Ejecución Resiliente                 |
+  | - Cadenas Multietapa: 1-4 pasos atómicos (rename, move, delete) con parada segura|
+  | - Sensor de Nube: 8 proveedores (OneDrive, Dropbox, Google Drive, Box, etc.)     |
+  | - Protección de Montajes Virtuales: pausa selectiva de carpetas; unidades libres |
+  | - Programador de Retroceso: retroceso exponencial configurable, jitter y demora  |
+  | - Motor de Respaldo: copia en flujo + SHA-256 + eliminación segura de origen     |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (transiciones de estado / persistencia)
+                                           v
+[VISTA 3: PERSISTENCIA EN TIEMPO DE EJECUCIÓN, REGISTROS Y NIVELES DE ALMACENAMIENTO]
+  +----------------------------------------------------------------------------------+
+  | Almacén Local de Estado e Integridad (%LOCALAPPDATA% / Dominio de Usuario)       |
+  | - Almacén de Estado Duradero: %LOCALAPPDATA%/CloudLockFixer/queue.json           |
+  | - Transiciones: pending -> retryable -> blocked -> failed_permanent -> done     |
+  | - Verificación Criptográfica: Registro de coincidencia SHA-256 bit a bit        |
+  | - Defensa Multi-Host: Filtros .gitignore para *-conflict-*, LOCK.*               |
+  | - Registro Local: %LOCALAPPDATA%/CloudLockFixer/clf.log con rotación             |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (perímetro de aislamiento air-gap)
+                                           v
+[VISTA 4: PERÍMETRO AIR-GAP, RUNASINVOKER Y LÍMITE ZERO-EGRESS]
+  +----------------------------------------------------------------------------------+
+  | Invariantes de Seguridad, Privacidad y Aislamiento                               |
+  | - Modo No Privilegiado RunAsInvoker: ejecución en espacio de usuario (INV-PRIV-02|
+  | - 100% Local-First y Zero Egress: 0 sockets de red, 0 HTTP, 0 telemetría remota  |
+  | - Cumplimiento de Enlace Dinámico: PySide6 LGPL-3.0 Sección 4 bibliotecas compart|
+  | - Aislamiento Zero-Copyleft: Núcleo permisivo 100% MIT                           |
+  | - Invariantes SBOM Nivel 1: INV-LOCAL-01..INV-SLA-10 auditados                   |
+  +----------------------------------------------------------------------------------+
+========================================================================================
 ```
 
 ---

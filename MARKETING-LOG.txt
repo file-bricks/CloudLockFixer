@@ -1,7 +1,7 @@
 ================================================================================
 CLOUDLOCKFIXER SUITE — MARKETING, DISCOVERY & GOVERNANCE LOG
 ================================================================================
-Stand: 2026-09-30
+Stand: 2026-10-03
 Repository: file-bricks/CloudLockFixer
 Branch: main
 Version: 0.2.3
@@ -169,3 +169,15 @@ CloudLockFixer integrates harmoniously into the file-bricks and open-bricks suit
   5. Governance & Invariants Verification: Re-verified all 10 governance invariants INV-LOCAL-01..INV-SLA-10, Zero-Egress isolation, and RunAsInvoker non-elevation.
   6. Documentation & Badge Currency: Synchronized Verified: 2026-09-30 badges across English, German, and Spanish READMEs; updated llms.txt and CHANGELOG.md.
   7. Automated Contract Test Suite: Expanded tests/test_metadata.py with contract tests verifying embedded screenshots gallery, updated 2026-09-30 verification badges, and exponential backoff CLI documentation.
+
+- 2026-10-03 — Pfad B Discoverability, Four-View ASCII Topology, Bilingual Contributing Guidelines & Level 1 SBOM Audit (file-bricks/CloudLockFixer):
+  1. Four-View ASCII Architectural Topology: Embedded standardized Section 5 Four-View Architectural Topology projection across README.md, README.de.md, and README.es.md ([VIEW 1: CALLER RUNTIMES, USER INTERACTION & INGESTION CHANNELS], [VIEW 2: CLOUDLOCKFIXER SOVEREIGN ENGINE & QUEUE ORCHESTRATOR], [VIEW 3: RUNTIME PERSISTENCE, EVIDENCE LEDGERS & STORAGE TIERS], [VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY]; German [SICHT 1]..[SICHT 4], Spanish [VISTA 1]..[VISTA 4]) projecting all 10 invariants INV-LOCAL-01..INV-SLA-10.
+  2. Bilingual CONTRIBUTING.md Guidelines: Completely upgraded root CONTRIBUTING.md in English and German detailing foundational invariants INV-LOCAL-01..INV-SLA-10, unprivileged RunAsInvoker mode (INV-PRIV-02), Plan D canonical local clone workflow (C:\_Local_DEV\repos\CloudLockFixer), 4 verification gates (pytest, ruff, compileall, git diff --check), version freeze discipline (v0.2.3 frozen per T-20260920-167562623), statutory disclaimer (§ 521 BGB Gefälligkeitsrecht), and binding 48h Security Response SLA.
+  3. Level 1 SBOM Plain-Text Companion & Re-Audit Stand 2026-10-03: Re-audited THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt confirming all 10 invariants INV-LOCAL-01..INV-SLA-10, unprivileged RunAsInvoker non-elevation, Zero-Copyleft isolation with PySide6 LGPL-3.0 § 4 dynamic linking, stdlib isolation, and statutory § 521 BGB disclaimer.
+  4. PEP 621 Metadata Alignment in pyproject.toml: Registered canonical endpoints for Contributing, Level 1 SBOM, Level 1 SBOM (Text), and Plain-Text License in project.urls.
+  5. Documentation & Badge Synchronization: Added Contributing Guidelines / Mitwirken-Leitfaden / Contribuir-Guía badges in all 3 READMEs; synchronized Verified / Geprüft / Verificado badges to 2026-10-03; updated llms.txt Stand 2026-10-03 with 350+ passing tests baseline and 4-View topology notes.
+  6. Automated Contract Test Suite: Added new contract tests in tests/test_metadata.py verifying ASCII 4-View topology in 3 languages, bilingual CONTRIBUTING.md integrity, PEP 621 URLs, and Level 1 SBOM currency.
+  7. Non-Automated Recommendations:
+     - Recommendation 1: Monitor Windows 11 24H2 Insider builds for cldflt mini-filter behavior updates regarding rapid sequential atomic renames on sparse hydration stubs.
+     - Recommendation 2: Consider submitting pre-compiled MSIX packages to Microsoft Store Partner Center following the staging documented in WINDOWS_STORE_PREP.md once release gating tag is cut.
+     - Recommendation 3: Evaluate optional tray dark mode icon adaptation when Windows system theme switches dynamically via winreg WM_SETTINGCHANGE notification.

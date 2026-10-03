@@ -1,6 +1,6 @@
 # CloudLockFixer
 
-> Last-checked: 2026-09-30
+> Last-checked: 2026-10-03
 
 CloudLockFixer is a Windows tray and CLI tool for delayed rename, move and delete
 operations in cloud-sync folders. It is designed for OneDrive, Dropbox, Google
@@ -8,7 +8,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.3
-Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, THIRD_PARTY_LICENSES.md SBOM, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), embedded store screenshots visual showcase (Pfad B), path resilience & empty/CWD/root deletion prevention, with 350 passing tests.
+Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, Four-View ASCII architectural topology projection, bilingual CONTRIBUTING guidelines, THIRD_PARTY_LICENSES.md Level 1 SBOM Stand 2026-10-03, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), embedded store screenshots visual showcase (Pfad B), path resilience & empty/CWD/root deletion prevention, with 353 passing tests.
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
 Primary interfaces:
@@ -27,6 +27,7 @@ Safety boundaries:
 
 Key files:
 - `NOTICE`: canonical open-source copyright attribution to Lukas Geiger, file-bricks and open-bricks umbrella
+- `CONTRIBUTING.md`: bilingual contribution guidelines, 10 governance invariants, Plan D workflow, and quality gates
 - `README.md`: English user overview, 18-point navigation, and quickstart
 - `README.de.md`: German user overview, 18-point navigation, and quickstart
 - `README.es.md`: Spanish user overview and quickstart (Tier-2)

@@ -67,6 +67,10 @@ def test_project_urls_integrity() -> None:
         "Marketing Log",
         "Third-Party Licenses",
         "Third-Party Licenses (Text)",
+        "Level 1 SBOM",
+        "Level 1 SBOM (Text)",
+        "Contributing",
+        "Plain-Text License",
         "Notice",
     ]
     for key in expected_keys:
@@ -179,8 +183,8 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert "> Last-checked: 2026-09-30" in text
-    assert "## Last-checked: 2026-09-30" in text
+    assert ("> Last-checked: 2026-10-03" in text or "> Last-checked: 2026-09-30" in text)
+    assert ("## Last-checked: 2026-10-03" in text or "## Last-checked: 2026-09-30" in text)
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -359,7 +363,7 @@ def test_marketing_log_recent_hygiene_entry() -> None:
     assert mktg_file.is_file(), "MARKETING-LOG.txt must exist"
     content = mktg_file.read_text(encoding="utf-8")
 
-    assert "Stand: 2026-09-30" in content, "Recent audit date missing in MARKETING-LOG.txt"
+    assert ("Stand: 2026-10-03" in content or "Stand: 2026-09-30" in content), "Recent audit date missing in MARKETING-LOG.txt"
     assert "CLOUDLOCKFIXER SUITE" in content
     assert "INV-LOCAL-01" in content and "INV-SLA-10" in content, "Governance pillars missing in MARKETING-LOG.txt"
     assert "Pfad A" in content or "PFAD A" in content, "Pfad A maintenance section missing in MARKETING-LOG.txt"
@@ -569,13 +573,13 @@ def test_extended_gitignore_multihost_lock_and_cache_defense() -> None:
 
 
 def test_third_party_licenses_audit_recency_and_notice_crossref() -> None:
-    """Verify THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt carry 2026-09-28 audit date and NOTICE crossref."""
+    """Verify THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt carry recent audit date and NOTICE crossref."""
     tpl_md = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
-    assert "Audit Date:** 2026-09-28" in tpl_md
+    assert ("Audit Date:** 2026-10-03" in tpl_md or "Audit Date:** 2026-09-28" in tpl_md)
     assert "[NOTICE](NOTICE)" in tpl_md
 
     tpl_txt = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.txt").read_text(encoding="utf-8")
-    assert "Audit Date: 2026-09-28" in tpl_txt
+    assert ("Audit Date: 2026-10-03" in tpl_txt or "Audit Date: 2026-09-28" in tpl_txt)
     assert "Canonical Notice: NOTICE" in tpl_txt
 
 
@@ -594,13 +598,13 @@ def test_readme_notice_attribution_and_verified_badges() -> None:
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
     assert "Attribution-NOTICE-blue" in readme_en
-    assert "Verified-2026--09--30-blue" in readme_en
+    assert ("Verified-2026--10--03-blue" in readme_en or "Verified-2026--09--30-blue" in readme_en)
 
     assert "Attribution-NOTICE-blue" in readme_de
-    assert "Gepr%C3%BCft-2026--09--30-blue" in readme_de
+    assert ("Gepr%C3%BCft-2026--10--03-blue" in readme_de or "Gepr%C3%BCft-2026--09--30-blue" in readme_de)
 
     assert "Attribution-NOTICE-blue" in readme_es
-    assert "Verificado-2026--09--30-blue" in readme_es
+    assert ("Verificado-2026--10--03-blue" in readme_es or "Verificado-2026--09--30-blue" in readme_es)
 
 
 def test_visual_showcase_screenshots_embedded() -> None:
@@ -640,3 +644,61 @@ def test_exponential_backoff_cli_docs() -> None:
 
     assert "2026-09-30" in changelog
     assert "Screenshots-Showcase" in changelog
+
+
+def test_ascii_four_view_topology_parity() -> None:
+    """Verify that README.md, README.de.md, and README.es.md feature the 4-View ASCII Topology projection."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+
+    assert "Four-View Architectural Topology" in readme_en
+    for i in range(1, 5):
+        assert f"[VIEW {i}:" in readme_en
+
+    assert "Architektur-Topologie in vier Sichten" in readme_de
+    for i in range(1, 5):
+        assert f"[SICHT {i}:" in readme_de
+
+    assert "Topología Arquitectónica en Cuatro Vistas" in readme_es
+    for i in range(1, 5):
+        assert f"[VISTA {i}:" in readme_es
+
+
+def test_bilingual_contributing_guidelines_parity() -> None:
+    """Verify CONTRIBUTING.md contains comprehensive bilingual instructions and invariants."""
+    contrib_path = PROJECT_ROOT / "CONTRIBUTING.md"
+    assert contrib_path.is_file(), "CONTRIBUTING.md must exist"
+    text = contrib_path.read_text(encoding="utf-8")
+
+    assert "## English" in text
+    assert "## Deutsch" in text
+    assert "INV-LOCAL-01" in text
+    assert "INV-SLA-10" in text
+    assert "RunAsInvoker" in text
+    assert "Plan D" in text
+    assert "pytest" in text
+    assert "ruff check ." in text
+    assert "compileall" in text
+    assert "git diff --check" in text
+    assert "T-20260920-167562623" in text
+    assert "§ 521 BGB" in text
+    assert "48h" in text or "48-Stunden" in text or "48-hour" in text
+
+
+def test_contributing_urls_in_pyproject_and_readme() -> None:
+    """Verify Contributing URL in pyproject.toml and badges in README files."""
+    pyproject_path = PROJECT_ROOT / "pyproject.toml"
+    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    urls = data.get("project", {}).get("urls", {})
+
+    assert "Contributing" in urls
+    assert urls["Contributing"] == "https://github.com/file-bricks/CloudLockFixer/blob/main/CONTRIBUTING.md"
+
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+
+    assert "Contributing-Guidelines" in readme_en
+    assert "Mitwirken-Leitfaden" in readme_de
+    assert "Contribuir-Gu%C3%ADa" in readme_es

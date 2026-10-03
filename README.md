@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-350%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-353%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -11,7 +11,8 @@
 [![Security SLA](https://img.shields.io/badge/security-48h%20SLA%20%7C%205d%20Triage-blue)](SECURITY.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Attribution](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
-[![Verified](https://img.shields.io/badge/Verified-2026--09--30-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Contributing](https://img.shields.io/badge/Contributing-Guidelines-blue)](CONTRIBUTING.md)
+[![Verified](https://img.shields.io/badge/Verified-2026--10--03-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![SBOM](https://img.shields.io/badge/SBOM-SPDX%20Audited-blue)](THIRD_PARTY_LICENSES.md)
 [![Ecosystem](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
@@ -245,7 +246,61 @@ sequenceDiagram
         Worker->>User: Fallback successful (status: done, zero data loss)
     else Irrecoverable Target Conflict
         Worker->>User: Mark task blocked (status: blocked, preserves data)
-    end
+```
+
+### ASCII Architectural Topology (Four-View Projection)
+
+```text
+========================================================================================
+                      CloudLockFixer: Four-View Architectural Topology
+========================================================================================
+
+[VIEW 1: CALLER RUNTIMES, USER INTERACTION & INGESTION CHANNELS]
+  +----------------------------------------------------------------------------------+
+  | Ingestion, Desktop Integration & Caller Interfaces                              |
+  | - Headless CLI: 'clf add --chain "rename A->B && delete C" | run-now | list'     |
+  | - PySide6 System Tray: Single-instance daemon, Task Dialog, Queue Overview       |
+  | - Shell Context Menus: Windows Explorer (HKCU), Linux (Nautilus/Dolphin), macOS  |
+  | - Queue File Monitor: Plain-text %LOCALAPPDATA%/CloudLockFixer/queue.txt intake  |
+  | - Shell Injection Guard: argv array isolation; 100% unprivileged user mode       |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (ingest -> parse -> validate)
+                                           v
+[VIEW 2: CLOUDLOCKFIXER SOVEREIGN ENGINE & QUEUE ORCHESTRATOR]
+  +----------------------------------------------------------------------------------+
+  | Task Dispatch, Sync Sensor & Resilient Execution Core                            |
+  | - Multi-Step Chaining: 1-4 atomic steps (rename, move, delete) with fail-halt   |
+  | - Cloud Provider Sensor: 8 engines (OneDrive, Dropbox, Google Drive, Box, etc.)  |
+  | - Virtual Mount Guard: selectively pauses folder sync; preserves virtual drives  |
+  | - Backoff Scheduler: configurable exponential backoff, jitter, and deferral     |
+  | - Fallback Engine: streaming copy + SHA-256 match + defensive source unlink     |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (state transitions / queue persistence)
+                                           v
+[VIEW 3: RUNTIME PERSISTENCE, EVIDENCE LEDGERS & STORAGE TIERS]
+  +----------------------------------------------------------------------------------+
+  | Local State Store & Audit Integrity (%LOCALAPPDATA% / User Domain)               |
+  | - Durable State Store: %LOCALAPPDATA%/CloudLockFixer/queue.json                  |
+  | - State Transitions: pending -> retryable -> blocked -> failed_permanent -> done|
+  | - Cryptographic Verification: Bit-for-bit SHA-256 digest match ledger            |
+  | - Multi-Host Conflict Defense: .gitignore filtering for *-conflict-*, LOCK.*    |
+  | - Local Logging: %LOCALAPPDATA%/CloudLockFixer/clf.log with rotation             |
+  +----------------------------------------------------------------------------------+
+                                           |
+                                           | (air-gap isolation perimeter)
+                                           v
+[VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY]
+  +----------------------------------------------------------------------------------+
+  | Security, Privacy & Runtime Isolation Invariants                                 |
+  | - RunAsInvoker Non-Elevation: strictly unprivileged user mode (INV-PRIV-02)      |
+  | - 100% Local-First & Zero Egress: 0 network sockets, 0 HTTP, 0 outbound telemetry|
+  | - Dynamic Linking Compliance: PySide6 LGPL-3.0 Section 4 shared library runtime  |
+  | - Zero-Copyleft Isolation: 100% permissive MIT application core                  |
+  | - Level 1 SBOM Invariants: INV-LOCAL-01..INV-SLA-10 cryptographically audited    |
+  +----------------------------------------------------------------------------------+
+========================================================================================
 ```
 
 ---
@@ -449,7 +504,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 350 automated tests (`pytest`, 350 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 353 automated tests (`pytest`, 353 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite
@@ -508,4 +563,5 @@ CloudLockFixer operates under strict security and privacy guarantees:
 - **Cryptographic Verification:** SHA-256 verification ensures that files are never lost during copy+delete fallbacks.
 - **Vulnerability SLA:** Coordinated vulnerability disclosure with a committed 48-hour initial response and 5-business-day triage SLA detailed in [`SECURITY.md`](SECURITY.md).
 - **Support & Troubleshooting:** Issue reporting guidelines and contact channels are detailed in [`SUPPORT.md`](SUPPORT.md).
+- **Contributing Guidelines:** Community development workflows, Plan D canonical local clone procedures, and invariant checklists are detailed in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - **Windows Store & Packaging:** Preparation guide and metadata for Microsoft Store submission are documented in [`WINDOWS_STORE_PREP.md`](WINDOWS_STORE_PREP.md) and [`STORE_LISTING.md`](STORE_LISTING.md).

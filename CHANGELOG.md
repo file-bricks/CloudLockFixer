@@ -6,6 +6,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added / Ergänzt
+- **Discoverability, Vier-Sichten-ASCII-Topologie & Bilinguale Contributing-Guidelines (Pfad B) (2026-10-03):**
+  * Standardisierte Section 5 ASCII-Architektur-Topologie ([VIEW 1: CALLER RUNTIMES, USER INTERACTION & INGESTION CHANNELS], [VIEW 2: CLOUDLOCKFIXER SOVEREIGN ENGINE & QUEUE ORCHESTRATOR], [VIEW 3: RUNTIME PERSISTENCE, EVIDENCE LEDGERS & STORAGE TIERS], [VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY]; deutsche Fassung [SICHT 1]..[SICHT 4], spanische Fassung [VISTA 1]..[VISTA 4]) projiziert über alle 10 Invarianten INV-LOCAL-01..INV-SLA-10.
+  * Bilinguale `CONTRIBUTING.md` Richtlinien (EN/DE) mit Spezifikation aller 10 Invarianten, unprivilegiertem `RunAsInvoker`-Modus (INV-PRIV-02), Plan D Klon-Workflow (`C:\_Local_DEV\repos\CloudLockFixer`), 4 Verifikations-Gates (`pytest`, `ruff`, `compileall`, `git diff --check`), Version-Freeze-Disziplin (`v0.2.3` eingefroren per `T-20260920-167562623`), gesetzlichem Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht) und verbindlicher 48h Security Response SLA.
+  * Level 1 SBOM Re-Audit in `THIRD_PARTY_LICENSES.md` & `THIRD_PARTY_LICENSES.txt` Stand 2026-10-03 mit Bestätigung von dynamic linking für PySide6 LGPL-3.0 § 4, Zero-Copyleft und Zero-Egress.
+  * PEP 621 URLs für Contributing, Level 1 SBOM, Level 1 SBOM (Text) und Plain-Text License in `pyproject.toml` registriert.
+  * Shields.io Badges für Contributing Guidelines in allen 3 READMEs synchronisiert; Verified/Geprüft/Verificado Badges auf Stand 2026-10-03 aktualisiert.
+  * Automatisierte Contract-Tests in `tests/test_metadata.py` für ASCII-Topologie in 3 Sprachen, bilinguale Contributing-Guidelines, PEP 621 URLs und SBOM Re-Audit-Currency.
 - Reproducible native Windows source-tray smoke with a private queue and
   singleton key, temporary filesystem operations, registry readback and Quit.
   Evidence covers source execution; login and release acceptance remain separate.
@@ -24,7 +31,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   The worker continues later tasks and saves pending retries with their next attempt time.
 - Gedeckeltes Retry-Backoff bleibt bei hohen persistierten Versuchszählern stabil;
   nachfolgende Tasks werden weiterverarbeitet und Wiederholungen gespeichert.
-- The verification contract reflects the current unreleased source state: 350 passing tests.
+- The verification contract reflects the current unreleased source state: 353 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
