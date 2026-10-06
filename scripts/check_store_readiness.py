@@ -10,10 +10,14 @@ import argparse
 import json
 import re
 import struct
-import tomllib
 import zipfile
 from pathlib import Path
 from typing import Sequence
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 (requires-python >= 3.10)
+    tomllib = None  # type: ignore[assignment]
 
 REQUIRED_DOCUMENTS = (
     "PRIVACY_POLICY.md",
@@ -59,7 +63,22 @@ def _load_json(path: Path) -> dict[str, object] | None:
     return value if isinstance(value, dict) else None
 
 
+def _project_version_fallback(text: str) -> str | None:
+    """Liest [project].version ohne tomllib (Python 3.10)."""
+    section = re.search(r"(?ms)^\[project\]\s*$(.*?)(?=^\[|\Z)", text)
+    if not section:
+        return None
+    match = re.search(r'(?m)^version\s*=\s*"([^"]+)"\s*$', section.group(1))
+    return match.group(1) if match else None
+
+
 def _project_version(project_root: Path) -> str | None:
+    if tomllib is None:
+        try:
+            text = (project_root / "pyproject.toml").read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            return None
+        return _project_version_fallback(text)
     try:
         data = tomllib.loads((project_root / "pyproject.toml").read_text(encoding="utf-8"))
     except (OSError, UnicodeError, tomllib.TOMLDecodeError):

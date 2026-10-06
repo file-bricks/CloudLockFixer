@@ -505,7 +505,7 @@ Obwohl die Behebung von `cldflt.sys`-Sperren Windows-spezifisch ist, besitzt Clo
 <a id="15-tests--qualitätsverifikation"></a><a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Tests & Qualitätsverifikation
 
-Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 373 Tests (`pytest`, **373 grün**, 0 Fehler, 100% Erfolgsquote):
+Das Repository unterliegt strenger automatisierter Qualitätssicherung mit 374 Tests (`pytest`, **374 grün**, 0 Fehler, 100% Erfolgsquote):
 
 ```bash
 # Gesamte Testsuite ausführen

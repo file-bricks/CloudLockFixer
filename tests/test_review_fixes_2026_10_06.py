@@ -277,3 +277,19 @@ def test_nautilus_script_invokes_launcher_with_spaces_in_path(tmp_path: Path, mo
         str(launcher_dir / "clf_launcher.pyw"),
         "gui-add", "--op", "move", "--src", "/data/a b.txt",
     ]
+
+
+# ── Store-Readiness: Python 3.10 ohne tomllib ──────────────────────
+
+
+def test_store_readiness_reads_project_version_without_tomllib():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.check_store_readiness import _project_version_fallback
+
+    text = (
+        '[build-system]\nrequires = ["setuptools"]\n\n'
+        '[project]\nname = "x"\nversion = "1.2.3"\n\n'
+        '[tool.other]\nversion = "9.9.9"\n'
+    )
+    assert _project_version_fallback(text) == "1.2.3"
+    assert _project_version_fallback('[tool.other]\nversion = "9.9.9"\n') is None

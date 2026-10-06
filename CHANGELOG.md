@@ -61,9 +61,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `python -m cloudlockfixer <args>` runs the CLI; the tray's "open data folder"
     works on Linux/macOS; `clf list` and the run summary are localized and report
     blocked tasks.
+  * `scripts/check_store_readiness.py` runs on Python 3.10 again (no `tomllib` there);
+    the Windows 3.10 CI job was red on `main` because of this import.
+    Store-Readiness-Skript läuft wieder unter Python 3.10.
   * Windows-only tests are platform-pinned or skipped so the suite also passes on
     Linux/macOS. Windows-spezifische Tests laufen jetzt auch unter Linux/macOS.
-- The verification contract reflects the current unreleased source state: 373 passing tests.
+- The verification contract reflects the current unreleased source state: 374 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
