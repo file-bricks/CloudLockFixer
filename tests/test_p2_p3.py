@@ -1,5 +1,6 @@
 """Tests fuer P2 (Kontextmenue-Command) und P3 (Praeventiv-Waechter-Logik)."""
 import subprocess
+import sys
 
 from cloudlockfixer import contextmenu
 from cloudlockfixer.providers import OneDriveProvider, SyncProvider
@@ -141,12 +142,14 @@ class _FakeCompleted:
 def test_is_running_handles_none_stdout(monkeypatch):
     """Auf de-Windows kann die dekodierte tasklist-Ausgabe None sein
     (UnicodeDecodeError im Reader-Thread) -> darf NICHT mit TypeError crashen."""
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted(None))
     assert OneDriveProvider().is_running() is False
 
 
 def test_is_running_detects_process(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("OneDrive.exe  1234 Console\n"))
     assert OneDriveProvider().is_running() is True

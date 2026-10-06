@@ -183,6 +183,9 @@ def test_worker_run_once_backoff_scheduling_and_deferral(tmp_path: Path, monkeyp
 def test_cli_list_and_run_now_ignore_backoff(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys):
     monkeypatch.setattr(cli, "data_dir", lambda: tmp_path)
     monkeypatch.setattr(settings, "data_dir", lambda: tmp_path)
+    # `clf list` ist lokalisiert; die deutsche Ausgabe unabhängig von der
+    # System-Locale des Runners (z.B. englisches Windows) festlegen.
+    monkeypatch.setattr(settings, "resolve_language", lambda cfg: "de")
 
     q = Queue(tmp_path)
     future = (datetime.now(timezone.utc) + timedelta(minutes=15)).isoformat()

@@ -14,7 +14,10 @@ from typing import Any
 
 log = logging.getLogger("clf")
 
-# POSIX-Muster-Zuordnungen für Sync-Provider-Prozesse
+# POSIX-Prozessnamen der Sync-Provider. Die Einträge werden EXAKT gegen den
+# Prozessnamen geprüft (``pgrep -x`` / ``pkill -x`` bzw. /proc/<pid>/comm),
+# nie als Teilstring der Kommandozeile: ``pkill -f box`` träfe sonst auch
+# Dropbox, VirtualBox oder einen Editor, der ``~/Box/notiz.txt`` geöffnet hat.
 _PROCESS_ALIASES_POSIX: dict[str, list[str]] = {
     "googledrivefs.exe": ["GoogleDriveFS", "Google Drive"],
     "onedrive.exe": ["OneDrive", "onedrive"],
@@ -37,6 +40,37 @@ def get_posix_patterns(exe_name: str) -> list[str]:
     if key.endswith(".exe"):
         return [exe_name[:-4]]
     return [exe_name]
+
+
+# Linux kürzt den Prozessnamen (comm) auf 15 Zeichen; pgrep/pkill -x
+# vergleichen gegen diesen gekürzten Namen.
+_LINUX_COMM_MAX = 15
+
+
+def _posix_match_name(pattern: str, platform: str) -> str:
+    """Name, gegen den ``pgrep -x``/``pkill -x`` auf *platform* vergleichen."""
+    if platform.startswith("linux"):
+        return pattern[:_LINUX_COMM_MAX]
+    return pattern
+
+
+def _proc_names(entry: Any) -> set[str]:
+    """Prozessnamen eines /proc/<pid>-Eintrags (comm und argv[0]-Basename)."""
+    names: set[str] = set()
+    try:
+        comm = (entry / "comm").read_text(encoding="utf-8", errors="ignore").strip()
+        if comm:
+            names.add(comm.lower())
+    except OSError:
+        pass
+    try:
+        argv0 = (entry / "cmdline").read_bytes().split(b"\x00", 1)[0]
+        base = argv0.decode("utf-8", errors="ignore").replace("\\", "/").rsplit("/", 1)[-1]
+        if base:
+            names.add(base.lower())
+    except OSError:
+        pass
+    return names
 
 
 def check_process(
@@ -69,14 +103,14 @@ def check_process(
     for pat in patterns:
         try:
             res = runner(
-                ["pgrep", "-f", pat],
+                ["pgrep", "-x", _posix_match_name(pat, platform)],
                 capture_output=True,
                 text=True,
                 timeout=10,
                 encoding="utf-8",
                 errors="ignore",
             )
-            if res.returncode == 0 and res.stdout.strip():
+            if getattr(res, "returncode", 1) == 0 and (res.stdout or "").strip():
                 return True
         except (OSError, subprocess.SubprocessError):
             pass
@@ -86,21 +120,12 @@ def check_process(
         try:
             proc_dir = path_cls("/proc")
             if proc_dir.is_dir():
-                patterns_lower = [p.lower() for p in patterns]
+                wanted = {_posix_match_name(p, platform).lower() for p in patterns}
+                wanted |= {p.lower() for p in patterns}
                 for entry in proc_dir.iterdir():
                     if entry.is_dir() and entry.name.isdigit():
-                        try:
-                            cmdline = (
-                                (entry / "cmdline")
-                                .read_bytes()
-                                .replace(b"\x00", b" ")
-                                .decode("utf-8", errors="ignore")
-                                .lower()
-                            )
-                            if any(pat in cmdline for pat in patterns_lower):
-                                return True
-                        except (OSError, PermissionError):
-                            continue
+                        if _proc_names(entry) & wanted:
+                            return True
         except (OSError, PermissionError):
             pass
     return False
@@ -140,7 +165,7 @@ def kill_process(
     for pat in patterns:
         try:
             runner(
-                ["pkill", "-f", pat],
+                ["pkill", "-x", _posix_match_name(pat, sys.platform)],
                 capture_output=True,
                 text=True,
                 timeout=timeout,

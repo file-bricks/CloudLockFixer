@@ -186,7 +186,7 @@ sequenceDiagram
   | - Cadenas Multietapa: 1-4 pasos atómicos (rename, move, delete) con parada segura|
   | - Sensor de Nube: 8 proveedores (OneDrive, Dropbox, Google Drive, Box, etc.)     |
   | - Protección de Montajes Virtuales: pausa selectiva de carpetas; unidades libres |
-  | - Programador de Retroceso: retroceso exponencial configurable, jitter y demora  |
+  | - Programador de Retroceso: retroceso exponencial configurable y demora          |
   | - Motor de Respaldo: copia en flujo + SHA-256 + eliminación segura de origen     |
   +----------------------------------------------------------------------------------+
                                            |
@@ -282,7 +282,7 @@ El controlador `cldflt.sys` (instalado por OneDrive, Dropbox, Google Drive, iClo
 | Vigilante preventivo y retroceso exponencial | Arquitectura multiplataforma y preparación para Store |
 | :---: | :---: |
 | [![Ajustes del vigilante preventivo](screenshots/store/03_preventive-watcher-settings.png)](screenshots/store/03_preventive-watcher-settings.png) | [![Arquitectura multiplataforma](screenshots/store/04_cross-platform-architecture.png)](screenshots/store/04_cross-platform-architecture.png) |
-| *Ajuste preciso de intervalos de fondo (30 min a 12 h), jitter, multiplicadores de retroceso y umbrales de eventos del sistema de archivos.* | *Arquitectura hermética sin salidas de red (Zero-Egress), modo usuario sin privilegios (`RunAsInvoker`) y empaquetado nativo MSIX.* |
+| *Ajuste preciso de intervalos de fondo (30 min a 12 h), multiplicadores de retroceso y umbrales de eventos del sistema de archivos.* | *Arquitectura hermética sin salidas de red (Zero-Egress), modo usuario sin privilegios (`RunAsInvoker`) y empaquetado nativo MSIX.* |
 
 ### Aplicación en la bandeja del sistema
 Se inicia con Windows cuando el inicio automático está activado. Menú de la bandeja: *Añadir tarea…*, *Ejecutar ahora* (también *con pausa de OneDrive*), *Intervalo* (pasos de 30 min, por defecto 2 h), *Iniciar con Windows*, *Abrir carpeta de datos*. Esta opción abre la carpeta local de la aplicación con `queue.txt` y los archivos de registro. El diálogo para añadir tareas permite elegir si el origen es un archivo o una carpeta.

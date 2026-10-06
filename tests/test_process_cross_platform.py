@@ -52,38 +52,68 @@ def test_check_process_posix_pgrep(monkeypatch):
     mock_runner.return_value.stdout = "4567\n"
 
     assert check_process("OneDrive.exe", _runner=mock_runner) is True
-    assert mock_runner.call_args[0][0][:2] == ["pgrep", "-f"]
+    # Exakter Prozessname statt Teilstring der Kommandozeile (-f).
+    assert mock_runner.call_args[0][0] == ["pgrep", "-x", "OneDrive"]
+
+
+def _fake_proc(tmp_path, processes):
+    fake_proc = tmp_path / "proc"
+    fake_proc.mkdir()
+    for pid, (comm, cmdline) in processes.items():
+        pid_dir = fake_proc / str(pid)
+        pid_dir.mkdir()
+        (pid_dir / "comm").write_text(comm + "\n", encoding="utf-8")
+        (pid_dir / "cmdline").write_bytes(b"\x00".join(cmdline) + b"\x00")
+
+    def path_cls(path_str):
+        return fake_proc if str(path_str) == "/proc" else Path(path_str)
+
+    return path_cls
+
+
+def _pgrep_not_found():
+    mock_runner = MagicMock()
+    mock_runner.return_value.returncode = 1
+    mock_runner.return_value.stdout = ""
+    return mock_runner
 
 
 def test_check_process_linux_proc_fallback(monkeypatch, tmp_path):
     monkeypatch.setattr(sys, "platform", "linux")
-
-    # pgrep fails
-    mock_runner = MagicMock()
-    mock_runner.return_value.returncode = 1
-    mock_runner.return_value.stdout = ""
-
-    # create fake /proc directory
-    fake_proc = tmp_path / "proc"
-    fake_proc.mkdir()
-    pid_dir = fake_proc / "1234"
-    pid_dir.mkdir()
-    (pid_dir / "cmdline").write_bytes(b"/usr/bin/python3\x00/opt/cloud/onedrive\x00--monitor\x00")
-
-    class FakePath:
-        def __init__(self, p):
-            self.p = Path(p)
-
-        def __call__(self, path_str):
-            if str(path_str) == "/proc":
-                return fake_proc
-            return Path(path_str)
+    path_cls = _fake_proc(tmp_path, {
+        1234: ("onedrive", [b"/usr/bin/onedrive", b"--monitor"]),
+    })
 
     assert check_process(
         "OneDrive.exe",
-        _runner=mock_runner,
-        _path_cls=FakePath(fake_proc),
+        _runner=_pgrep_not_found(),
+        _path_cls=path_cls,
     ) is True
+
+
+def test_check_process_linux_proc_fallback_ignores_path_arguments(monkeypatch, tmp_path):
+    """Ein Editor mit ~/OneDrive/... oder Dropbox als Box-Teilstring ist kein Treffer."""
+    monkeypatch.setattr(sys, "platform", "linux")
+    path_cls = _fake_proc(tmp_path, {
+        10: ("vim", [b"vim", b"/home/u/OneDrive/notes.txt"]),
+        11: ("dropbox", [b"/usr/bin/dropbox"]),
+        12: ("VirtualBox", [b"/usr/lib/virtualbox/VirtualBox"]),
+    })
+
+    assert check_process("OneDrive.exe", _runner=_pgrep_not_found(),
+                         _path_cls=path_cls) is False
+    assert check_process("Box.exe", _runner=_pgrep_not_found(),
+                         _path_cls=path_cls) is False
+    assert check_process("Dropbox.exe", _runner=_pgrep_not_found(),
+                         _path_cls=path_cls) is True
+
+
+def test_posix_match_name_truncates_to_linux_comm(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "linux")
+    mock_runner = _pgrep_not_found()
+    check_process("averyveryverylongsyncclient", _runner=mock_runner,
+                  _path_cls=lambda _p: Path("/nonexistent-proc"))
+    assert mock_runner.call_args[0][0] == ["pgrep", "-x", "averyveryverylo"]
 
 
 def test_kill_process_win32(monkeypatch):
@@ -134,7 +164,8 @@ def test_kill_process_posix(monkeypatch):
         _checker=mock_checker,
     )
     assert res is True
-    assert mock_runner.call_args[0][0][:2] == ["pkill", "-f"]
+    killed = [c[0][0] for c in mock_runner.call_args_list]
+    assert killed == [["pkill", "-x", "Dropbox"], ["pkill", "-x", "dropbox"]]
 
 
 def test_launch_process_win32(monkeypatch, tmp_path):

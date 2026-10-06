@@ -1,5 +1,6 @@
 """Tests für Multicloud-Provider: Discovery, Erkennung, Virtual-Mount Guard."""
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -165,42 +166,49 @@ class _FakeCompleted:
 
 
 def test_googledrive_is_running_detects_process(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("GoogleDriveFS.exe  9008\n"))
     assert GoogleDriveProvider().is_running() is True
 
 
 def test_googledrive_is_running_negative(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("INFO: Keine Aufgaben\n"))
     assert GoogleDriveProvider().is_running() is False
 
 
 def test_dropbox_is_running(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("Dropbox.exe  1234\n"))
     assert DropboxProvider().is_running() is True
 
 
 def test_box_is_running(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("Box.exe  2345\n"))
     assert BoxProvider().is_running() is True
 
 
 def test_nextcloud_is_running(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("nextcloud.exe  6789\n"))
     assert NextcloudProvider().is_running() is True
 
 
 def test_synology_drive_is_running(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("cloud-drive-ui.exe  4321\n"))
     assert SynologyDriveProvider().is_running() is True
 
 
 def test_icloud_is_running_either_process(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(subprocess, "run",
                         lambda *a, **k: _FakeCompleted("iCloud.exe  5678\n"))
     assert ICloudProvider().is_running() is True
@@ -323,6 +331,7 @@ def test_googledrive_resume_picks_highest_semantic_version(tmp_path, monkeypatch
 
     monkeypatch.setattr(sp, "Popen", fake_popen)
     monkeypatch.setattr(GoogleDriveProvider, "_RESUME_BASE", base, raising=False)
+    monkeypatch.setattr(sys, "platform", "win32")
 
     GoogleDriveProvider().resume()
 
@@ -339,6 +348,7 @@ def test_check_process_case_insensitive_exe_name(monkeypatch):
     """Robustheit: tasklist gibt Prozessnamen in System-Schreibweise zurück
     (z.B. 'Nextcloud.exe'). Wenn wir mit 'nextcloud.exe' suchen, muss der
     Vergleich trotzdem True liefern (case-insensitive)."""
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     from cloudlockfixer.providers import _check_process
 
     class _Fake:
@@ -367,10 +377,14 @@ def test_pcloud_detects_volume_with_pcloud_label(monkeypatch):
     def fake_get_volume_label(letter: str) -> str:
         return {"P": "pCloud Drive", "Q": "pCloud Backup"}.get(letter, "")
 
-    monkeypatch.setattr(
-        _ctypes.windll.kernel32, "GetLogicalDrives", fake_get_logical_drives,
-        raising=False,
-    )
+    class _FakeKernel32:
+        GetLogicalDrives = staticmethod(fake_get_logical_drives)
+
+    class _FakeWinDLL:
+        kernel32 = _FakeKernel32()
+
+    # ctypes.windll existiert nur unter Windows; ein Fake hält den Test portabel.
+    monkeypatch.setattr(_ctypes, "windll", _FakeWinDLL(), raising=False)
     monkeypatch.setattr(
         "cloudlockfixer.providers._get_volume_label", fake_get_volume_label
     )
@@ -406,6 +420,7 @@ def test_pcloud_no_roots_when_no_pcloud_volume(monkeypatch):
 
 
 def test_pcloud_is_running_detects_process(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(
         subprocess, "run",
         lambda *a, **k: _FakeCompleted("pCloud.exe  4321\n"),
@@ -414,6 +429,7 @@ def test_pcloud_is_running_detects_process(monkeypatch):
 
 
 def test_pcloud_is_running_negative(monkeypatch):
+    monkeypatch.setattr(sys, "platform", "win32")  # tasklist-Ausgabe
     monkeypatch.setattr(
         subprocess, "run",
         lambda *a, **k: _FakeCompleted("INFO: Keine Aufgaben\n"),

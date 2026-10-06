@@ -65,7 +65,7 @@ def test_cli_run_now_passes_explicit_max_retries(tmp_path: Path, monkeypatch: py
 
     captured_kwargs: dict[str, object] = {}
 
-    def fake_run_once(queue, force_pause=False, max_retries=None):
+    def fake_run_once(queue, force_pause=False, max_retries=None, **kwargs):
         captured_kwargs["force_pause"] = force_pause
         captured_kwargs["max_retries"] = max_retries
         return {
@@ -93,7 +93,7 @@ def test_cli_run_now_uses_configured_max_retries(tmp_path: Path, monkeypatch: py
 
     captured_kwargs: dict[str, object] = {}
 
-    def fake_run_once(queue, force_pause=False, max_retries=None):
+    def fake_run_once(queue, force_pause=False, max_retries=None, **kwargs):
         captured_kwargs["max_retries"] = max_retries
         return {
             "done": 0,

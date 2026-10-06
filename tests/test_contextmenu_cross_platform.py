@@ -80,7 +80,7 @@ def test_linux_contextmenu_frozen_executable(monkeypatch, tmp_path):
 
     assert contextmenu.install()
     script = (nautilus_dir / "01_delayed_rename.sh").read_text(encoding="utf-8")
-    assert 'CMD="/opt/CloudLockFixer/clf"' in script
+    assert '    /opt/CloudLockFixer/clf "$@"\n' in script
 
     desktop = kio_desktop.read_text(encoding="utf-8")
     assert 'Exec="/opt/CloudLockFixer/clf" gui-add --op rename --src %f' in desktop

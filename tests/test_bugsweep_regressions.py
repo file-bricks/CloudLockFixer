@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import ast
+import sys
 from pathlib import Path
+
+import pytest
 
 SRC = Path(__file__).resolve().parents[1] / "src" / "cloudlockfixer"
 
@@ -169,6 +172,11 @@ def test_case_only_move_file(tmp_path):
 
 def test_case_only_rename_two_stage_fallback(tmp_path, monkeypatch):
     """Wenn direkter os.replace bei Case-Rename scheitert, greift der zweistufige Zwischenschritt."""
+    probe = tmp_path / "case_probe"
+    probe.write_text("x", encoding="utf-8")
+    if not (tmp_path / "CASE_PROBE").exists():
+        pytest.skip("Case-Only-Rename betrifft nur case-insensitive Dateisysteme")
+    probe.unlink()
     import os
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -327,6 +335,7 @@ def test_nonexistent_sync_roots_are_filtered(tmp_path, monkeypatch):
     assert missing_od not in od_roots, "OneDriveProvider must filter non-existent sync roots"
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows-Laufwerkspfade sind nur unter Windows absolut")
 def test_windows_resume_exe_candidates_are_strictly_absolute(monkeypatch):
     """Executable candidates in resume() must be strictly absolute paths (Bug #12-1)."""
     import sys

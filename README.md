@@ -60,7 +60,7 @@
 - **Omnichannel Ingestion:** Add tasks via headless **CLI** (`clf add`), plain-text **`queue.txt`**, PySide6 **System Tray Dialog**, or Windows Explorer **Right-Click Context Menu** (`HKCU`).
 - **8-Provider Cloud Sensor:** Automatic discovery and intelligent pause/resume for OneDrive, Dropbox, Google Drive, Box, iCloud, Nextcloud, pCloud, and Synology Drive.
 - **Virtual Mount Guard:** Distinguishes between folder-mount providers (OneDrive, Dropbox) and virtual-drive mounts (Google Drive, pCloud), strictly preserving virtual mount stability.
-- **Deterministic Retry Engine with Exponential Backoff:** Configurable retry interval (default 2 h), retry limits (`max_retries`), and exponential backoff (`--initial-delay`, `--backoff-multiplier`, `--max-delay`, jitter) to smooth out synchronization contention. Tasks transition idempotently between `pending`, `retryable`, `blocked`, `failed_permanent`, and `done`.
+- **Deterministic Retry Engine with Exponential Backoff:** Configurable retry interval (default 2 h), retry limits (`max_retries`), and exponential backoff (`--initial-delay`, `--backoff-multiplier`, `--max-delay`) to smooth out synchronization contention. Tasks transition idempotently between `pending`, `retryable`, `blocked`, `failed_permanent`, and `done`.
 - **Cross-Platform Shell Integrations:** Native right-click context menu extensions across Windows Explorer (`HKCU`), Linux file managers (Nautilus, Nemo, Caja, Dolphin), and macOS Finder Services.
 - **Windows Store & MSIX Packaging Pipeline:** Turnkey MSIX Desktop Bridge packaging (`store_package/`, `WINDOWS_STORE_PREP.md`) and high-resolution store presentation assets.
 - **100% Local-First & Zero Egress:** Zero outbound network traffic, zero analytics, zero external sockets. Verified by automated AST static analysis contract tests.
@@ -273,7 +273,7 @@ sequenceDiagram
   | - Multi-Step Chaining: 1-4 atomic steps (rename, move, delete) with fail-halt   |
   | - Cloud Provider Sensor: 8 engines (OneDrive, Dropbox, Google Drive, Box, etc.)  |
   | - Virtual Mount Guard: selectively pauses folder sync; preserves virtual drives  |
-  | - Backoff Scheduler: configurable exponential backoff, jitter, and deferral     |
+  | - Backoff Scheduler: configurable exponential backoff and deferral              |
   | - Fallback Engine: streaming copy + SHA-256 match + defensive source unlink     |
   +----------------------------------------------------------------------------------+
                                            |
@@ -382,7 +382,7 @@ CloudLockFixer operates unobtrusively in the background while offering intuitive
 | Preventive Watcher & Exponential Backoff | Cross-Platform Architecture & Store Readiness |
 | :---: | :---: |
 | [![Preventive Watcher Settings](screenshots/store/03_preventive-watcher-settings.png)](screenshots/store/03_preventive-watcher-settings.png) | [![Cross-Platform Architecture](screenshots/store/04_cross-platform-architecture.png)](screenshots/store/04_cross-platform-architecture.png) |
-| *Fine-tune background retry intervals (30m–12h), jitter, backoff multiplier, and filesystem watcher thresholds.* | *Hermetic zero-egress architecture, unprivileged user mode (`RunAsInvoker`), and native Windows Store MSIX packaging.* |
+| *Fine-tune background retry intervals (30m–12h), backoff multiplier, and filesystem watcher thresholds.* | *Hermetic zero-egress architecture, unprivileged user mode (`RunAsInvoker`), and native Windows Store MSIX packaging.* |
 
 ### PySide6 System Tray Interface
 CloudLockFixer runs quietly in the Windows notification area (System Tray). Key tray menu features:
@@ -391,7 +391,7 @@ CloudLockFixer runs quietly in the Windows notification area (System Tray). Key 
 - **Retry Controls:** View and re-trigger individual failed tasks or trigger `Retry All`.
 - **Configurable Interval:** Adjust worker background cycle (30-min intervals up to 12 hours; default 2 h).
 - **Max Retries:** Configure retry limits (Unlimited, 3, 5, 10, 20 attempts).
-- **Exponential Backoff & Jitter:** Smooths out transient file locks using exponential deferral without thundering herd spikes.
+- **Exponential Backoff:** Smooths out transient file locks using capped exponential deferral instead of hammering locked files.
 - **Desktop Notifications:** Toggle native Windows toast notifications on permanent task failure or block.
 - **Autostart with Windows:** Toggles `HKCU` registry autostart entry without admin privileges.
 - **Open Data Folder:** Direct access to `%LOCALAPPDATA%\CloudLockFixer` containing `queue.txt`, `queue.json`, and runtime logs.
@@ -452,12 +452,11 @@ clf run-now
 clf run-now --pause
 clf run-now --max-retries 5
 
-# Execute with custom exponential backoff & jitter
+# Skip tasks whose backoff has not expired yet (manual runs are immediate by default)
+clf run-now --backoff
+# Customize the retry schedule written for tasks that fail in this run
 clf run-now --initial-delay 5.0 --backoff-multiplier 2.0 --max-delay 300.0
 clf run-now --ignore-backoff    # Process immediately ignoring deferrals
-
-# Diagnostics
-clf diagnose
 ```
 
 *(Development invocation: `PYTHONPATH=src python -m cloudlockfixer.cli ...`)*
@@ -504,7 +503,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 353 automated tests (`pytest`, 353 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 374 automated tests (`pytest`, 374 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

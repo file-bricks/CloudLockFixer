@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import plistlib
+import shlex
 import shutil
 import sys
 from pathlib import Path
@@ -38,7 +39,7 @@ def _command(op: str) -> str:
 
 
 def _quote_sh(value: str) -> str:
-    """Quote one argument for POSIX shell and desktop execution."""
+    """Quote one argument for a Desktop Entry ``Exec`` line (KDE ServiceMenu)."""
     escaped = (
         value.replace("\\", "\\\\")
         .replace('"', '\\"')
@@ -51,6 +52,15 @@ def _quote_sh(value: str) -> str:
 
 def _desktop_exec_command() -> str:
     return " ".join(_quote_sh(arg) for arg in _launch_args())
+
+
+def _shell_command() -> str:
+    """Launcher-Aufruf für POSIX-Shellskripte (Nautilus, Automator).
+
+    Desktop-Entry-Quoting (``%%``, Backslash-Escapes) ist in einer echten Shell
+    falsch; shlex.quote liefert dort ein sicheres, wörtliches Argument.
+    """
+    return " ".join(shlex.quote(arg) for arg in _launch_args())
 
 
 # ---------------------------------------------------------------------------
@@ -129,18 +139,23 @@ def _linux_kio_dir() -> Path:
 
 
 def _linux_nautilus_script_content(op: str, label_key: str) -> str:
-    cmd = _desktop_exec_command()
+    # Eine Shell-Funktion statt CMD-Variable: ``CMD="python" "launcher"`` würde
+    # den Launcher als eigenes Kommando ausführen, und ein unquotiertes $CMD
+    # zerfiele an Leerzeichen im Pfad.
+    cmd = _shell_command()
     return (
         "#!/bin/sh\n"
         f"# CloudLockFixer - {t(label_key)}\n"
-        "CMD=" + cmd + "\n"
+        "clf() {\n"
+        f"    {cmd} \"$@\"\n"
+        "}\n"
         "if [ -n \"$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS\" ]; then\n"
         "    printf '%s\\n' \"$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS\" | while IFS= read -r f || [ -n \"$f\" ]; do\n"
-        f"        [ -n \"$f\" ] && $CMD gui-add --op {op} --src \"$f\"\n"
+        f"        [ -n \"$f\" ] && clf gui-add --op {op} --src \"$f\"\n"
         "    done\n"
         "elif [ -n \"$1\" ]; then\n"
         "    for f in \"$@\"; do\n"
-        f"        $CMD gui-add --op {op} --src \"$f\"\n"
+        f"        clf gui-add --op {op} --src \"$f\"\n"
         "    done\n"
         "fi\n"
     )
@@ -246,7 +261,7 @@ def _macos_is_installed() -> bool:
 
 def _macos_install() -> bool:
     services_dir = _macos_services_dir()
-    cmd = _desktop_exec_command()
+    cmd = _shell_command()
 
     try:
         services_dir.mkdir(parents=True, exist_ok=True)
