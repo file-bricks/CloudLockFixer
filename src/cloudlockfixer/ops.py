@@ -44,16 +44,55 @@ def _is_lock_error(e: OSError) -> bool:
 
 def _force_writable(path: str | os.PathLike) -> None:
     try:
-        os.chmod(path, stat.S_IWRITE)
+        if sys.platform == "win32":
+            os.chmod(path, stat.S_IWRITE)  # entfernt das Read-only-Attribut
+            return
+        # POSIX: Rechte nur ergänzen. chmod(S_IWRITE) setzte den Modus auf 0o200
+        # und entzog Verzeichnissen damit Lese-/Ausführrecht. Links nicht anfassen
+        # (chmod folgt ihnen und änderte sonst das Ziel).
+        st = os.lstat(path)
+        if stat.S_ISLNK(st.st_mode):
+            return
+        extra = stat.S_IWUSR
+        if stat.S_ISDIR(st.st_mode):
+            extra |= stat.S_IRUSR | stat.S_IXUSR
+        os.chmod(path, stat.S_IMODE(st.st_mode) | extra)
     except OSError:
         pass
+
+
+def _make_tree_writable(root: Path) -> None:
+    """POSIX: Verzeichnisse top-down beschreib-/lesbar machen, ohne Links zu folgen.
+
+    Ein Verzeichnis ohne Lese-/Ausführrecht kann rmtree weder auflisten noch
+    leeren; der onexc-Handler kommt dafür zu spät. Daher vor dem zweiten
+    Löschversuch einmal den Baum öffnen."""
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        _force_writable(current)
+        try:
+            entries = list(os.scandir(current))
+        except OSError:
+            continue
+        for entry in entries:
+            try:
+                if entry.is_dir(follow_symlinks=False):
+                    stack.append(Path(entry.path))
+                else:
+                    _force_writable(entry.path)
+            except OSError:
+                continue
 
 
 def _on_rm_error(func, path, _exc):
     """rmtree-Fehlerbehandler: read-only-Attribut entfernen, dann erneut versuchen.
     Windows verweigert das Löschen read-only markierter Dateien/Verzeichnisse mit
     WinError 5 (z.B. .pytest_cache, .git/objects oder von OneDrive 'pinned'). Ohne
-    diesen Handler bricht shutil.rmtree an solchen Einträgen ab."""
+    diesen Handler bricht shutil.rmtree an solchen Einträgen ab. Unter POSIX
+    braucht das Entfernen eines Eintrags Schreibrecht am Elternverzeichnis."""
+    if sys.platform != "win32":
+        _force_writable(os.path.dirname(os.fspath(path)))
     _force_writable(path)
     func(path)
 
@@ -66,12 +105,24 @@ def _is_link(p: Path) -> bool:
     return bool(isjunction and isjunction(p))
 
 
-def _rmtree(p: Path) -> None:
+def _rmtree_once(p: Path) -> None:
     # onexc ab 3.12 (onerror dort deprecated); Handler-Signatur ist kompatibel.
     if sys.version_info >= (3, 12):
         shutil.rmtree(p, onexc=_on_rm_error)
     else:
         shutil.rmtree(p, onerror=_on_rm_error)
+
+
+def _rmtree(p: Path) -> None:
+    try:
+        _rmtree_once(p)
+    except OSError:
+        # Unlesbare Unterordner überspringt rmtree trotz Handler und scheitert
+        # dann z.B. mit ENOTEMPTY am Elternordner — daher der Baum-weite Retry.
+        if sys.platform == "win32":
+            raise
+        _make_tree_writable(p)
+        _rmtree_once(p)
 
 
 def _payload_signature(p: Path) -> tuple[int, int, str]:

@@ -42,6 +42,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
     never descends into linked directories.
     Symlinks werden tatsächlich entfernt (ohne das Ziel anzufassen); der Lock-Fallback
     folgt keinen Verzeichnis-Links mehr.
+  * Linux/macOS: read-only directory trees can be deleted again; the permission fix
+    only adds owner bits instead of resetting the mode to `0o200` (which removed
+    read/execute from directories). Schreibgeschützte Bäume lassen sich unter POSIX löschen.
   * A task added via `clf add` while the tray worker runs is no longer overwritten by
     the worker's final save. Parallel hinzugefügte Tasks gehen nicht mehr verloren.
   * `clf run-now` processes deferred tasks immediately unless `--backoff` is given
