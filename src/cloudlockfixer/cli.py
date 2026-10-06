@@ -32,6 +32,36 @@ def _setup_logging() -> None:
     )
 
 
+def _positive_seconds(value: str) -> float:
+    try:
+        seconds = float(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid number: {value!r}") from None
+    if not 0 < seconds < float("inf"):
+        raise argparse.ArgumentTypeError(f"must be a positive number of seconds: {value!r}")
+    return seconds
+
+
+def _positive_int(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid integer: {value!r}") from None
+    if number <= 0:
+        raise argparse.ArgumentTypeError(f"must be a positive integer: {value!r}")
+    return number
+
+
+def _backoff_factor(value: str) -> float:
+    try:
+        factor = float(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid number: {value!r}") from None
+    if not 1.0 <= factor <= 100.0:
+        raise argparse.ArgumentTypeError(f"must be between 1.0 and 100.0: {value!r}")
+    return factor
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     review_only = bool(argv) and argv[0] == "review-legacy-retries"
@@ -54,12 +84,18 @@ def main(argv: list[str] | None = None) -> int:
     p_run = sub.add_parser("run-now", help=t("cli_run_help"))
     p_run.add_argument("--pause", action="store_true",
                        help=t("cli_pause_help"))
-    p_run.add_argument("--max-retries", type=int, default=None, metavar="N",
+    p_run.add_argument("--max-retries", type=_positive_int, default=None, metavar="N",
                        help=t("cli_max_retries_help"))
     p_run.add_argument("--backoff", action="store_true",
-                       help="Wende exponentielles Backoff an und überspringe unfertige Aufgaben")
+                       help=t("cli_backoff_help"))
     p_run.add_argument("--ignore-backoff", "--force", action="store_true",
                        dest="ignore_backoff", help=t("cli_ignore_backoff_help"))
+    p_run.add_argument("--initial-delay", type=_positive_seconds, default=None,
+                       metavar="SEC", help=t("cli_initial_delay_help"))
+    p_run.add_argument("--backoff-multiplier", type=_backoff_factor, default=None,
+                       metavar="FACTOR", help=t("cli_backoff_multiplier_help"))
+    p_run.add_argument("--max-delay", type=_positive_seconds, default=None,
+                       metavar="SEC", help=t("cli_max_delay_help"))
 
     p_retry = sub.add_parser("retry", help=t("cli_retry_help"))
     p_retry.add_argument("task_id", metavar="ID", help=t("cli_retry_id_help"))
@@ -133,30 +169,32 @@ def main(argv: list[str] | None = None) -> int:
             print(t("queue_empty"))
             return 0
         for tk in queue.tasks:
-            next_info = f"  (nächster Versuch: {tk.next_try_at})" if tk.next_try_at else ""
-            print(f"[{tk.status:7}] {tk.id}  (Versuche {tk.retry_count}){next_info}  {tk.describe()}"
+            next_info = f"  ({t('list_next_try', at=tk.next_try_at)})" if tk.next_try_at else ""
+            print(f"[{tk.status:7}] {tk.id}  ({t('list_attempts', n=tk.retry_count)}){next_info}"
+                  f"  {tk.describe()}"
                   + (f"  ! {tk.last_error}" if tk.last_error else ""))
         return 0
 
     if args.cmd == "run-now":
         max_retries = (args.max_retries if args.max_retries is not None
                        else settings.get_max_retries(cfg))
-        backoff_base = settings.get_backoff_base(cfg)
-        backoff_max = settings.get_backoff_max(cfg)
-        apply_backoff = bool(getattr(args, "backoff", False)) and not bool(getattr(args, "ignore_backoff", False))
-        ignore_backoff = bool(getattr(args, "ignore_backoff", False))
-        try:
-            summary = run_once(
-                queue,
-                force_pause=args.pause,
-                max_retries=max_retries,
-                apply_backoff=apply_backoff,
-                ignore_backoff=ignore_backoff,
-                backoff_base_sec=backoff_base,
-                backoff_max_sec=backoff_max,
-            )
-        except TypeError:
-            summary = run_once(queue, force_pause=args.pause, max_retries=max_retries)
+        backoff_base = (args.initial_delay if args.initial_delay is not None
+                        else settings.get_backoff_base(cfg))
+        backoff_max = (args.max_delay if args.max_delay is not None
+                       else settings.get_backoff_max(cfg))
+        backoff_multiplier = (args.backoff_multiplier if args.backoff_multiplier is not None
+                              else settings.get_backoff_multiplier(cfg))
+        # Manuelle Läufe arbeiten sofort; Aufschieben nur mit explizitem --backoff.
+        apply_backoff = args.backoff and not args.ignore_backoff
+        summary = run_once(
+            queue,
+            force_pause=args.pause,
+            max_retries=max_retries,
+            ignore_backoff=not apply_backoff,
+            backoff_base_sec=backoff_base,
+            backoff_max_sec=backoff_max,
+            backoff_multiplier=backoff_multiplier,
+        )
         paused = ""
         if summary["paused_providers"]:
             paused = t("paused_providers",
@@ -164,10 +202,13 @@ def main(argv: list[str] | None = None) -> int:
         deferred = ""
         if summary.get("deferred"):
             deferred = t("run_summary_deferred", deferred=summary["deferred"])
+        blocked = ""
+        if summary.get("blocked"):
+            blocked = t("run_summary_blocked", blocked=summary["blocked"])
         print(t("run_summary", done=summary["done"],
                 failed=summary["failed_again"],
                 permanent=summary["failed_permanent"],
-                start=summary["pending_start"], paused=paused) + deferred)
+                start=summary["pending_start"], paused=paused) + blocked + deferred)
         return 0
 
     if args.cmd == "retry":

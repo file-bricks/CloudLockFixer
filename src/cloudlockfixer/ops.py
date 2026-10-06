@@ -58,6 +58,14 @@ def _on_rm_error(func, path, _exc):
     func(path)
 
 
+def _is_link(p: Path) -> bool:
+    """True für Symlinks und (ab Python 3.12) Windows-Junctions."""
+    if p.is_symlink():
+        return True
+    isjunction = getattr(os.path, "isjunction", None)
+    return bool(isjunction and isjunction(p))
+
+
 def _rmtree(p: Path) -> None:
     # onexc ab 3.12 (onerror dort deprecated); Handler-Signatur ist kompatibel.
     if sys.version_info >= (3, 12):
@@ -121,6 +129,12 @@ def _delete_path(p: Path) -> tuple[bool, str]:
     if forbidden:
         return False, err
     try:
+        if _is_link(p):
+            # Symlink/Junction: nur den Verweis entfernen, nie das Ziel. rmtree
+            # verweigert Links und meldete das über den onexc-Handler bisher
+            # stillschweigend als Erfolg, obwohl der Link bestehen blieb.
+            _remove_entry(p)
+            return True, "gelöscht"
         if not p.exists():
             return True, "bereits gelöscht"
         if p.is_dir():
@@ -152,6 +166,18 @@ def _delete_path(p: Path) -> tuple[bool, str]:
         return False, f"Löschen fehlgeschlagen: {e}"
 
 
+def _remove_entry(child: Path) -> None:
+    """Entfernt eine Datei oder einen Link-Eintrag, ohne dem Link zu folgen."""
+    if _is_link(child):
+        if child.is_dir() and not child.is_symlink():
+            child.rmdir()  # Windows-Junction
+        else:
+            child.unlink()
+        return
+    _force_writable(child)
+    child.unlink()
+
+
 def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
     """Löscht ein Verzeichnis rekursiv, überspringt EBUSY-gesperrte Dateien.
 
@@ -163,24 +189,36 @@ def _delete_dir_skip_locked(p: Path) -> tuple[bool, list[Path]]:
     if not p.exists():
         return True, []
 
-    # Dateien zuerst (tiefes Niveau zuerst damit Verzeichnisse leer werden)
-    for child in sorted(p.rglob("*"), key=lambda x: len(x.parts), reverse=True):
-        if child.is_file() or child.is_symlink():
+    # os.walk statt rglob: Verzeichnis-Links und Junctions werden nie betreten,
+    # sondern nur als Eintrag entfernt — sonst löschte der Fallback Dateien im
+    # Link-Ziel außerhalb des zu löschenden Baums.
+    dirs: list[Path] = []
+    for root, dirnames, filenames in os.walk(p, topdown=True):
+        root_path = Path(root)
+        dirs.append(root_path)
+        entries = [root_path / name for name in filenames]
+        real_dirs = []
+        for name in dirnames:
+            child = root_path / name
+            if _is_link(child):
+                entries.append(child)
+            else:
+                real_dirs.append(name)
+        dirnames[:] = real_dirs
+        for child in entries:
             try:
-                _force_writable(child)
-                child.unlink()
+                _remove_entry(child)
             except OSError as e:
                 if _is_lock_error(e):
                     locked.append(child)
                 # Andere Fehler ignorieren (best-effort)
 
-    # Leere Unterverzeichnisse entfernen
-    for child in sorted(p.rglob("*"), key=lambda x: len(x.parts), reverse=True):
-        if child.is_dir():
-            try:
-                child.rmdir()  # nur wenn leer
-            except OSError:
-                pass
+    # Leere Unterverzeichnisse entfernen (tiefste zuerst)
+    for child in reversed(dirs[1:]):
+        try:
+            child.rmdir()  # nur wenn leer
+        except OSError:
+            pass
 
     if not locked:
         try:

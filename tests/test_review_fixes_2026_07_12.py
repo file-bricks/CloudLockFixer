@@ -153,7 +153,7 @@ def _patch_kernel32(monkeypatch, fake):
     class _FakeWinDLL:
         kernel32 = fake
 
-    monkeypatch.setattr(_ctypes, "windll", _FakeWinDLL())
+    monkeypatch.setattr(_ctypes, "windll", _FakeWinDLL(), raising=False)
 
 
 def test_get_volume_label_sets_and_restores_error_mode(monkeypatch):

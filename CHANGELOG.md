@@ -31,7 +31,36 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   The worker continues later tasks and saves pending retries with their next attempt time.
 - Gedeckeltes Retry-Backoff bleibt bei hohen persistierten Versuchszählern stabil;
   nachfolgende Tasks werden weiterverarbeitet und Wiederholungen gespeichert.
-- The verification contract reflects the current unreleased source state: 353 passing tests.
+- **Code review 2026-10-06 / Code-Review 2026-10-06:**
+  * Linux/macOS: sync clients are now detected and paused by exact process name
+    (`pgrep -x`/`pkill -x`, `/proc/<pid>/comm`) instead of a command-line substring.
+    `pkill -f box` previously also hit Dropbox/VirtualBox or an editor with `~/Box/...` open.
+    Sync-Clients werden unter Linux/macOS per exaktem Prozessnamen erkannt und pausiert,
+    statt per Teilstring der Kommandozeile fremde Prozesse zu beenden.
+  * Deleting a symlink no longer reports success while the link remains; links and
+    junctions are removed without touching their target, and the locked-file fallback
+    never descends into linked directories.
+    Symlinks werden tatsächlich entfernt (ohne das Ziel anzufassen); der Lock-Fallback
+    folgt keinen Verzeichnis-Links mehr.
+  * A task added via `clf add` while the tray worker runs is no longer overwritten by
+    the worker's final save. Parallel hinzugefügte Tasks gehen nicht mehr verloren.
+  * `clf run-now` processes deferred tasks immediately unless `--backoff` is given
+    (it previously always applied backoff). The documented `--initial-delay`,
+    `--backoff-multiplier` and `--max-delay` flags now exist; the multiplier is also
+    configurable via `backoff_multiplier` in `settings.json`. Undocumented jitter and
+    the non-existent `clf diagnose` were removed from the docs.
+    `run-now` schiebt nur noch mit `--backoff` auf; dokumentierte Backoff-Flags umgesetzt.
+  * Worker errors are no longer swallowed by a `TypeError` fallback that re-ran the
+    whole queue. Ein TypeError im Worker löst keinen zweiten Lauf mehr aus.
+  * Linux Nautilus scripts and macOS Quick Actions now invoke the launcher correctly
+    (the generated Nautilus script executed the launcher path as a command).
+    Nautilus-Skripte und macOS-Quick-Actions rufen den Launcher korrekt auf.
+  * `python -m cloudlockfixer <args>` runs the CLI; the tray's "open data folder"
+    works on Linux/macOS; `clf list` and the run summary are localized and report
+    blocked tasks.
+  * Windows-only tests are platform-pinned or skipped so the suite also passes on
+    Linux/macOS. Windows-spezifische Tests laufen jetzt auch unter Linux/macOS.
+- The verification contract reflects the current unreleased source state: 373 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

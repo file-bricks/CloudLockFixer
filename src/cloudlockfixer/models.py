@@ -67,19 +67,26 @@ class Task:
 
     def compute_next_retry(
         self,
-        base_sec: int = 60,
-        max_sec: int = 3600,
+        base_sec: float = 60,
+        max_sec: float = 3600,
         now_dt: datetime | None = None,
+        multiplier: float = 2.0,
     ) -> str:
-        """Berechnet den nächsten Retry-Zeitpunkt mit gedeckeltem exponentiellem Backoff."""
+        """Berechnet den nächsten Retry-Zeitpunkt mit gedeckeltem exponentiellem Backoff.
+
+        Verzögerung = ``base_sec * multiplier ** (retry_count - 1)``, gedeckelt auf
+        ``max_sec``. Ein Faktor <= 1 ergibt eine konstante Verzögerung.
+        """
         exponent = max(0, self.retry_count - 1)
         # Nach Erreichen des Caps nicht weiter potenzieren: persistierte Zähler
-        # können bei unbegrenzten Wiederholungen beliebig groß werden.
+        # können bei unbegrenzten Wiederholungen beliebig groß werden. Ohne
+        # Wachstum (Faktor <= 1) bliebe die Schleife ungebremst — daher entfällt sie.
         delay = min(base_sec, max_sec)
-        for _ in range(exponent):
-            if delay >= max_sec:
-                break
-            delay = min(max_sec, delay * 2)
+        if multiplier > 1:
+            for _ in range(exponent):
+                if delay >= max_sec:
+                    break
+                delay = min(max_sec, delay * multiplier)
         current = now_dt or datetime.now(timezone.utc)
         if current.tzinfo is None:
             current = current.replace(tzinfo=timezone.utc)
@@ -365,7 +372,32 @@ class Queue:
         with self._lock:
             self._save_unlocked()
 
+    def _merge_external_tasks_unlocked(self) -> None:
+        """Übernimmt Tasks, die ein anderer Prozess seit load() gespeichert hat.
+
+        Tray und CLI teilen sich queue.json. Ohne Merge überschrieb das save()
+        am Ende eines (minutenlangen) Worker-Laufs ein zwischenzeitliches
+        ``clf add`` — der Task ging verloren. Tasks werden nie aus der Queue
+        entfernt, eine unbekannte ID auf der Platte ist daher immer neu.
+        """
+        try:
+            raw = json.loads(self.json_path.read_text(encoding="utf-8"))
+            on_disk = raw.get("tasks", []) if isinstance(raw, dict) else []
+        except (ValueError, OSError, AttributeError):
+            return
+        known = {t.id for t in self.tasks}
+        for entry in on_disk:
+            if not isinstance(entry, dict) or entry.get("id") in known:
+                continue
+            try:
+                task = Task.from_dict(entry)
+            except (TypeError, ValueError, AttributeError):
+                continue
+            self.tasks.append(task)
+            known.add(task.id)
+
     def _save_unlocked(self) -> None:
+        self._merge_external_tasks_unlocked()
         payload = {"version": 1, "saved_at": _now(),
                    "tasks": [t.to_dict() for t in self.tasks]}
         tmp = self.json_path.with_suffix(".json.tmp")

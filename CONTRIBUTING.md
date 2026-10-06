@@ -17,7 +17,7 @@ Every contribution must strictly preserve our 10 foundational system and operati
 - **Unprivileged Non-Elevation Execution (`INV-PRIV-02`)**: Executes strictly in user mode (`RunAsInvoker`), never requiring administrative privileges, root elevation, or UAC prompts.
 - **Cryptographic Copy+Delete Fallback (`INV-SAFE-03`)**: Fallback copies verify bit-for-bit SHA-256 digests before the locked source file is unlinked; zero data loss guarantee.
 - **Atomic Step Ordering (`INV-ATOM-04`)**: In multi-step operation chains (`1–4 steps`), Step $N$ executes strictly if Step $N-1$ succeeded. Destructive steps are skipped on upstream failure.
-- **Configurable Retry Limits & Backoff (`INV-RETRY-05`)**: Configurable exponential retry backoff, jitter, and retry caps to resolve transient cloud-sync lock contention safely.
+- **Configurable Retry Limits & Backoff (`INV-RETRY-05`)**: Configurable exponential retry backoff (base delay, multiplier, cap) and retry limits to resolve transient cloud-sync lock contention safely.
 - **Desktop Notification Contract (`INV-NOTIF-06`)**: Emits non-intrusive desktop tray notifications on permanent failures or terminal conflicts without disrupting workflow.
 - **Virtual Mount Guard (`INV-PROV-07`)**: Distinguishes between folder mounts (OneDrive, Dropbox) and virtual-drive mounts (Google Drive, pCloud); never pauses virtual mounts.
 - **Multi-Host Conflict Defense (`INV-CONF-08`)**: Strict `.gitignore` blocking of cloud sync conflict copies (`*-conflict-*`, `* (Kopie)*`) and multi-agent coordination locks (`LOCK.*`).
@@ -95,7 +95,7 @@ Jeder Beitrag muss unsere 10 grundlegenden System- und Betriebsinvarianten wahre
 - **Nicht-privilegierte Ausführung (`INV-PRIV-02`)**: Strikter Benutzermodus (`RunAsInvoker`), niemals Administrator- oder Root-Rechte oder UAC-Prompts erforderlich.
 - **Kryptographisches Copy+Delete-Fallback (`INV-SAFE-03`)**: Fallback-Kopien verifizieren vor dem Löschen der gesperrten Quelldatei bitgenaue SHA-256-Prüfsummen; Garantie gegen Datenverlust.
 - **Atomare Schritt-Reihenfolge (`INV-ATOM-04`)**: In mehrschrittigen Operationsketten (1–4 Schritte) wird Schritt $N$ nur ausgeführt, wenn Schritt $N-1$ erfolgreich war. Destruktive Schritte stoppen bei Fehlern sofort.
-- **Konfigurierbare Wiederholungslimits & Backoff (`INV-RETRY-05`)**: Konfigurierbarer exponentieller Backoff, Jitter und Retry-Caps zur sicheren Auflösung von Synchronisationssperren.
+- **Konfigurierbare Wiederholungslimits & Backoff (`INV-RETRY-05`)**: Konfigurierbarer exponentieller Backoff (Basis, Multiplikator, Deckel) und Retry-Limits zur sicheren Auflösung von Synchronisationssperren.
 - **Desktop-Benachrichtigungsvertrag (`INV-NOTIF-06`)**: Sendet dezente System-Tray-Benachrichtigungen bei dauerhaften Fehlern oder Konflikten ohne Arbeitsunterbrechung.
 - **Virtueller Mount-Wächter (`INV-PROV-07`)**: Unterscheidet zwischen Ordner-Mounts (OneDrive, Dropbox) und virtuellen Laufwerken (Google Drive, pCloud); pausiert virtuelle Mounts niemals.
 - **Multi-Host-Konfliktabwehr (`INV-CONF-08`)**: Strikte `.gitignore`-Blockierung von Cloud-Sync-Konfliktdateien (`*-conflict-*`, `* (Kopie)*`) und Multi-Agenten-Sperren (`LOCK.*`).

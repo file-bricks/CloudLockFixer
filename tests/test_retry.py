@@ -201,7 +201,7 @@ def test_tray_retry_failed_action_and_status_refresh(tmp_path: Path, monkeypatch
 
     # Führe Retry-Action aus
     run_async_called = []
-    monkeypatch.setattr(tray_app, "run_async", lambda force: run_async_called.append(force))
+    monkeypatch.setattr(tray_app, "run_async", lambda force, **kwargs: run_async_called.append(force))
 
     tray_app._retry_failed_tasks()
     assert len(run_async_called) == 1

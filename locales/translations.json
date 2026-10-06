@@ -103,6 +103,22 @@
     "ru": "Добавить задачу в очередь",
     "zh": "向队列添加任务"
   },
+  "cli_backoff_help": {
+    "de": "Exponentielles Backoff anwenden und noch nicht fällige Aufgaben aufschieben",
+    "en": "Apply exponential backoff and defer tasks that are not yet due",
+    "es": "Aplicar retroceso exponencial y posponer las tareas que aún no corresponden",
+    "ja": "指数バックオフを適用し、期限前のタスクを延期",
+    "ru": "Применить экспоненциальную задержку и отложить задачи, срок которых не наступил",
+    "zh": "应用指数退避并推迟尚未到期的任务"
+  },
+  "cli_backoff_multiplier_help": {
+    "de": "Faktor, um den die Wartezeit je Fehlversuch wächst (1.0–100.0, Standard: settings.json oder 2.0)",
+    "en": "Factor the delay grows by per failed attempt (1.0-100.0, default: settings.json or 2.0)",
+    "es": "Factor de crecimiento de la espera por intento fallido (1.0-100.0, por defecto: settings.json o 2.0)",
+    "ja": "失敗ごとの待機時間の増加係数（1.0〜100.0、デフォルト: settings.json または 2.0）",
+    "ru": "Множитель роста задержки после каждой неудачи (1.0–100.0, по умолчанию: settings.json или 2.0)",
+    "zh": "每次失败后等待时间的增长因子（1.0–100.0，默认：settings.json 或 2.0）"
+  },
   "cli_context_help": {
     "de": "Explorer-Kontextmenü verwalten",
     "en": "Manage Explorer context menu",
@@ -135,6 +151,14 @@
     "ru": "Игнорировать экспоненциальную задержку и выполнить все задачи немедленно",
     "zh": "忽略指数退避并立即执行所有任务"
   },
+  "cli_initial_delay_help": {
+    "de": "Basis-Wartezeit in Sekunden nach dem ersten Fehlversuch (Standard: settings.json oder 60)",
+    "en": "Base delay in seconds after the first failed attempt (default: settings.json or 60)",
+    "es": "Espera base en segundos tras el primer intento fallido (por defecto: settings.json o 60)",
+    "ja": "最初の失敗後の基本待機秒数（デフォルト: settings.json または 60）",
+    "ru": "Базовая задержка в секундах после первой неудачи (по умолчанию: settings.json или 60)",
+    "zh": "首次失败后的基础等待秒数（默认：settings.json 或 60）"
+  },
   "cli_legacy_review_help": {
     "de": "Alte Fünfer-Limit-Fehler ohne Änderungen prüfen",
     "en": "Review old five-attempt failures without changes",
@@ -158,6 +182,14 @@
     "ja": "キューを表示",
     "ru": "Показать очередь",
     "zh": "显示任务队列"
+  },
+  "cli_max_delay_help": {
+    "de": "Obergrenze der Wartezeit in Sekunden (Standard: settings.json oder 3600)",
+    "en": "Upper bound for the delay in seconds (default: settings.json or 3600)",
+    "es": "Límite superior de la espera en segundos (por defecto: settings.json o 3600)",
+    "ja": "待機時間の上限秒数（デフォルト: settings.json または 3600）",
+    "ru": "Верхний предел задержки в секундах (по умолчанию: settings.json или 3600)",
+    "zh": "等待时间上限（秒）（默认：settings.json 或 3600）"
   },
   "cli_max_retries_help": {
     "de": "Maximale Wiederholungen für fehlgeschlagene Tasks (Standard: unbegrenzt oder aus settings.json)",
@@ -391,6 +423,22 @@
     "ru": "Язык / Language",
     "zh": "语言 / Language"
   },
+  "list_attempts": {
+    "de": "Versuche {n}",
+    "en": "attempts {n}",
+    "es": "intentos {n}",
+    "ja": "試行 {n} 回",
+    "ru": "попыток {n}",
+    "zh": "尝试 {n} 次"
+  },
+  "list_next_try": {
+    "de": "nächster Versuch: {at}",
+    "en": "next attempt: {at}",
+    "es": "próximo intento: {at}",
+    "ja": "次回試行: {at}",
+    "ru": "следующая попытка: {at}",
+    "zh": "下次尝试：{at}"
+  },
   "max_retries_menu": {
     "de": "Max. Wiederholungen",
     "en": "Max retries",
@@ -558,6 +606,14 @@
     "ja": "実行完了: {done} 件完了、{failed} 件保留中、{permanent} 件完全失敗（開始時: {start} 件保留中）。{paused}",
     "ru": "Выполнение завершено: {done} выполнено, {failed} все еще в очереди, {permanent} окончательно не удалось (начало: {start} в очереди).{paused}",
     "zh": "运行完成：已完成 {done} 个，仍有 {failed} 个待处理，{permanent} 个永久失败（初始：{start} 个待处理）。{paused}"
+  },
+  "run_summary_blocked": {
+    "de": " ({blocked} blockiert, Eingriff nötig)",
+    "en": " ({blocked} blocked, needs attention)",
+    "es": " ({blocked} bloqueada(s), requiere atención)",
+    "ja": "（{blocked} 件ブロック、対応が必要）",
+    "ru": " ({blocked} заблокировано, требуется вмешательство)",
+    "zh": "（{blocked} 个被阻止，需要处理）"
   },
   "run_summary_deferred": {
     "de": " ({deferred} wegen Backoff aufgeschoben)",

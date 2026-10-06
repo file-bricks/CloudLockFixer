@@ -11,8 +11,10 @@ import os
 import sys
 import threading
 
-from PySide6.QtCore import QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QActionGroup, QColor, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QObject, Qt, QTimer, QUrl, Signal
+from PySide6.QtGui import (
+    QAction, QActionGroup, QColor, QDesktopServices, QIcon, QPainter, QPixmap,
+)
 from PySide6.QtWidgets import (
     QApplication, QFileDialog, QInputDialog, QMenu, QMessageBox, QSystemTrayIcon,
 )
@@ -23,6 +25,8 @@ from .models import Queue, Step, Task
 from .paths import data_dir, log_file
 from .providers import WATCHER_TICK_MS, available_providers, provider_for
 from .worker import run_once
+
+log = logging.getLogger("clf")
 
 INTERVAL_CHOICES_MIN = [30, 60, 90, 120, 180, 240, 360, 720]
 
@@ -290,21 +294,17 @@ class TrayApp:
 
         def job():
             try:
-                max_retries = settings.get_max_retries(self.settings)
-                b_base = settings.get_backoff_base(self.settings)
-                b_max = settings.get_backoff_max(self.settings)
-                try:
-                    s = run_once(
-                        self.queue,
-                        force_pause=force_pause,
-                        max_retries=max_retries,
-                        apply_backoff=apply_backoff,
-                        backoff_base_sec=b_base,
-                        backoff_max_sec=b_max,
-                    )
-                except TypeError:
-                    s = run_once(self.queue, force_pause=force_pause, max_retries=max_retries)
+                s = run_once(
+                    self.queue,
+                    force_pause=force_pause,
+                    max_retries=settings.get_max_retries(self.settings),
+                    apply_backoff=apply_backoff,
+                    backoff_base_sec=settings.get_backoff_base(self.settings),
+                    backoff_max_sec=settings.get_backoff_max(self.settings),
+                    backoff_multiplier=settings.get_backoff_multiplier(self.settings),
+                )
             except Exception as e:  # pragma: no cover
+                log.exception("Worker run failed")
                 s = {"error": str(e)}
             self.sig.done.emit(s)
 
@@ -359,10 +359,9 @@ class TrayApp:
         settings.set_notifications_enabled(self.settings, checked)
 
     def _open_data_dir(self) -> None:
-        try:
-            os.startfile(str(data_dir()))  # type: ignore[attr-defined]
-        except (OSError, AttributeError):
-            pass
+        # QDesktopServices öffnet den Ordner auch unter Linux/macOS
+        # (os.startfile existiert nur unter Windows).
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(data_dir())))
 
     def _set_language(self, code: str) -> None:
         self.settings["language"] = code
@@ -399,10 +398,7 @@ class TrayApp:
             self.tray.showMessage("CloudLockFixer",
                                   t("retried_notification", count=len(retried)),
                                   _make_icon(), 4000)
-            try:
-                self.run_async(False, apply_backoff=False)
-            except TypeError:
-                self.run_async(False)
+            self.run_async(False, apply_backoff=False)
 
     # ── P2: Kontextmenü ─────────────────────────────────────────────
     def _toggle_context(self, checked: bool) -> None:
@@ -461,8 +457,9 @@ class TrayApp:
             try:
                 watcher.tick_all(self.watchers)
             except Exception:  # pragma: no cover
-                pass
-            self._watch_running = False
+                log.exception("Preventive watcher tick failed")
+            finally:
+                self._watch_running = False
 
         threading.Thread(target=job, daemon=True).start()
 

@@ -12,6 +12,7 @@ DEFAULT_MAX_RETRIES: int | None = None
 DEFAULT_NOTIFICATIONS_ENABLED: bool = True
 DEFAULT_BACKOFF_BASE_SEC: int = 60  # Basis-Backoff: 60 s
 DEFAULT_BACKOFF_MAX_SEC: int = 3600  # Maximaler Backoff: 1 h (3600 s)
+DEFAULT_BACKOFF_MULTIPLIER: float = 2.0  # Verdopplung je Fehlversuch
 
 
 def _path():
@@ -35,6 +36,7 @@ def load() -> dict:
         "notifications_enabled": DEFAULT_NOTIFICATIONS_ENABLED,
         "backoff_base_sec": DEFAULT_BACKOFF_BASE_SEC,
         "backoff_max_sec": DEFAULT_BACKOFF_MAX_SEC,
+        "backoff_multiplier": DEFAULT_BACKOFF_MULTIPLIER,
     }
 
 
@@ -116,3 +118,19 @@ def set_backoff_max(cfg: dict, val: int) -> None:
     cfg["backoff_max_sec"] = val
     save(cfg)
 
+
+def get_backoff_multiplier(cfg: dict) -> float:
+    """Return stored backoff_multiplier (>= 1.0) or DEFAULT_BACKOFF_MULTIPLIER."""
+    val = cfg.get("backoff_multiplier")
+    if isinstance(val, (int, float)) and not isinstance(val, bool) and 1.0 <= val <= 100.0:
+        return float(val)
+    return DEFAULT_BACKOFF_MULTIPLIER
+
+
+def set_backoff_multiplier(cfg: dict, val: float) -> None:
+    """Set and persist backoff_multiplier (number between 1.0 and 100.0)."""
+    if (not isinstance(val, (int, float)) or isinstance(val, bool)
+            or not 1.0 <= val <= 100.0):
+        raise ValueError("backoff_multiplier must be a number between 1.0 and 100.0")
+    cfg["backoff_multiplier"] = float(val)
+    save(cfg)

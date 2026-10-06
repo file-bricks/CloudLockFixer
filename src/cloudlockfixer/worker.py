@@ -17,6 +17,7 @@ from .providers import SyncProvider, provider_for
 from .settings import (
     DEFAULT_BACKOFF_BASE_SEC,
     DEFAULT_BACKOFF_MAX_SEC,
+    DEFAULT_BACKOFF_MULTIPLIER,
     DEFAULT_MAX_RETRIES,
 )
 
@@ -87,8 +88,9 @@ def run_once(
     max_retries: int | None = DEFAULT_MAX_RETRIES,
     apply_backoff: bool = False,
     ignore_backoff: bool | None = None,
-    backoff_base_sec: int = DEFAULT_BACKOFF_BASE_SEC,
-    backoff_max_sec: int = DEFAULT_BACKOFF_MAX_SEC,
+    backoff_base_sec: float = DEFAULT_BACKOFF_BASE_SEC,
+    backoff_max_sec: float = DEFAULT_BACKOFF_MAX_SEC,
+    backoff_multiplier: float = DEFAULT_BACKOFF_MULTIPLIER,
 ) -> dict:
     """Versucht alle offenen Tasks einmal. Gibt eine Ergebnis-Zusammenfassung.
 
@@ -163,7 +165,9 @@ def run_once(
                 t.status = "pending"  # bleibt für nächsten Lauf
                 t.last_outcome = "retryable"
                 t.next_try_at = t.compute_next_retry(
-                    base_sec=backoff_base_sec, max_sec=backoff_max_sec
+                    base_sec=backoff_base_sec,
+                    max_sec=backoff_max_sec,
+                    multiplier=backoff_multiplier,
                 )
                 summary["failed_again"] += 1
                 log.warning(
