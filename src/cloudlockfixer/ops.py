@@ -131,10 +131,18 @@ def _payload_signature(p: Path) -> tuple[int, int, str]:
     Gleich viele Bytes sind kein Integritätsnachweis: Eine beschädigte Kopie kann
     dieselbe Größe wie die Quelle haben. Der Digest wird gestreamt, damit auch
     große Cloud-Dateien nicht vollständig in den Speicher geladen werden.
+    Auch Verzeichnisstrukturen (einschließlich leerer Ordner) fließen in den
+    Digest ein, um unvollständige Verzeichnis-Kopien zuverlässig zu erkennen.
     """
     files = [p] if p.is_file() else sorted(f for f in p.rglob("*") if f.is_file())
     digest = hashlib.sha256()
     total = 0
+    if p.is_dir():
+        dirs = sorted(d.relative_to(p).as_posix() for d in p.rglob("*") if d.is_dir())
+        for d in dirs:
+            digest.update(b"D:")
+            digest.update(d.encode("utf-8", "surrogateescape"))
+            digest.update(b"\0")
     for f in files:
         # Beim Umbenennen einer einzelnen Datei unterscheiden sich Quelle und
         # Zielname absichtlich. Innerhalb eines Verzeichnisses müssen die
@@ -295,11 +303,29 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
     forbidden_dst, err_dst = _is_forbidden_target(dst, action="Verschieben (Ziel)")
     if forbidden_dst:
         return False, err_dst, False
-    if not src.exists() and dst.exists():
+    src_exists = src.exists() or _is_link(src)
+    dst_exists = dst.exists() or _is_link(dst)
+
+    tmp_suffix = hashlib.sha256(str(dst).encode("utf-8")).hexdigest()[:8]
+    interrupted_tmp = src.with_name(f"{src.name}.clf_tmp_{tmp_suffix}")
+    if not src_exists and interrupted_tmp.exists():
+        # Ein früherer Case-Rename wurde nach dem Zwischenschritt (src -> tmp) unterbrochen.
+        # Versuche atomare Finalisierung auf dst oder sicheren Rollback auf src.
+        try:
+            os.replace(interrupted_tmp, dst)
+            return True, "in-place umbenannt (Zwischenschritt wiederaufgenommen)", False
+        except OSError:
+            try:
+                os.replace(interrupted_tmp, src)
+            except OSError:
+                pass
+            src_exists = src.exists() or _is_link(src)
+
+    if not src_exists and dst_exists:
         return True, "bereits verschoben", True
-    if not src.exists():
+    if not src_exists:
         return False, f"Quelle fehlt: {src}", False
-    if dst.exists():
+    if dst_exists:
         try:
             # Case-Only Rename oder selbes Ziel: src und dst müssen denselben Dateisystempfad referenzieren.
             # Bei Hardlinks in unterschiedlichen Verzeichnissen (src.samefile(dst) ist True, aber
@@ -316,8 +342,7 @@ def _do_move(src: Path, dst: Path) -> tuple[bool, str, bool]:
                     return True, "in-place umbenannt", False
                 except OSError:
                     # Zweistufiger Fallback bei gesperrtem Direkt-Rename über temporären Namen
-                    tmp_suffix = hashlib.sha256(str(dst).encode("utf-8")).hexdigest()[:8]
-                    tmp = src.with_name(f"{src.name}.clf_tmp_{tmp_suffix}")
+                    tmp = interrupted_tmp
                     try:
                         os.replace(src, tmp)
                         os.replace(tmp, dst)

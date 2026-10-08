@@ -137,7 +137,7 @@ class TrayApp:
         interval_menu = self.menu.addMenu(t("interval_menu"))
         grp = QActionGroup(self.menu)
         grp.setExclusive(True)
-        cur = int(self.settings.get("interval_min", settings.DEFAULT_INTERVAL_MIN))
+        cur = settings.get_interval_min(self.settings)
         for m in INTERVAL_CHOICES_MIN:
             label = f"{m} min" if m < 60 else (f"{m // 60} h" if m % 60 == 0
                                                else f"{m / 60:.1f} h")
@@ -344,12 +344,11 @@ class TrayApp:
             self._show_setting_change_error(t("autostart_label"))
 
     def _set_interval(self, minutes: int) -> None:
-        self.settings["interval_min"] = minutes
-        settings.save(self.settings)
+        settings.set_interval_min(self.settings, minutes)
         self._apply_interval()
 
     def _apply_interval(self) -> None:
-        minutes = int(self.settings.get("interval_min", settings.DEFAULT_INTERVAL_MIN))
+        minutes = settings.get_interval_min(self.settings)
         self.timer.start(minutes * 60 * 1000)
 
     def _set_max_retries(self, limit: int | None) -> None:

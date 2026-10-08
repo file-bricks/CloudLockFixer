@@ -42,13 +42,36 @@ def load() -> dict:
 
 def save(settings: dict) -> None:
     p = _path()
+    tmp = p.with_suffix(".json.tmp")
     try:
-        tmp = p.with_suffix(".json.tmp")
+        p.parent.mkdir(parents=True, exist_ok=True)
         tmp.write_text(json.dumps(settings, ensure_ascii=False, indent=2),
                        encoding="utf-8")
         tmp.replace(p)
     except OSError:
         pass
+    finally:
+        if tmp.exists():
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+
+
+def get_interval_min(cfg: dict) -> int:
+    """Return stored interval_min in minutes or DEFAULT_INTERVAL_MIN."""
+    val = cfg.get("interval_min")
+    if isinstance(val, int) and val > 0 and not isinstance(val, bool):
+        return val
+    return DEFAULT_INTERVAL_MIN
+
+
+def set_interval_min(cfg: dict, val: int) -> None:
+    """Set and persist interval_min (positive integer in minutes)."""
+    if not isinstance(val, int) or val <= 0 or isinstance(val, bool):
+        raise ValueError("interval_min must be a positive integer")
+    cfg["interval_min"] = val
+    save(cfg)
 
 
 def resolve_language(cfg: dict) -> str:

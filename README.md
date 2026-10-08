@@ -503,7 +503,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 374 automated tests (`pytest`, 374 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 381 automated tests (`pytest`, 381 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

@@ -144,6 +144,9 @@ def main(argv: list[str] | None = None) -> int:
             if not src_val or not arg_val:
                 print(t("invalid_chain") + ": Quelle und Ziel dürfen nicht leer sein", file=sys.stderr)
                 return 2
+            if src_val in (".", "./", ".\\") or arg_val in (".", "./", ".\\"):
+                print(t("invalid_chain") + ": Arbeitsverzeichnis darf nicht als Quelle oder Ziel genutzt werden", file=sys.stderr)
+                return 2
             task = Task(chain=[Step(op="move", src=args.move[0], arg=args.move[1])])
         elif args.delete:
             src_val = args.delete[0].strip()

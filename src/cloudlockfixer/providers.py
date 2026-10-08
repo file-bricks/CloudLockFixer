@@ -59,8 +59,17 @@ class SyncProvider(ABC):
             self._cached_roots = self._detect_roots()
         return self._cached_roots
 
-    def owns_path(self, p: Path) -> bool:
-        return any(_is_subpath(Path(p), root) for root in self._roots())
+    def owns_path(self, p: Path | str | None) -> bool:
+        if p is None:
+            return False
+        raw = str(p).strip()
+        if not raw or raw in (".", "./", ".\\"):
+            return False
+        try:
+            target = Path(raw)
+        except (ValueError, TypeError):
+            return False
+        return any(_is_subpath(target, root) for root in self._roots())
 
 
 def _is_subpath(child: Path, parent: Path) -> bool:
@@ -370,6 +379,10 @@ class GoogleDriveProvider(SyncProvider):
                             roots.append(Path(f"{letter}:\\"))
             except (OSError, AttributeError):
                 pass
+            for name in ("Google Drive", "GoogleDrive", "My Drive"):
+                p = Path.home() / name
+                if p.is_dir():
+                    roots.append(p)
         else:
             cloud_storage = Path.home() / "Library" / "CloudStorage"
             if cloud_storage.is_dir():
@@ -395,17 +408,24 @@ class GoogleDriveProvider(SyncProvider):
     def resume(self) -> bool:
         with self._lock:
             if sys.platform == "win32":
-                base = self._RESUME_BASE
-                if not base.exists():
-                    return False
-                versions = sorted(base.glob("*/GoogleDriveFS.exe"),
-                                  key=_gdrive_version_key, reverse=True)
-                for exe in versions:
-                    try:
-                        subprocess.Popen([str(exe)])
-                        return True
-                    except OSError:
+                bases = [
+                    self._RESUME_BASE,
+                    Path(r"C:\Program Files\Google\Drive"),
+                    Path(r"C:\Program Files (x86)\Google\Drive"),
+                    Path(r"C:\Program Files (x86)\Google\Drive File Stream"),
+                ]
+                for base in bases:
+                    if not base.exists():
                         continue
+                    versions = sorted(base.glob("*/GoogleDriveFS.exe"),
+                                      key=_gdrive_version_key, reverse=True)
+                    direct = [base / "GoogleDriveFS.exe"] if (base / "GoogleDriveFS.exe").exists() else []
+                    for exe in versions + direct:
+                        try:
+                            subprocess.Popen([str(exe)])
+                            return True
+                        except (OSError, subprocess.SubprocessError):
+                            continue
                 return False
             elif sys.platform == "darwin":
                 try:
@@ -867,8 +887,16 @@ def available_providers() -> list[SyncProvider]:
     return list(_get_providers())
 
 
-def provider_for(path: Path | str) -> SyncProvider | None:
-    p = Path(path)
+def provider_for(path: Path | str | None) -> SyncProvider | None:
+    if path is None:
+        return None
+    raw = str(path).strip()
+    if not raw or raw in (".", "./", ".\\"):
+        return None
+    try:
+        p = Path(raw)
+    except (ValueError, TypeError):
+        return None
     for prov in _get_providers():
         try:
             if prov.owns_path(p):

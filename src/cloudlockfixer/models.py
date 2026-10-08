@@ -103,9 +103,13 @@ class Task:
     @classmethod
     def from_dict(cls, d: dict) -> "Task":
         step_fields = set(Step.__dataclass_fields__)
+        raw_chain = d.get("chain")
+        if not isinstance(raw_chain, list):
+            raw_chain = []
         chain = [
             Step(**{k: v for k, v in s.items() if k in step_fields})
-            for s in d.get("chain", [])
+            for s in raw_chain
+            if isinstance(s, dict)
         ]
         known = {f for f in cls.__dataclass_fields__ if f != "chain"}
         return cls(chain=chain, **{k: v for k, v in d.items() if k in known})
@@ -218,6 +222,11 @@ def parse_txt_line(line: str) -> Task | None:
                     raise ValueError(f"'rename' neuer Name darf keinen Pfad enthalten in: {part!r}")
                 if tokens[2].strip() in (".", ".."):
                     raise ValueError(f"'rename' neuer Name darf kein relativer Pfadbezeichner sein in: {part!r}")
+            elif op == "move":
+                if tokens[1].strip() in (".", "./", ".\\"):
+                    raise ValueError(f"'move' Quelle darf nicht das Arbeitsverzeichnis sein in: {part!r}")
+                if tokens[2].strip() in (".", "./", ".\\"):
+                    raise ValueError(f"'move' Ziel darf nicht das Arbeitsverzeichnis sein in: {part!r}")
             steps.append(Step(op=op, src=tokens[1], arg=tokens[2]))  # type: ignore[arg-type]
     if not steps:
         return None
@@ -244,7 +253,14 @@ class Queue:
                     raw = json.loads(self.json_path.read_text(encoding="utf-8"))
                     if not isinstance(raw, dict):
                         raise TypeError(f"unexpected JSON root type: {type(raw)}")
-                    self.tasks = [Task.from_dict(t) for t in raw.get("tasks", [])]
+                    loaded: list[Task] = []
+                    for entry in raw.get("tasks", []):
+                        if isinstance(entry, dict):
+                            try:
+                                loaded.append(Task.from_dict(entry))
+                            except (TypeError, ValueError, AttributeError):
+                                continue
+                    self.tasks = loaded
                 except (ValueError, OSError, TypeError, AttributeError):
                     # ValueError faengt JSONDecodeError UND UnicodeDecodeError
                     # (abgebrochener Multibyte-Schreibvorgang, Disk-Korruption) ab.
