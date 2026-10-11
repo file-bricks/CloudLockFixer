@@ -183,8 +183,16 @@ def test_llms_txt_structure_and_timestamp() -> None:
     text = llms_path.read_text(encoding="utf-8")
 
     assert text.startswith("# CloudLockFixer")
-    assert ("> Last-checked: 2026-10-03" in text or "> Last-checked: 2026-09-30" in text)
-    assert ("## Last-checked: 2026-10-03" in text or "## Last-checked: 2026-09-30" in text)
+    assert (
+        "> Last-checked: 2026-10-11" in text
+        or "> Last-checked: 2026-10-03" in text
+        or "> Last-checked: 2026-09-30" in text
+    )
+    assert (
+        "## Last-checked: 2026-10-11" in text
+        or "## Last-checked: 2026-10-03" in text
+        or "## Last-checked: 2026-09-30" in text
+    )
     assert "https://github.com/file-bricks/CloudLockFixer" in text
 
 
@@ -363,7 +371,11 @@ def test_marketing_log_recent_hygiene_entry() -> None:
     assert mktg_file.is_file(), "MARKETING-LOG.txt must exist"
     content = mktg_file.read_text(encoding="utf-8")
 
-    assert ("Stand: 2026-10-03" in content or "Stand: 2026-09-30" in content), "Recent audit date missing in MARKETING-LOG.txt"
+    assert (
+        "Stand: 2026-10-11" in content
+        or "Stand: 2026-10-03" in content
+        or "Stand: 2026-09-30" in content
+    ), "Recent audit date missing in MARKETING-LOG.txt"
     assert "CLOUDLOCKFIXER SUITE" in content
     assert "INV-LOCAL-01" in content and "INV-SLA-10" in content, "Governance pillars missing in MARKETING-LOG.txt"
     assert "Pfad A" in content or "PFAD A" in content, "Pfad A maintenance section missing in MARKETING-LOG.txt"
@@ -575,11 +587,19 @@ def test_extended_gitignore_multihost_lock_and_cache_defense() -> None:
 def test_third_party_licenses_audit_recency_and_notice_crossref() -> None:
     """Verify THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt carry recent audit date and NOTICE crossref."""
     tpl_md = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
-    assert ("Audit Date:** 2026-10-03" in tpl_md or "Audit Date:** 2026-09-28" in tpl_md)
+    assert (
+        "Audit Date:** 2026-10-11" in tpl_md
+        or "Audit Date:** 2026-10-03" in tpl_md
+        or "Audit Date:** 2026-09-28" in tpl_md
+    )
     assert "[NOTICE](NOTICE)" in tpl_md
 
     tpl_txt = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.txt").read_text(encoding="utf-8")
-    assert ("Audit Date: 2026-10-03" in tpl_txt or "Audit Date: 2026-09-28" in tpl_txt)
+    assert (
+        "Audit Date: 2026-10-11" in tpl_txt
+        or "Audit Date: 2026-10-03" in tpl_txt
+        or "Audit Date: 2026-09-28" in tpl_txt
+    )
     assert "Canonical Notice: NOTICE" in tpl_txt
 
 
@@ -598,13 +618,25 @@ def test_readme_notice_attribution_and_verified_badges() -> None:
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
     assert "Attribution-NOTICE-blue" in readme_en
-    assert ("Verified-2026--10--03-blue" in readme_en or "Verified-2026--09--30-blue" in readme_en)
+    assert (
+        "Verified-2026--10--11-blue" in readme_en
+        or "Verified-2026--10--03-blue" in readme_en
+        or "Verified-2026--09--30-blue" in readme_en
+    )
 
     assert "Attribution-NOTICE-blue" in readme_de
-    assert ("Gepr%C3%BCft-2026--10--03-blue" in readme_de or "Gepr%C3%BCft-2026--09--30-blue" in readme_de)
+    assert (
+        "Gepr%C3%BCft-2026--10--11-blue" in readme_de
+        or "Gepr%C3%BCft-2026--10--03-blue" in readme_de
+        or "Gepr%C3%BCft-2026--09--30-blue" in readme_de
+    )
 
     assert "Attribution-NOTICE-blue" in readme_es
-    assert ("Verificado-2026--10--03-blue" in readme_es or "Verificado-2026--09--30-blue" in readme_es)
+    assert (
+        "Verificado-2026--10--11-blue" in readme_es
+        or "Verificado-2026--10--03-blue" in readme_es
+        or "Verificado-2026--09--30-blue" in readme_es
+    )
 
 
 def test_visual_showcase_screenshots_embedded() -> None:
@@ -702,3 +734,23 @@ def test_contributing_urls_in_pyproject_and_readme() -> None:
     assert "Contributing-Guidelines" in readme_en
     assert "Mitwirken-Leitfaden" in readme_de
     assert "Contribuir-Gu%C3%ADa" in readme_es
+
+
+def test_readme_test_count_badges_parity() -> None:
+    """Verify that Pytest test count badges are synchronized to 383 passed across all 3 READMEs."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+
+    assert "tests-383%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 383 passed"
+    assert "tests-383%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 383 grün"
+    assert "tests-383%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 383 pasados"
+
+
+def test_changelog_recent_pfad_b_2026_10_11_entry() -> None:
+    """Verify CHANGELOG.md records the 2026-10-11 Pfad B Discoverability entry under Unreleased."""
+    changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    assert "Pfad B" in changelog
+    assert "2026-10-11" in changelog
+    assert "Test-Count-Parität" in changelog
+    assert "T-20260920-167562623" in changelog

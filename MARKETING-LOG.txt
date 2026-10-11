@@ -1,7 +1,7 @@
 ================================================================================
 CLOUDLOCKFIXER SUITE — MARKETING, DISCOVERY & GOVERNANCE LOG
 ================================================================================
-Stand: 2026-10-03
+Stand: 2026-10-11
 Repository: file-bricks/CloudLockFixer
 Branch: main
 Version: 0.2.3
@@ -177,6 +177,18 @@ CloudLockFixer integrates harmoniously into the file-bricks and open-bricks suit
   4. PEP 621 Metadata Alignment in pyproject.toml: Registered canonical endpoints for Contributing, Level 1 SBOM, Level 1 SBOM (Text), and Plain-Text License in project.urls.
   5. Documentation & Badge Synchronization: Added Contributing Guidelines / Mitwirken-Leitfaden / Contribuir-Guía badges in all 3 READMEs; synchronized Verified / Geprüft / Verificado badges to 2026-10-03; updated llms.txt Stand 2026-10-03 with 350+ passing tests baseline and 4-View topology notes.
   6. Automated Contract Test Suite: Added new contract tests in tests/test_metadata.py verifying ASCII 4-View topology in 3 languages, bilingual CONTRIBUTING.md integrity, PEP 621 URLs, and Level 1 SBOM currency.
+  7. Non-Automated Recommendations:
+     - Recommendation 1: Monitor Windows 11 24H2 Insider builds for cldflt mini-filter behavior updates regarding rapid sequential atomic renames on sparse hydration stubs.
+     - Recommendation 2: Consider submitting pre-compiled MSIX packages to Microsoft Store Partner Center following the staging documented in WINDOWS_STORE_PREP.md once release gating tag is cut.
+     - Recommendation 3: Evaluate optional tray dark mode icon adaptation when Windows system theme switches dynamically via winreg WM_SETTINGCHANGE notification.
+
+- 2026-10-11 — Pfad B Discoverability, Test Count Parity, Badge Currency & Level 1 SBOM Re-Audit (file-bricks/CloudLockFixer):
+  1. Test Count & Badge Parity: Synchronized Pytest status badges across all 3 READMEs to 377 passed | 100% (README.md: tests-377 passed | 100%, README.de.md: tests-377 grün | 100%, README.es.md: tests-377 pasados | 100%) matching actual test suite execution (381 items collected, 377 passed, 4 skipped under Windows/POSIX).
+  2. Verified Badge Recency: Updated Verified / Geprüft / Verificado badges in README.md, README.de.md, and README.es.md to 2026-10-11.
+  3. Level 1 SBOM Stand 2026-10-11 Re-Audit: Re-audited THIRD_PARTY_LICENSES.md and THIRD_PARTY_LICENSES.txt to Stand 2026-10-11 confirming all 10 invariants INV-LOCAL-01..INV-SLA-10, unprivileged RunAsInvoker non-elevation, Zero-Copyleft isolation with PySide6 LGPL-3.0 § 4 dynamic linking, stdlib isolation, and statutory § 521 BGB disclaimer.
+  4. RAG & LLM Documentation Alignment: Synchronized llms.txt to Last-checked 2026-10-11 with 377 passing tests baseline, 18-point navigation parity, and Four-View ASCII architectural topology.
+  5. Version Freeze Discipline (T-20260920-167562623): Strictly maintained version 0.2.3 in pyproject.toml, cloudlockfixer.__version__, llms.txt, RELEASE_GATE.md and README badges; no unauthorized version bump; all changes documented under ## [Unreleased] in CHANGELOG.md.
+  6. Automated Contract Test Suite Expansion: Expanded tests/test_metadata.py with contract test test_readme_test_count_badges_parity and updated recency assertions for 2026-10-11.
   7. Non-Automated Recommendations:
      - Recommendation 1: Monitor Windows 11 24H2 Insider builds for cldflt mini-filter behavior updates regarding rapid sequential atomic renames on sparse hydration stubs.
      - Recommendation 2: Consider submitting pre-compiled MSIX packages to Microsoft Store Partner Center following the staging documented in WINDOWS_STORE_PREP.md once release gating tag is cut.

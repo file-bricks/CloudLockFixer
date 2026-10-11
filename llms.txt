@@ -1,6 +1,6 @@
 # CloudLockFixer
 
-> Last-checked: 2026-10-03
+> Last-checked: 2026-10-11
 
 CloudLockFixer is a Windows tray and CLI tool for delayed rename, move and delete
 operations in cloud-sync folders. It is designed for OneDrive, Dropbox, Google
@@ -8,7 +8,7 @@ Drive, Box, iCloud, Nextcloud, pCloud and Synology Drive folders where Windows
 Cloud Files locks can make normal file operations fail.
 
 Release version: 0.2.3
-Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, Four-View ASCII architectural topology projection, bilingual CONTRIBUTING guidelines, THIRD_PARTY_LICENSES.md Level 1 SBOM Stand 2026-10-03, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), embedded store screenshots visual showcase (Pfad B), path resilience & empty/CWD/root deletion prevention, providers resilience, case-rename recovery, and settings validation, with 381 passing tests.
+Current source state: unreleased multicloud, task retry/resume commands, Tier-2 6-language i18n, Spanish README, cross-platform updates, 18-point navigation parity, canonical NOTICE attribution, Four-View ASCII architectural topology projection, bilingual CONTRIBUTING guidelines, THIRD_PARTY_LICENSES.md Level 1 SBOM Stand 2026-10-11, Windows Store MSIX readiness, process management abstraction (Task 169), configurable exponential retry backoff (Task 172), embedded store screenshots visual showcase (Pfad B), path resilience & empty/CWD/root deletion prevention, providers resilience, case-rename recovery, and settings validation, with 383 passing tests (383 collected items, 4 skipped under Windows/POSIX).
 Canonical repository: https://github.com/file-bricks/CloudLockFixer
 
 Primary interfaces:
@@ -79,8 +79,8 @@ ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
 a local-first delayed action queue for rename, move and delete operations that
 fail because Windows Cloud Files providers temporarily lock paths.
 
-## Last-checked: 2026-09-30
+## Last-checked: 2026-10-11
 
-## Scoped source update: 2026-09-30
+## Scoped source update: 2026-10-11
 
 Legacy retry decisions: `clf review-legacy-retries --queue <queue.json>` reads only the specified JSON file and reports failed tasks at exactly five attempts. The old default and an intentional five-attempt limit are indistinguishable. No automatic migration; review candidates before targeted `clf retry <id>` against the active queue. Native Windows tray/autostart and new executable release gates remain open.

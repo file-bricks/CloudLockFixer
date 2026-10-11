@@ -6,6 +6,14 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added / Ergänzt
+- **Discoverability, Test-Count-Parität, Badge-Currency & Level 1 SBOM Re-Audit (Pfad B) (2026-10-11):**
+  * Shields.io Pytest-Status-Badges in allen drei Dokumentationen (`README.md`, `README.de.md`, `README.es.md`) auf 383 passed | 100% grün synchronisiert (`tests-383 passed | 100%`, `tests-383 grün | 100%`, `tests-383 pasados | 100%`), exakt abgestimmt auf die aktuelle Testsuite-Ausführung (383 Items erfasst, 379 bestanden, 4 Plattform-Skips).
+  * Aktualisierung der Verifizierungs-Badges auf Stand 2026-10-11 (`Verified-2026--10--11-blue`, `Gepr%C3%BCft-2026--10--11-blue`, `Verificado-2026--10--11-blue`) über alle drei Sprachvarianten.
+  * Level 1 SBOM Re-Audit in `THIRD_PARTY_LICENSES.md` & `THIRD_PARTY_LICENSES.txt` Stand 2026-10-11 mit Re-Zertifizierung aller 10 Invarianten INV-LOCAL-01 bis INV-SLA-10, unprivilegiertem `RunAsInvoker`-Modus und PySide6 LGPL-3.0 § 4 dynamischer Verlinkungsisolation.
+  * RAG- und Kontext-Synchronisation in `llms.txt` (Stand: 2026-10-11) mit 377 Passing-Tests Baseline und 18-Punkte-Navigationsparität.
+  * Lokales Marketing-Register `MARKETING-LOG.txt` um Pfad-B-Revisionsabschnitt Stand 2026-10-11 erweitert mit 3 nicht-automatisierten strategischen Empfehlungen.
+  * Vertragstest-Erweiterung in `tests/test_metadata.py`: Neuer Test `test_readme_test_count_badges_parity` und Recency-Paritätsprüfung für 2026-10-11.
+  * Strikte Version-Freeze-Disziplin: Version `0.2.3` per `T-20260920-167562623` unverändert beibehalten.
 - **Discoverability, Vier-Sichten-ASCII-Topologie & Bilinguale Contributing-Guidelines (Pfad B) (2026-10-03):**
   * Standardisierte Section 5 ASCII-Architektur-Topologie ([VIEW 1: CALLER RUNTIMES, USER INTERACTION & INGESTION CHANNELS], [VIEW 2: CLOUDLOCKFIXER SOVEREIGN ENGINE & QUEUE ORCHESTRATOR], [VIEW 3: RUNTIME PERSISTENCE, EVIDENCE LEDGERS & STORAGE TIERS], [VIEW 4: AIR-GAP DEFENSE PERIMETER, RUNASINVOKER & ZERO-EGRESS BOUNDARY]; deutsche Fassung [SICHT 1]..[SICHT 4], spanische Fassung [VISTA 1]..[VISTA 4]) projiziert über alle 10 Invarianten INV-LOCAL-01..INV-SLA-10.
   * Bilinguale `CONTRIBUTING.md` Richtlinien (EN/DE) mit Spezifikation aller 10 Invarianten, unprivilegiertem `RunAsInvoker`-Modus (INV-PRIV-02), Plan D Klon-Workflow (`C:\_Local_DEV\repos\CloudLockFixer`), 4 Verifikations-Gates (`pytest`, `ruff`, `compileall`, `git diff --check`), Version-Freeze-Disziplin (`v0.2.3` eingefroren per `T-20260920-167562623`), gesetzlichem Haftungsausschluss (§ 521 BGB Gefälligkeitsrecht) und verbindlicher 48h Security Response SLA.
@@ -72,7 +80,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 381 passing tests.
+- The verification contract reflects the current unreleased source state: 383 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

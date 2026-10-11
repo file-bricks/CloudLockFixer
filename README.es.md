@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Estado de Pytest](https://img.shields.io/badge/tests-353%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Estado de Pytest](https://img.shields.io/badge/tests-383%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Versión de Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Plataforma](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacidad](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
@@ -11,7 +11,7 @@
 [![Licencia](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Atribución](https://img.shields.io/badge/Attribution-NOTICE-blue)](NOTICE)
 [![Contribuir](https://img.shields.io/badge/Contribuir-Gu%C3%ADa-blue)](CONTRIBUTING.md#english)
-[![Verificado](https://img.shields.io/badge/Verificado-2026--10--03-blue)](https://github.com/file-bricks/CloudLockFixer)
+[![Verificado](https://img.shields.io/badge/Verificado-2026--10--11-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Ecosistema](https://img.shields.io/badge/ecosystem-file--bricks-blue)](https://github.com/file-bricks)
 [![Umbrella](https://img.shields.io/badge/umbrella-open--bricks-blue)](https://github.com/open-bricks)
 [![Versión](https://img.shields.io/badge/version-0.2.3-blue)](pyproject.toml)
