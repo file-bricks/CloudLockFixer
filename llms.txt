@@ -79,6 +79,10 @@ ransomware recovery tool, cloud-storage SDK, or sync provider replacement. It is
 a local-first delayed action queue for rename, move and delete operations that
 fail because Windows Cloud Files providers temporarily lock paths.
 
+## Related Tools
+
+- [doc-bricks/llm-note](https://github.com/doc-bricks/llm-note): Local SQLite and plain-text notebook for personal or agent notes; a complementary place to keep notes about delayed file operations.
+
 ## Last-checked: 2026-10-11
 
 ## Scoped source update: 2026-10-11

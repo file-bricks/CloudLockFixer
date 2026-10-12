@@ -318,6 +318,7 @@ CloudLockFixer forma parte del ecosistema para escritorio y desarrolladores de *
 | Repositorio | Ámbito y especialidad | Rol en el ecosistema | Enlace |
 |-------------|-----------------------|----------------------|--------|
 | **file-bricks/CloudLockFixer** | Operaciones diferidas de archivos/carpetas y desbloqueo del filtro `cldflt` | Resiliencia del sistema de archivos local | [Repositorio](https://github.com/file-bricks/CloudLockFixer) |
+| **doc-bricks/llm-note** | Cuaderno local de SQLite y texto plano para notas personales o de agentes | Complemento local para conservar notas sobre operaciones de archivos diferidas | [Repositorio](https://github.com/doc-bricks/llm-note) |
 | **file-bricks/SoftwareCenter** | Portafolio de aplicaciones de escritorio y hub del entorno local | Cabina central de la estación de trabajo | [Repositorio](https://github.com/file-bricks/SoftwareCenter) |
 | **file-bricks/knowledgedigest** | Motor de indexación y síntesis de conocimiento multifuente | Análisis de documentos de escritorio | [Repositorio](https://github.com/file-bricks/knowledgedigest) |
 | **open-bricks** | Ecosistema paraguas de herramientas y software de código abierto | Gobernanza arquitectónica | [Repositorio](https://github.com/open-bricks) |
