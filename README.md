@@ -543,6 +543,7 @@ CloudLockFixer integrates into the **file-bricks** and **open-bricks** desktop a
 | Repository | Scope & Specialty | Role in Ecosystem | Link |
 |---|---|---|---|
 | **file-bricks/CloudLockFixer** | Delayed file/folder operations & `cldflt` filter unlocker | Local filesystem resilience | [Repository](https://github.com/file-bricks/CloudLockFixer) |
+| **doc-bricks/llm-note** | Local SQLite and plain-text notebook for personal or agent notes | Complementary place to keep notes about delayed file operations | [Repository](https://github.com/doc-bricks/llm-note) |
 | **file-bricks/SoftwareCenter** | Desktop application portfolio and local environment hub | Central workstation cockpit | [Repository](https://github.com/file-bricks/SoftwareCenter) |
 | **file-bricks/knowledgedigest** | Multi-source knowledge indexing and digest engine | Desktop document analysis | [Repository](https://github.com/file-bricks/knowledgedigest) |
 | **open-bricks** | Umbrella open-source software and tooling collective | Architectural governance | [Repository](https://github.com/open-bricks) |

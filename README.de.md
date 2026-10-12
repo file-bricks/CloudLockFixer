@@ -545,6 +545,7 @@ CloudLockFixer ist Teil des **file-bricks** und **open-bricks** Desktop- und Ent
 | Repository | Zweck & Spezialisierung | Rolle im Ökosystem | Link |
 |---|---|---|---|
 | **file-bricks/CloudLockFixer** | Verzögerte Datei-/Ordneroperationen & `cldflt`-Entsperrung | Lokale Dateisystem-Resilienz | [Repository](https://github.com/file-bricks/CloudLockFixer) |
+| **doc-bricks/llm-note** | Lokales SQLite- und Klartext-Notizbuch für persönliche oder Agentennotizen | Ergänzendes lokales Notizbuch für Notizen zu verzögerten Dateioperationen | [Repository](https://github.com/doc-bricks/llm-note) |
 | **file-bricks/SoftwareCenter** | Desktop-Anwendungsportfolio und zentrale Umgebung | Lokales Workstation-Cockpit | [Repository](https://github.com/file-bricks/SoftwareCenter) |
 | **file-bricks/knowledgedigest** | Multi-Source Wissensindexierung und Dokumenten-Digest | Desktop-Dokumentenanalyse | [Repository](https://github.com/file-bricks/knowledgedigest) |
 | **open-bricks** | Dachorganisation für Open-Source-Software und Standards | Architektonische Governance | [Repository](https://github.com/open-bricks) |
