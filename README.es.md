@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Estado de Pytest](https://img.shields.io/badge/tests-383%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Estado de Pytest](https://img.shields.io/badge/tests-385%20pasados%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Versión de Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Plataforma](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privacidad](https://img.shields.io/badge/privacy-100%25%20Local--First%20%7C%20Zero--Egress-brightgreen)](SECURITY.md)
@@ -56,14 +56,21 @@
 
 ## Capacidades clave e invariantes de gobernanza
 
-| Capacidad / Pilar | Comportamiento e implementación | Invariante de seguridad y gobernanza |
-|-------------------|---------------------------------|--------------------------------------|
-| **Reserva `copy+delete`** | Cuando Windows `cldflt.sys` bloquea operaciones directas con `WinError 5` / `EXDEV`, CLF transmite el contenido al destino, verifica la coincidencia del hash SHA-256 y desenlaza de forma segura el origen. | **Cero pérdida de datos:** Los archivos de origen nunca se eliminan hasta que el flujo de destino coincide bit a bit. Los atributos de solo lectura se retiran defensivamente antes del borrado. |
-| **Cadenas atómicas de pasos múltiples** | Admite secuencias ordenadas de 1 a 4 operaciones (`rename`, `move`, `delete` separadas por `&&`). El paso $N$ se ejecuta estrictamente tras el éxito del paso $N-1$. | **Seguridad condicional:** Las operaciones destructivas (`delete`) jamás se ejecutan si los pasos previos encuentran algún error. |
-| **Sensor de proveedores multicloud** | Detecta activamente motores de sincronización para 8 proveedores: OneDrive, Google Drive, Dropbox, Box, iCloud, Nextcloud, pCloud y Synology Drive. | **Pausa selectiva:** Solo las tareas ejecutables con fallos persistentes en proveedores basados en carpetas activan pausas temporales; los montajes virtuales (Google Drive, pCloud) nunca se pausan. |
-| **Zero-Egress y Local-First** | Funciona 100% desconectado sin llamadas salientes de red, analíticas ni telemetría hacia APIs externas. | **Aislamiento hermético:** Verificado mediante pruebas de contrato de análisis estático AST (`test_offline_zero_egress_no_network_imports`). |
-| **Privilegio mínimo (sin elevación)** | Se ejecuta íntegramente en el espacio de usuario no privilegiado sin requerir credenciales de administrador o root. | **Ámbito confinado:** Las entradas de inicio automático y los menús contextuales de Explorer residen exclusivamente en dominios de usuario (`HKCU`, `~/.config/autostart`, `~/Library/LaunchAgents`). |
-| **Motor de reintentos idempotente** | Las tareas realizan transiciones entre `pending`, `done`, `retryable`, `blocked` y `permanent`. Conserva índices de pasos parciales. | **Resiliencia de estado:** Los orígenes faltantes sin destinos se bloquean de forma segura; los movimientos completados siguen siendo éxitos idempotentes en reintentos. |
+| Invariante | Categoría | Comportamiento e implementación | Invariante de seguridad y gobernanza |
+|---|---|---|---|
+| INV-LOCAL-01 | Local-First y Zero-Egress | Ejecución 100% offline sin llamadas externas de red, analíticas, seguimiento ni telemetría. | **Aislamiento hermético:** Verificado mediante análisis estático AST (	est_offline_zero_egress_no_network_imports). |
+| INV-RUNAS-02 | Modo de usuario no privilegiado | Se ejecuta íntegramente en el espacio de usuario no privilegiado (RunAsInvoker). | **Ámbito confinado:** Claves de registro y menús contextuales residen exclusivamente en HKCU sin avisos de UAC ni privilegios de administrador. |
+| INV-HASH-03 | Copia y borrado criptográfico | Cuando cldflt.sys bloquea movimientos atómicos, CLF transmite contenido al destino y verifica hashes SHA-256 coincidentes. | **Cero pérdida de datos:** Los archivos de origen nunca se desenlazan hasta que el resumen del destino coincida bit a bit. |
+| INV-CHAIN-04 | Cadenas atómicas de pasos múltiples | Admite secuencias ordenadas de 1 a 4 operaciones (
+ename, move, delete separadas por &&). | **Seguridad condicional:** El paso $ se ejecuta estrictamente tras el éxito del paso -1$. Las operaciones destructivas se cancelan si fallan los pasos anteriores. |
+| INV-SENSOR-05 | Sensor de proveedores multicloud | Inspecciona y detecta automáticamente 8 motores de sincronización: OneDrive, Dropbox, Google Drive, Box, iCloud, Nextcloud, pCloud y Synology Drive. | **Pausa selectiva:** Solo los motores de sincronización respaldados por carpetas se pausan temporalmente durante bloqueos persistentes; los montajes virtuales nunca se pausan. |
+| INV-IDEMP-06 | Reintento determinista e idempotente | Las tareas realizan transiciones entre pending, done,
+etryable, locked y
+ailed_permanent. | **Resiliencia de estado:** Los orígenes faltantes sin destinos se bloquean de forma segura; las tareas ya completadas siguen siendo éxitos idempotentes. |
+| INV-TRIM-07 | Tratamiento defensivo de origen y solo lectura | Los atributos de solo lectura se retiran defensivamente antes del borrado; los cambios de solo mayúsculas/minúsculas se gestionan con seguridad. | **Limpieza del sistema de archivos:** Protege contra restos bloqueados de solo lectura y estados intermedios corruptos. |
+| INV-PLAT-08 | Fundación multiplataforma | Lógica central y de directorio de datos multiplataforma compatible con Windows, Linux (autostart XDG) y macOS (LaunchAgents). | **Paridad de plataforma:** La cola central y el worker se ejecutan limpiamente en los principales sistemas operativos de escritorio. |
+| INV-DOCS-09 | Documentación simétrica y trilingüe | Paridad de documentación en inglés (README.md), alemán (README.de.md) y español (README.es.md) respaldada por llms.txt. | **Transparencia arquitectónica:** Directrices operativas completas accesibles tanto para desarrolladores humanos como para agentes de codificación autónomos. |
+| INV-SLA-10 | Gobernanza de código abierto y SLA | Licencia MIT, rastreador público de problemas en GitHub y SLA de seguridad comprometido. | **Compromiso de seguridad:** SLA de respuesta inicial de 48 horas y compromiso de triaje de 5 días hábiles documentados en SECURITY.md. |
 
 ---
 

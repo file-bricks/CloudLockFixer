@@ -10,6 +10,9 @@ readme = "README.md"
 authors = [
     { name = "file-bricks", email = "info@file-bricks.org" }
 ]
+maintainers = [
+    { name = "open-bricks maintainers", email = "maintainers@open-bricks.org" }
+]
 license = { text = "MIT" }
 license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md", "THIRD_PARTY_LICENSES.txt"]
 keywords = [
@@ -39,6 +42,9 @@ classifiers = [
     "Environment :: Win32 (MS Windows)",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
+    "Natural Language :: German",
+    "Natural Language :: English",
+    "Natural Language :: Spanish",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -114,5 +120,3 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = ["E501"]
-
-

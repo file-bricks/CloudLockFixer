@@ -26,6 +26,10 @@ def test_pyproject_pep621_metadata() -> None:
     authors = project.get("authors", [])
     assert any(a.get("name") == "file-bricks" for a in authors)
 
+    maintainers = project.get("maintainers", [])
+    assert any(m.get("name") == "open-bricks maintainers" for m in maintainers)
+    assert any(m.get("email") == "maintainers@open-bricks.org" for m in maintainers)
+
     classifiers = project.get("classifiers", [])
     required_classifiers = [
         "Development Status :: 4 - Beta",
@@ -41,6 +45,10 @@ def test_pyproject_pep621_metadata() -> None:
     ]
     for classifier in required_classifiers:
         assert classifier in classifiers, f"Missing classifier: {classifier}"
+
+    assert "Natural Language :: German" in classifiers
+    assert "Natural Language :: English" in classifiers
+    assert "Natural Language :: Spanish" in classifiers
 
     keywords = project.get("keywords", [])
     assert isinstance(keywords, list)
@@ -603,11 +611,13 @@ def test_third_party_licenses_audit_recency_and_notice_crossref() -> None:
     assert "Canonical Notice: NOTICE" in tpl_txt
 
 
-def test_changelog_recent_pfad_a_2026_09_28_entry() -> None:
-    """Verify CHANGELOG.md records the 2026-09-28 Pfad A hygiene entry."""
+def test_changelog_recent_pfad_a_hygiene_entries() -> None:
+    """Verify CHANGELOG.md records Pfad A hygiene entries."""
     changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     assert "Pfad A" in changelog
     assert "2026-09-28" in changelog
+    assert "2026-10-30" in changelog
+    assert "CI-Matrix-Härtung" in changelog
     assert "NOTICE" in changelog
 
 
@@ -737,14 +747,14 @@ def test_contributing_urls_in_pyproject_and_readme() -> None:
 
 
 def test_readme_test_count_badges_parity() -> None:
-    """Verify that Pytest test count badges are synchronized to 383 passed across all 3 READMEs."""
+    """Verify that Pytest test count badges are synchronized to 385 passed across all 3 READMEs."""
     readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
-    assert "tests-383%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 383 passed"
-    assert "tests-383%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 383 grün"
-    assert "tests-383%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 383 pasados"
+    assert "tests-385%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 385 passed"
+    assert "tests-385%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 385 grün"
+    assert "tests-385%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 385 pasados"
 
 
 def test_changelog_recent_pfad_b_2026_10_11_entry() -> None:
@@ -754,3 +764,40 @@ def test_changelog_recent_pfad_b_2026_10_11_entry() -> None:
     assert "2026-10-11" in changelog
     assert "Test-Count-Parität" in changelog
     assert "T-20260920-167562623" in changelog
+
+
+def test_all_ten_governance_invariants_enumerated_and_verified() -> None:
+    """Verify that all 10 governance invariants (INV-LOCAL-01..INV-SLA-10) are enumerated across documents."""
+    readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
+    readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
+    readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
+    mktg_log = (PROJECT_ROOT / "MARKETING-LOG.txt").read_text(encoding="utf-8")
+    tpl_md = (PROJECT_ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
+
+    expected_invariants = [
+        "INV-LOCAL-01",
+        "INV-RUNAS-02",
+        "INV-HASH-03",
+        "INV-CHAIN-04",
+        "INV-SENSOR-05",
+        "INV-IDEMP-06",
+        "INV-TRIM-07",
+        "INV-PLAT-08",
+        "INV-DOCS-09",
+        "INV-SLA-10",
+    ]
+    for inv in expected_invariants:
+        assert inv in readme_en, f"Missing {inv} in README.md"
+        assert inv in readme_de, f"Missing {inv} in README.de.md"
+        assert inv in readme_es, f"Missing {inv} in README.es.md"
+        assert inv in mktg_log, f"Missing {inv} in MARKETING-LOG.txt"
+        assert inv in tpl_md, f"Missing {inv} in THIRD_PARTY_LICENSES.md"
+
+
+def test_platform_test_execution_split() -> None:
+    """Verify that platform-specific tests are cleanly annotated with skipif markers."""
+    review_fixes = (PROJECT_ROOT / "tests" / "test_review_fixes_2026_10_06.py").read_text(encoding="utf-8")
+    assert "needs_symlinks = pytest.mark.skipif(" in review_fixes
+    assert 'reason="Symlinks brauchen unter Windows Zusatzrechte"' in review_fixes
+    assert '@pytest.mark.skipif(sys.platform == "win32", reason="POSIX-Shellskript")' in review_fixes
+    assert review_fixes.count("@needs_symlinks") == 3

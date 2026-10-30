@@ -5,6 +5,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Repository-Hygiene, CI-Matrix-Härtung, PEP 621 Metadaten & Governance-Vertragstest-Erweiterung (Pfad A) (2026-10-30)
+- **CI-Matrix-Härtung:** `.github/workflows/tests.yml` (`tests-linux` Job) um Python 3.13 Matrix (`["3.12", "3.13"]`) erweitert; `.github/workflows/source-platform-smoke.yml` um Matrix-Strategie (`os: [ubuntu-latest, macos-latest]`, `python-version: ["3.11", "3.12"]`) gehärtet unter strikter Wahrung von Concurrency (`cancel-in-progress: true`) und expliziten Timeouts.
+- **PEP 621 Metadaten:** `pyproject.toml` um `maintainers` (`open-bricks maintainers <maintainers@open-bricks.org>`) und Sprachklassifikatoren (`Natural Language :: German/English/Spanish`) erweitert.
+- **Vertragstest-Erweiterung (tests/test_metadata.py):** Neue Tests `test_all_ten_governance_invariants_enumerated_and_verified` und `test_platform_test_execution_split`. Schließt die in `ISSUES-KNOWN.txt` vermerkte Prüflücke durch lückenlose Zähler- und Inhaltsprüfung aller 10 Governance-Invarianten (`INV-LOCAL-01` bis `INV-SLA-10`) über `README.md`, `README.de.md`, `README.es.md`, `MARKETING-LOG.txt` und `THIRD_PARTY_LICENSES.md`.
+- **Testsuite & Badge-Synchronisation:** Test-Suite von 383 auf 385 gesammelte Items erweitert (381 bestanden, 4 Plattform-Skips unter unprivilegiertem Windows, 100% grün auf Linux CI). Pytest-Status-Badges in allen 3 READMEs auf `tests-385 passed | 100%` synchronisiert.
+- **Version-Freeze-Disziplin:** Version `0.2.3` per `T-20260920-167562623` unverändert beibehalten.
+
 ### Added / Ergänzt
 - **Discoverability, Test-Count-Parität, Badge-Currency & Level 1 SBOM Re-Audit (Pfad B) (2026-10-11):**
   * Shields.io Pytest-Status-Badges in allen drei Dokumentationen (`README.md`, `README.de.md`, `README.es.md`) auf 383 passed | 100% grün synchronisiert (`tests-383 passed | 100%`, `tests-383 grün | 100%`, `tests-383 pasados | 100%`), exakt abgestimmt auf die aktuelle Testsuite-Ausführung (383 Items erfasst, 379 bestanden, 4 Plattform-Skips).
@@ -80,7 +87,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 383 passing tests.
+- The verification contract reflects the current unreleased source state: 385 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
