@@ -133,6 +133,8 @@ class TrayApp:
         self.menu.addAction(self.retry_failed_action)
         self.menu.addAction(QAction(t("open_data_folder"), self.menu,
                                     triggered=self._open_data_dir))
+        self.menu.addAction(QAction(t("menu_export_snapshot"), self.menu,
+                                    triggered=self._export_snapshot))
 
         interval_menu = self.menu.addMenu(t("interval_menu"))
         grp = QActionGroup(self.menu)
@@ -356,6 +358,20 @@ class TrayApp:
 
     def _toggle_notifications(self, checked: bool) -> None:
         settings.set_notifications_enabled(self.settings, checked)
+
+    def _export_snapshot(self) -> None:
+        from .snapshot import export_snapshot
+        try:
+            out_path = export_snapshot(self.data_dir)
+            if settings.get_notifications_enabled(self.settings):
+                self.tray.showMessage(
+                    "CloudLockFixer",
+                    t("snapshot_exported", path=out_path.name),
+                    QSystemTrayIcon.MessageIcon.Information if hasattr(QSystemTrayIcon, "MessageIcon") else QSystemTrayIcon.Information,
+                    4000,
+                )
+        except Exception as exc:
+            log.warning("Fehler beim Exportieren des Snapshots: %s", exc)
 
     def _open_data_dir(self) -> None:
         # QDesktopServices öffnet den Ordner auch unter Linux/macOS

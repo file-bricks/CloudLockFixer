@@ -135,6 +135,22 @@
     "ru": "CLI CloudLockFixer",
     "zh": "CloudLockFixer 命令行工具"
   },
+  "cli_export_snapshot_help": {
+    "de": "Exportiert einen schreibgeschützten Snapshot (JSON) für Web-Companion und Diagnose",
+    "en": "Exports a read-only snapshot (JSON) for web companion and diagnostics",
+    "es": "Exporta una instantánea de solo lectura (JSON) para el compañero web y diagnósticos",
+    "ja": "Webコンパニオンおよび診断用の読み取り専用スナップショット (JSON) をエクスポート",
+    "ru": "Экспорт снимка состояния только для чтения (JSON) для веб-компаньона и диагностики",
+    "zh": "导出用于 Web 助手和诊断的只读快照 (JSON)"
+  },
+  "cli_export_snapshot_output_help": {
+    "de": "Zieldateipfad für den Snapshot-Export (Standard: cloudlockfixer-snapshot-v1.json im Datenverzeichnis)",
+    "en": "Target file path for snapshot export (default: cloudlockfixer-snapshot-v1.json in data directory)",
+    "es": "Ruta de archivo de destino para exportar la instantánea (predeterminado: cloudlockfixer-snapshot-v1.json en el directorio de datos)",
+    "ja": "スナップショット出力先ファイルパス（デフォルト: データディレクトリ内の cloudlockfixer-snapshot-v1.json）",
+    "ru": "Путь к файлу снимка (по умолчанию: cloudlockfixer-snapshot-v1.json в каталоге данных)",
+    "zh": "快照导出的目标文件路径（默认：数据目录中的 cloudlockfixer-snapshot-v1.json）"
+  },
   "cli_gui_add_help": {
     "de": "Dialog zum Einreihen (vom Kontextmenü)",
     "en": "Queuing dialog (from context menu)",
@@ -455,6 +471,14 @@
     "ru": "Без ограничений (по умолчанию)",
     "zh": "无限制（默认）"
   },
+  "menu_export_snapshot": {
+    "de": "Snapshot exportieren...",
+    "en": "Export snapshot...",
+    "es": "Exportar instantánea...",
+    "ja": "スナップショットをエクスポート...",
+    "ru": "Экспорт снимка...",
+    "zh": "导出快照..."
+  },
   "no_failed_tasks": {
     "de": "Keine fehlgeschlagenen oder blockierten Aufgaben vorhanden.",
     "en": "No failed or blocked tasks found.",
@@ -630,6 +654,14 @@
     "ja": "{setting} を変更できませんでした。以前の設定が維持されます。",
     "ru": "Не удалось изменить {setting}. Сохранена предыдущая настройка.",
     "zh": "无法更改 {setting}。保留之前的设置。"
+  },
+  "snapshot_exported": {
+    "de": "Snapshot erfolgreich exportiert nach: {path}",
+    "en": "Snapshot successfully exported to: {path}",
+    "es": "Instantánea exportada exitosamente a: {path}",
+    "ja": "スナップショットが正常にエクスポートされました: {path}",
+    "ru": "Снимок успешно экспортирован в: {path}",
+    "zh": "快照已成功导出至：{path}"
   },
   "source_kind_choose": {
     "de": "Quelle auswählen:",

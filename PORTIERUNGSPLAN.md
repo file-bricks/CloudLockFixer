@@ -163,3 +163,17 @@ plattformübergreifende Kontextmenüs (Linux Nautilus & KDE Dolphin, macOS Servi
 sowie Windows Store Readiness (MSIX Desktop Bridge, Kacheln, Listings, Validierungs-Suite)
 auf Source-Ebene vollständig umgesetzt und abgesichert. Offen bleiben native
 Linux-/macOS-Pakete/Installer (Task 171) und ein nativer Mac-Login-/`launchctl`-Smoke.
+
+---
+
+## Phase 6: Mobile- & Companion-Strategie (Task 170 — umgesetzt 2026-10-30)
+
+### 1. Begründung & Bedarfsanalyse (Nutzen, Mobilität & Use-Cases)
+- **Use-Case & Mobilität:** CloudLockFixer operiert als gerätespezifischer Hintergrunddienst auf Desktops (Windows, Linux, macOS). Nutzer müssen oft unterwegs oder an Zweitgeräten (Laptop, Smartphone, Tablet) prüfen, ob kritische Datei- oder Ordneroperationen noch in der Warteschlange hängen, welche Provider pausiert sind oder welche Backoff-Fristen für gesperrte Dateien aktiv sind.
+- **Vermeidung von Multi-Plattform-Zersplitterung:** Ein nativer mobiler Daemon auf Android/iOS ist technisch weder sinnvoll noch machbar (fehlender Zugriff auf Desktop-Cloud-Sync-Prozesse wie OneDrive/Google Drive Desktop). Stattdessen wird eine lokale, risikoarme Brücke etabliert: Ein read-only Snapshot-Export (cloudlockfixer-snapshot-v1.json) gekoppelt an eine leichtgewichtige Progressive Web App (web_companion/).
+- **Local-First & Zero-Egress:** Keine externen Serververbindungen, kein Tracking, kein Risiko unberechtigter Fernzugriffe auf das Host-Dateisystem.
+- **Implementierungs-Lieferung:**
+  1. src/cloudlockfixer/snapshot.py: Export-Modul und clf export-snapshot CLI-Kommando.
+  2. EXPORTFORMAT.md: Spezifikation des kanonischen Schemas cloudlockfixer-snapshot-v1.
+  3. web_companion/: Vollwertige PWA (HTML5, Responsive CSS, Offline ServiceWorker sw.js, W3C manifest.json, 6 Sprachen: de, en, es, zh, ja, ru).
+  4. Testabdeckung: 	ests/test_snapshot_export.py und 	ests/test_web_companion.py.

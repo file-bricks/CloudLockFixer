@@ -1,0 +1,26 @@
+{
+  "name": "CloudLockFixer Web Companion",
+  "short_name": "CLF Companion",
+  "description": "Local-first Web Companion für CloudLockFixer — Read-only Queue-, Backoff- und Provider-Statusanzeige.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#121212",
+  "theme_color": "#2e9e44",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

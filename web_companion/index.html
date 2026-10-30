@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudLockFixer — Web Companion</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e9e44">
+  <meta name="description" content="Local-first Web Companion für CloudLockFixer — Read-only Queue-, Backoff- und Provider-Statusanzeige.">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header" role="banner">
+      <div class="header-brand">
+        <img src="icons/icon-192.png" alt="CloudLockFixer Icon" class="header-logo" width="36" height="36">
+        <div>
+          <h1 class="header-title">CloudLockFixer</h1>
+          <span class="header-subtitle" data-i18n="companion_subtitle">Web Companion & Snapshot-Viewer</span>
+        </div>
+      </div>
+      <div class="header-controls">
+        <label for="lang-select" class="sr-only" data-i18n="sr_language">Sprache</label>
+        <select id="lang-select" class="control-select" aria-label="Language selection">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="zh">中文</option>
+          <option value="ja">日本語</option>
+          <option value="ru">Русский</option>
+        </select>
+        <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle theme">
+          <span id="theme-icon">☀️</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main" role="main">
+      <!-- Upload / Drag & Drop Hero -->
+      <section class="drop-zone" id="drop-zone" aria-label="Snapshot Import Zone">
+        <div class="drop-zone-content">
+          <span class="drop-zone-icon">📁</span>
+          <p class="drop-zone-text" data-i18n="drop_zone_prompt">Snapshot-Datei (JSON) hier ablegen oder Datei auswählen</p>
+          <div class="drop-zone-actions">
+            <label for="file-input" class="btn btn-primary" data-i18n="btn_choose_file">Snapshot laden</label>
+            <input type="file" id="file-input" accept=".json,application/json" class="sr-only">
+            <button id="btn-load-sample" class="btn btn-secondary" data-i18n="btn_load_sample">Demo-Snapshot</button>
+          </div>
+          <span class="drop-zone-hint" data-i18n="drop_zone_hint">cloudlockfixer-snapshot-v1.json (Zero-Egress, 100% lokal im Browser)</span>
+        </div>
+      </section>
+
+      <!-- Snapshot Metadata Bar -->
+      <section id="snapshot-meta-bar" class="meta-bar hidden" aria-label="Snapshot Information">
+        <div class="meta-item">
+          <span class="meta-label" data-i18n="meta_generated_at">Stand:</span>
+          <span id="meta-time" class="meta-val">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label" data-i18n="meta_version">Version:</span>
+          <span id="meta-version" class="meta-val">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label" data-i18n="meta_platform">Plattform:</span>
+          <span id="meta-platform" class="meta-val">-</span>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" role="tablist" aria-label="Companion Sections">
+        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="overview" data-i18n="tab_overview">Übersicht</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="queue" data-i18n="tab_queue">Queue-Monitor</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="providers" data-i18n="tab_providers">Sync-Provider</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="settings" data-i18n="tab_settings">Einstellungen</button>
+      </nav>
+
+      <!-- Tab Content: Overview -->
+      <div id="tab-overview" class="tab-content active" role="tabpanel">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-num" id="kpi-total">0</span>
+            <span class="kpi-label" data-i18n="kpi_total">Tasks Gesamt</span>
+          </div>
+          <div class="kpi-card kpi-pending">
+            <span class="kpi-num" id="kpi-pending">0</span>
+            <span class="kpi-label" data-i18n="kpi_pending">Offen / Fällig</span>
+          </div>
+          <div class="kpi-card kpi-deferred">
+            <span class="kpi-num" id="kpi-deferred">0</span>
+            <span class="kpi-label" data-i18n="kpi_deferred">Im Backoff (Verzögert)</span>
+          </div>
+          <div class="kpi-card kpi-failed">
+            <span class="kpi-num" id="kpi-failed">0</span>
+            <span class="kpi-label" data-i18n="kpi_failed">Fehlversuche</span>
+          </div>
+          <div class="kpi-card kpi-providers">
+            <span class="kpi-num" id="kpi-providers">0</span>
+            <span class="kpi-label" data-i18n="kpi_providers">Aktive Provider</span>
+          </div>
+        </div>
+
+        <section class="section-card">
+          <h2 class="card-title" data-i18n="title_quick_status">Aktuelle Systemgesundheit</h2>
+          <div id="quick-status-text" class="status-summary">
+            <p data-i18n="msg_no_data">Noch kein Snapshot geladen. Bitte eine Datei öffnen oder Demo-Snapshot wählen.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Tab Content: Queue -->
+      <div id="tab-queue" class="tab-content" role="tabpanel">
+        <div class="toolbar">
+          <input type="text" id="queue-search" class="search-input" placeholder="Nach Pfad oder Task-ID filtern..." data-i18n-ph="ph_search_queue" aria-label="Search queue">
+          <select id="queue-filter-status" class="control-select" aria-label="Filter status">
+            <option value="all" data-i18n="filter_all">Alle Status</option>
+            <option value="pending" data-i18n="filter_pending">Offen / Fällig</option>
+            <option value="deferred" data-i18n="filter_deferred">Im Backoff</option>
+            <option value="failed" data-i18n="filter_failed">Fehler</option>
+            <option value="done" data-i18n="filter_done">Erledigt</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" aria-label="Queue Tasks">
+            <thead>
+              <tr>
+                <th scope="col" data-i18n="col_id">ID</th>
+                <th scope="col" data-i18n="col_op">Operation</th>
+                <th scope="col" data-i18n="col_src">Datei / Ordner</th>
+                <th scope="col" data-i18n="col_status">Status</th>
+                <th scope="col" data-i18n="col_retries">Versuche</th>
+                <th scope="col" data-i18n="col_next_try">Nächster Versuch</th>
+              </tr>
+            </thead>
+            <tbody id="queue-table-body">
+              <tr>
+                <td colspan="6" class="text-center" data-i18n="msg_queue_empty">Keine Einträge vorhanden.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Content: Providers -->
+      <div id="tab-providers" class="tab-content" role="tabpanel">
+        <div id="providers-grid" class="providers-grid">
+          <!-- Dynamische Provider-Karten -->
+        </div>
+      </div>
+
+      <!-- Tab Content: Settings -->
+      <div id="tab-settings" class="tab-content" role="tabpanel">
+        <div class="settings-grid">
+          <div class="section-card">
+            <h2 class="card-title" data-i18n="title_service_settings">Dienst-Einstellungen</h2>
+            <div id="settings-list" class="kv-list">
+              <!-- Dynamische Key-Value Paare -->
+            </div>
+          </div>
+          <div class="section-card">
+            <h2 class="card-title" data-i18n="title_about">Über CloudLockFixer</h2>
+            <p data-i18n="about_desc">Delayed Action Service für Cloud-Sync-gesperrte Datei- und Ordneroperationen via copy+delete-Workaround mit exponentiellem Backoff.</p>
+            <ul class="feature-bullets">
+              <li data-i18n="feat_zero_egress">100% Local-First / Zero-Egress</li>
+              <li data-i18n="feat_offline">PWA Offline-Fähigkeit via Service Worker</li>
+              <li data-i18n="feat_i18n">Tier-2 Internationalisierung (6 Sprachen)</li>
+              <li data-i18n="feat_mit">Open Source unter MIT-Lizenz</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <span>CloudLockFixer Web Companion v1.0.0 &bull; Local-First &bull; Zero-Egress &bull; Offline-Ready</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,5 +1,17 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Web-Companion & Snapshot-Export (Task 170) — erledigt 2026-10-30
+
+- [x] `src/cloudlockfixer/snapshot.py`: `build_snapshot()` und atomarer `export_snapshot()` mit Schema `cloudlockfixer-snapshot-v1`.
+- [x] `src/cloudlockfixer/cli.py`: Neuer Befehl `clf export-snapshot [-o PATH] [--pretty]` mit vollständiger Validierung.
+- [x] `src/cloudlockfixer/tray.py`: Menüpunkt `menu_export_snapshot` ("Snapshot exportieren...") mit Infomeldung integriert.
+- [x] `locales/translations.json` & `src/cloudlockfixer/i18n.py`: 4 neue Keys (`cli_export_snapshot_help`, `cli_export_snapshot_output_help`, `snapshot_exported`, `menu_export_snapshot`) in allen 6 Tier-2 Sprachen (DE, EN, ES, ZH, JA, RU).
+- [x] `EXPORTFORMAT.md`: Spezifikation für `cloudlockfixer-snapshot-v1.json` mit Zero-Secrets & Zero-Egress Invarianten angelegt.
+- [x] `PORTIERUNGSPLAN.md`: Phase 6 (Mobile- & Companion-Strategie) mit Begründung (Use-Cases, Nutzen, Risikominimierung) verankert.
+- [x] `web_companion/`: Autarke PWA mit HTML5, CSS (Dark/Light), JavaScript (Zero-Egress), W3C WebManifest (`manifest.json`), Offline Cache ServiceWorker (`sw.js`), Icons und 6-Sprachen-Unterstützung.
+- [x] Tests: 10 neue automatisierte Tests (`tests/test_snapshot_export.py`, `tests/test_web_companion.py`), Gesamtsuite auf 395 Tests erhöht.
+
+
 ## Entscheidung über historische Fünfer-Limit-Fehler — 2026-09-30
 
 - [x] Rein lesenden CLI-Review mit explizitem Queue-Pfad, Kandidaten, Fortschritt

@@ -115,6 +115,11 @@ def main(argv: list[str] | None = None) -> int:
     p_gui = sub.add_parser("gui-add", help=t("cli_gui_add_help"))
     p_gui.add_argument("--op", required=True, choices=["rename", "move", "delete"])
     p_gui.add_argument("--src", required=True)
+    p_snap = sub.add_parser("export-snapshot", help=t("cli_export_snapshot_help"))
+    p_snap.add_argument("-o", "--output", type=Path, default=None, metavar="PATH",
+                        help=t("cli_export_snapshot_output_help"))
+    p_snap.add_argument("--pretty", action="store_true",
+                        help="Format JSON with indentation")
 
     args = parser.parse_args(argv)
     if args.cmd == "review-legacy-retries":
@@ -248,6 +253,20 @@ def main(argv: list[str] | None = None) -> int:
         print(t("context_status_installed") if contextmenu.is_installed()
               else t("context_status_not_installed"))
         return 0
+
+    if args.cmd == "export-snapshot":
+        from .snapshot import export_snapshot
+        try:
+            out_file = export_snapshot(
+                data_dir=data_dir(),
+                output_path=args.output,
+                pretty=args.pretty,
+            )
+            print(t("snapshot_exported", path=str(out_file)))
+            return 0
+        except Exception as error:
+            print(f"Error exporting snapshot: {error}", file=sys.stderr)
+            return 1
 
     if args.cmd == "gui-add":
         return _gui_add(args.op, args.src, queue)

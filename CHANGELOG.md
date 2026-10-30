@@ -5,6 +5,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Web-Companion & Read-only Snapshot-Export (Task 170):
+  - Modul `cloudlockfixer.snapshot`: Erzeugung und atomarer Export des `cloudlockfixer-snapshot-v1` Schemas.
+  - CLI: Neuer Subcommand `clf export-snapshot [-o PATH] [--pretty]`.
+  - Tray: Menüeintrag "Snapshot exportieren..." mit Benachrichtigungs-Feedback.
+  - Spezifikation `EXPORTFORMAT.md` für das kanonische Snapshot-Schema.
+  - PWA Web-Companion unter `web_companion/`: 100% Local-First / Zero-Egress, Offline-Cache (Service Worker), 6 Sprachen (DE/EN/ES/ZH/JA/RU), Dashboard, filterbarer Queue-Monitor, Provider-Übersicht und Einstellungen.
+  - 10 neue automatisierte Tests in `tests/test_snapshot_export.py` und `tests/test_web_companion.py`.
+
+
 ### Repository-Hygiene, CI-Matrix-Härtung, PEP 621 Metadaten & Governance-Vertragstest-Erweiterung (Pfad A) (2026-10-30)
 - **CI-Matrix-Härtung:** `.github/workflows/tests.yml` (`tests-linux` Job) um Python 3.13 Matrix (`["3.12", "3.13"]`) erweitert; `.github/workflows/source-platform-smoke.yml` um Matrix-Strategie (`os: [ubuntu-latest, macos-latest]`, `python-version: ["3.11", "3.12"]`) gehärtet unter strikter Wahrung von Concurrency (`cancel-in-progress: true`) und expliziten Timeouts.
 - **PEP 621 Metadaten:** `pyproject.toml` um `maintainers` (`open-bricks maintainers <maintainers@open-bricks.org>`) und Sprachklassifikatoren (`Natural Language :: German/English/Spanish`) erweitert.
@@ -87,7 +97,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 385 passing tests.
+- The verification contract reflects the current unreleased source state: 395 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

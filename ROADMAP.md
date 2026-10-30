@@ -114,6 +114,9 @@
 - [x] Konfigurierbares Retry-Verhalten (Backoff und persistierbares Limit) (Task 172, erledigt 2026-09-29).
   Der Default bleibt unbegrenzt; exponentielles Backoff (`DEFAULT_BACKOFF_BASE_SEC=60`, `DEFAULT_BACKOFF_MAX_SEC=3600`)
   verzögert wiederholte Versuche automatisch, während explizite Aufrufer Limits oder Sofort-Ausführung wählen können.
+- [x] Web-Companion & Read-only Snapshot-Export (Task 170 / Phase 6, erledigt 2026-10-30):
+  Offline-fähige PWA (web_companion/) mit W3C-Manifest, Service Worker,
+  6 Sprachen und kanonischem Snapshot-Export (clf export-snapshot, Schema cloudlockfixer-snapshot-v1).
 - [ ] Web-Dashboard / Remote-Status (Task 173)
 - [ ] Plugin-System für Community-Provider (Task 173)
 
