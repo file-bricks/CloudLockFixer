@@ -47,8 +47,8 @@ def test_docs_reference_current_collected_test_count() -> None:
     count = _collect_pytest_count()
     expectations = {
         PROJECT_ROOT / "README.md": rf"`pytest`, {count} passing",
-        PROJECT_ROOT / "README.de.md": rf"pytest, \*\*{count} grün\*\*",
-        PROJECT_ROOT / "README.es.md": rf"pytest, {count} pasadas",
+        PROJECT_ROOT / "README.de.md": rf"`pytest`, \*\*{count} grün\*\*",
+        PROJECT_ROOT / "README.es.md": rf"`pytest`, {count} pasadas",
         PROJECT_ROOT / "llms.txt": rf"with {count}\s+passing tests",
         PROJECT_ROOT / "CHANGELOG.md": rf"reflects the current unreleased source state: {count} passing",
     }
