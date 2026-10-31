@@ -4,6 +4,9 @@
   "publisher_display": "Geiger",
   "identity_name": "Geiger.CloudLockFixer",
   "version": "0.2.3.0",
+  "package_version": "0.2.3.0",
+  "executable": "CloudLockFixer.exe",
+  "execution_alias": "cloudlockfixer.exe",
   "exe_name": "CloudLockFixer",
   "msix_name": "CloudLockFixer.msix",
   "output_dir": "C:/_Local_DEV/codex_build/cloudlockfixer-store",
@@ -13,7 +16,12 @@
   "pfx_password": "",
   "timestamp_url": "http://timestamp.digicert.com",
   "license_files": ["../../LICENSE"],
+  "license": "MIT",
   "enable_i18n": true,
+  "languages": [
+    "de-DE",
+    "en-US"
+  ],
   "capabilities": "runFullTrust",
   "privacy_url": "https://github.com/file-bricks/CloudLockFixer/blob/main/PRIVACY_POLICY.md",
   "support_url": "https://github.com/file-bricks/CloudLockFixer/issues",
@@ -21,5 +29,23 @@
   "age_rating": "3+",
   "description_de": "Windows-Tray- und Hintergrundwerkzeug zur automatischen und verzögerten Auflösung von Dateisperren in Cloud-Sync-Ordnern.",
   "description_en": "Windows tray and background utility for delayed file operations in locked cloud synchronization folders.",
-  "keywords": "Dateisperre, Cloud-Sync, Warteschlange, Hintergrundtool, Datei-Entsperrer, Tray-Tool, Task-Manager"
+  "keywords": "Dateisperre, Cloud-Sync, Warteschlange, Hintergrundtool, Datei-Entsperrer, Tray-Tool, Task-Manager",
+  "keywords_de": [
+    "Dateisperre",
+    "Cloud-Sync",
+    "Warteschlange",
+    "Hintergrundtool",
+    "Datei-Entsperrer",
+    "Tray-Tool",
+    "Task-Manager"
+  ],
+  "keywords_en": [
+    "file lock",
+    "cloud sync",
+    "file unlocker",
+    "tray tool",
+    "task queue",
+    "background tool",
+    "file manager"
+  ]
 }

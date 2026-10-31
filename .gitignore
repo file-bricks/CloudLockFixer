@@ -61,6 +61,10 @@ releases/windowsstore/*
 !releases/windowsstore/screenshots/
 releases/windowsstore/screenshots/*
 !releases/windowsstore/screenshots/*.png
+!releases/windowsstore/test_reports/
+releases/windowsstore/test_reports/*
+!releases/windowsstore/test_reports/*.xml
+!releases/windowsstore/test_reports/*.json
 *.exe
 *.msi
 *.msix

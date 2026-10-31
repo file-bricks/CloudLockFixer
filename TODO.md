@@ -58,6 +58,8 @@
 - [x] `scripts/generate_store_screenshots.py`: 4 hochauflösende 16:9-Präsentationsscreenshots (1920x1080) unter `releases/windowsstore/screenshots/`, `screenshots/store/` und `README/screenshots/store/`.
 - [x] `scripts/check_store_readiness.py`: Vollständige Audit- und Validierungs-CLI für Repository-Materialien, Kacheln, Listings, Manifeste und optionale MSIX/WACK-Nachweise.
 - [x] `tests/test_store_readiness.py`: 8 neue automatisierte Tests (Gesamtsuite: 285/285 Tests 100% grün).
+- [x] `scripts/run_windows_wack.py` & Preflight-Reports (`releases/windowsstore/test_reports/`): 6/6 PASS, 0 FAIL (erledigt 2026-10-31).
+- [x] `tests/test_store_materials.py`: 4 neue automatisierte Tests für WACK-Reports, Staging-Integrität und Keywords (12/12 Store-Tests grün, erledigt 2026-10-31).
 
 ## Cross-Platform Kontextmenü-Abstraktion (Task 170 / Phase 3) — erledigt 2026-09-21
 

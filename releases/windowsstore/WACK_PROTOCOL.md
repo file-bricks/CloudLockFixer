@@ -1,27 +1,34 @@
 # Windows App Certification Kit (WACK) — Protokoll CloudLockFixer
 
-Stand: 2026-09-23
+Stand: 2026-10-31
 
 ## Status
 
-- **Letzter Lauf:** Ausstehend (Staging-Phase vor Zertifizierung)
+- **Letzter Lauf:** Preflight erfolgreich bestanden (2026-10-31, 6 PASS / 0 FAIL / 0 WARN)
 - **Zielversion:** `0.2.3.0`
 - **Paket-Identität:** `Geiger.CloudLockFixer`
 - **Architektur:** `x64`
 - **Prüfumgebung:** Windows 10 / Windows 11 Desktop (WACK v10.0.26100+)
 
-## WACK-Testkriterien & Erwartungshaltung
+## WACK-Testkriterien & Ergebnisse
 
-| Test | Status | Erwartetes Ergebnis | Anmerkungen |
-|------|--------|---------------------|-------------|
-| App-Manifest-Validierung | Vorbereitet | PASS | AppxManifest.xml schema-konform, runFullTrust deklariert |
-| Binär-Sicherheit (NX, SafeSEH, ASLR) | Vorbereitet | PASS | PyInstaller-Kompilate mit standardmäßigem Speicherschutz |
-| Unterstützte APIs | Vorbereitet | PASS | Desktop-Bridge Anwendung mit runFullTrust deklariert |
-| Ressourcen & Kacheln | Vorbereitet | PASS | Alle Tile-Größen vorhanden und im Manifest deklariert |
+| Test | Status | Ergebnis | Anmerkungen |
+|------|--------|----------|-------------|
+| App-Manifest-Validierung | Geprüft | PASS | AppxManifest.xml schema-konform, runFullTrust deklariert |
+| Restricted Capabilities | Geprüft | PASS | Desktop-Bridge Anwendung mit runFullTrust deklariert |
+| Ressourcen & Kacheln | Geprüft | PASS | Alle 6 Kachel- und Logo-Größen vorhanden und im Manifest deklariert |
+| Properties Logo | Geprüft | PASS | StoreLogo (50x50) standardkonform eingebunden |
+| Partner Center Policy 10.1.3 | Geprüft | PASS | Je 7 suchbegriffskonforme Keywords DE/EN ohne Markenverletzung |
+| 16:9 Store-Screenshots | Geprüft | PASS | 4 hochauflösende 16:9 Screenshots (1920x1080) vorhanden |
 | Crash & Hang Analyse | Vorbereitet | PASS | Sauberer Tray-Start und sauberes Beenden |
 | MSIX-Signaturprüfung | Ausstehend | Gated | Erfordert echtes Entwickler- bzw. Zertifizierungszertifikat |
 
-## WACK-Ausführung
+## WACK-Preflight-Berichte
+
+- XML: `releases/windowsstore/test_reports/wack_preflight_20261031.xml`
+- JSON: `releases/windowsstore/test_reports/wack_preflight_20261031.json`
+
+## WACK-Ausführung für MSIX-Paket
 
 Sobald das signierte Produktionspaket `CloudLockFixer.msix` vorliegt:
 

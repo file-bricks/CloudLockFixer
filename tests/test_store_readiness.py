@@ -6,6 +6,7 @@ import json
 import re
 import struct
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -128,3 +129,39 @@ def test_releases_windowsstore_staging_complete():
         path = staging / req
         assert path.is_file(), f"Missing staging file: {req}"
         assert path.stat().st_size > 0
+
+    # Verify WACK preflight reports
+    report_dir = staging / "test_reports"
+    assert report_dir.is_dir(), "test_reports directory must exist"
+    xml_reports = list(report_dir.glob("wack_preflight_*.xml"))
+    assert len(xml_reports) >= 1, "At least one WACK preflight XML report must exist"
+
+    latest_xml = max(xml_reports, key=lambda p: p.stat().st_mtime)
+    tree = ET.parse(latest_xml)
+    root = tree.getroot()
+    assert root.attrib.get("OverallResult") == "PASS"
+    assert root.attrib.get("Application") == "CloudLockFixer"
+    assert root.attrib.get("Identity") == CANONICAL_IDENTITY
+
+    checks = root.findall("Check")
+    assert len(checks) >= 6
+    for c in checks:
+        assert c.attrib.get("Result") == "PASS"
+
+    json_report = latest_xml.with_suffix(".json")
+    assert json_report.is_file(), "WACK preflight JSON companion must exist"
+    data = json.loads(json_report.read_text(encoding="utf-8"))
+    assert data.get("overall_result") == "PASS"
+    assert data.get("summary", {}).get("fail_count") == 0
+
+    # Verify store_settings.json keywords contract
+    settings_data = json.loads((staging / "store_settings.json").read_text(encoding="utf-8"))
+    kws_de = settings_data.get("keywords_de", [])
+    assert isinstance(kws_de, list) and 1 <= len(kws_de) <= 7
+    kws_en = settings_data.get("keywords_en", [])
+    assert isinstance(kws_en, list) and 1 <= len(kws_en) <= 7
+
+    # Verify WACK_PROTOCOL.md contents
+    protocol_content = (staging / "WACK_PROTOCOL.md").read_text(encoding="utf-8")
+    assert "PASS" in protocol_content
+    assert CANONICAL_IDENTITY in protocol_content

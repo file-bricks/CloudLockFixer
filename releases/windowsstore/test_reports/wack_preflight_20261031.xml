@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<WackPreflightReport Timestamp="2026-10-31T18:19:36.649874" OverallResult="PASS" Application="CloudLockFixer" Identity="Geiger.CloudLockFixer" Version="0.2.3.0">
+  <Check Id="MANIFEST_SYNTAX" Name="AppxManifest-Validierung &amp; XML-Wohlgeformtheit" Result="PASS">
+    <Details>Manifest syntax OK: AppxManifest.xml</Details>
+  </Check>
+  <Check Id="RESTRICTED_CAPABILITIES" Name="Restricted Capabilities Deklaration (runFullTrust)" Result="PASS">
+    <Details>Desktop-Bridge Anwendung deklariert runFullTrust</Details>
+  </Check>
+  <Check Id="TILE_ASSETS" Name="MSIX Kachel- und Icon-Assets Vollständigkeit" Result="PASS">
+    <Details>Alle 6 Kachelgrößen in store_assets vorhanden</Details>
+  </Check>
+  <Check Id="STORE_LOGO_PROPERTY" Name="AppxManifest Properties Logo (50x50 StoreLogo)" Result="PASS">
+    <Details>Properties Logo verweist auf icons\StoreLogo.png</Details>
+  </Check>
+  <Check Id="STORE_POLICY_10_1_3" Name="Microsoft Store Richtlinie 10.1.3 (Max. 7 Keywords)" Result="PASS">
+    <Details>DE: 7 Keywords, EN: 7 Keywords (Richtlinie &lt;= 7 erfüllt)</Details>
+  </Check>
+  <Check Id="STORE_SCREENSHOTS" Name="16:9 Full-HD Store-Screenshots" Result="PASS">
+    <Details>4 maßhaltige 16:9 Screenshots vorhanden</Details>
+  </Check>
+</WackPreflightReport>

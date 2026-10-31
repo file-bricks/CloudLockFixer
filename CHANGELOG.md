@@ -6,6 +6,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Windows Store Readiness Audit & Packaging-Staging (2026-10-31):
+  - WACK-Runner `scripts/run_windows_wack.py` implementiert (generiert hermetische Preflight-Berichte und validiert Manifest, runFullTrust, Kacheln, 16:9-Screenshots und Store-Policy 10.1.3).
+  - WACK-Preflight-Reports `releases/windowsstore/test_reports/wack_preflight_20261031.xml` und `.json` erzeugt (6 PASS / 0 FAIL / 0 WARN).
+  - `releases/windowsstore/store_settings.json` um `keywords_de` und `keywords_en` (je 7 richtlinienkonforme Keywords gemäß Partner Center Policy 10.1.3), `package_version` und `languages` gehärtet.
+  - `releases/windowsstore/WACK_PROTOCOL.md` mit den aktuellen Preflight-Prüfergebnissen aktualisiert.
+  - Store-Vertragstests in `tests/test_store_readiness.py` erweitert (WACK-Reports, Keywords & Staging-Integrität).
 - Web-Companion & Read-only Snapshot-Export (Task 170):
   - Modul `cloudlockfixer.snapshot`: Erzeugung und atomarer Export des `cloudlockfixer-snapshot-v1` Schemas.
   - CLI: Neuer Subcommand `clf export-snapshot [-o PATH] [--pretty]`.

@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-10-31T18:19:36.651367",
+  "overall_result": "PASS",
+  "application": "CloudLockFixer",
+  "identity": "Geiger.CloudLockFixer",
+  "version": "0.2.3.0",
+  "summary": {
+    "total_checks": 6,
+    "pass_count": 6,
+    "fail_count": 0,
+    "warning_count": 0
+  },
+  "checks": [
+    {
+      "id": "MANIFEST_SYNTAX",
+      "name": "AppxManifest-Validierung & XML-Wohlgeformtheit",
+      "result": "PASS",
+      "details": "Manifest syntax OK: AppxManifest.xml"
+    },
+    {
+      "id": "RESTRICTED_CAPABILITIES",
+      "name": "Restricted Capabilities Deklaration (runFullTrust)",
+      "result": "PASS",
+      "details": "Desktop-Bridge Anwendung deklariert runFullTrust"
+    },
+    {
+      "id": "TILE_ASSETS",
+      "name": "MSIX Kachel- und Icon-Assets Vollständigkeit",
+      "result": "PASS",
+      "details": "Alle 6 Kachelgrößen in store_assets vorhanden"
+    },
+    {
+      "id": "STORE_LOGO_PROPERTY",
+      "name": "AppxManifest Properties Logo (50x50 StoreLogo)",
+      "result": "PASS",
+      "details": "Properties Logo verweist auf icons\\StoreLogo.png"
+    },
+    {
+      "id": "STORE_POLICY_10_1_3",
+      "name": "Microsoft Store Richtlinie 10.1.3 (Max. 7 Keywords)",
+      "result": "PASS",
+      "details": "DE: 7 Keywords, EN: 7 Keywords (Richtlinie <= 7 erfüllt)"
+    },
+    {
+      "id": "STORE_SCREENSHOTS",
+      "name": "16:9 Full-HD Store-Screenshots",
+      "result": "PASS",
+      "details": "4 maßhaltige 16:9 Screenshots vorhanden"
+    }
+  ]
+}
