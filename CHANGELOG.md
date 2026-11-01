@@ -6,6 +6,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Test-Count-Parität & Dokumentations-Vertrag (2026-11-01):
+  - `README.es.md` auf aktuellen Stand von 395 gesammelten Tests (`395 pasadas`) synchronisiert.
+  - `tests/test_docs_contract.py` um Prüfung von `README.es.md` erweitert (dauerhafte 3-Sprachen-Parität DE/EN/ES gegen Testcount-Drift).
 - Windows Store Readiness Audit & Packaging-Staging (2026-10-31):
   - WACK-Runner `scripts/run_windows_wack.py` implementiert (generiert hermetische Preflight-Berichte und validiert Manifest, runFullTrust, Kacheln, 16:9-Screenshots und Store-Policy 10.1.3).
   - WACK-Preflight-Reports `releases/windowsstore/test_reports/wack_preflight_20261031.xml` und `.json` erzeugt (6 PASS / 0 FAIL / 0 WARN).
