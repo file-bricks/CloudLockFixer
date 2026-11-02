@@ -747,14 +747,14 @@ def test_contributing_urls_in_pyproject_and_readme() -> None:
 
 
 def test_readme_test_count_badges_parity() -> None:
-    """Verify that Pytest test count badges are synchronized to 395 passed across all 3 READMEs."""
+    """Verify that Pytest test count badges are synchronized to 403 passed across all 3 READMEs."""
     readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
-    assert "tests-395%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 385 passed"
-    assert "tests-395%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 385 grün"
-    assert "tests-395%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 385 pasados"
+    assert "tests-403%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 385 passed"
+    assert "tests-403%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 385 grün"
+    assert "tests-403%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 385 pasados"
 
 
 def test_changelog_recent_pfad_b_2026_10_11_entry() -> None:

@@ -1,4 +1,52 @@
 {
+  "about_a11y_label": {
+    "de": "Barrierefreiheit: Konform zu WCAG 2.1 AA und BITV 2.0",
+    "en": "Accessibility: Conforming to WCAG 2.1 AA and BITV 2.0",
+    "es": "Accesibilidad: Conforme a WCAG 2.1 AA y BITV 2.0",
+    "ja": "アクセシビリティ: WCAG 2.1 AA および BITV 2.0 に準拠",
+    "ru": "Доступность: Соответствует стандартам WCAG 2.1 AA и BITV 2.0",
+    "zh": "辅助功能：符合 WCAG 2.1 AA 和 BITV 2.0 标准"
+  },
+  "about_dialog_desc": {
+    "de": "Automatischer Delayed Action Service für gesperrte Cloud-Sync-Dateien (OneDrive, Google Drive, Dropbox) unter Windows.",
+    "en": "Automatic delayed action service for locked cloud sync files (OneDrive, Google Drive, Dropbox) on Windows.",
+    "es": "Servicio automático de acción diferida para archivos bloqueados de sincronización en la nube (OneDrive, Google Drive, Dropbox) en Windows.",
+    "ja": "Windows上のロックされたクラウド同期ファイル（OneDrive、Google Drive、Dropbox）用の自動遅延アクションサービス。",
+    "ru": "Служба отложенных действий для заблокированных файлов облачной синхронизации (OneDrive, Google Drive, Dropbox) в Windows.",
+    "zh": "适用于 Windows 上已锁定云同步文件（OneDrive、Google Drive、Dropbox）的自动延迟操作服务。"
+  },
+  "about_dialog_title": {
+    "de": "Über CloudLockFixer",
+    "en": "About CloudLockFixer",
+    "es": "Acerca de CloudLockFixer",
+    "ja": "CloudLockFixer について",
+    "ru": "О программе CloudLockFixer",
+    "zh": "关于 CloudLockFixer"
+  },
+  "about_license_label": {
+    "de": "Lizenz: MIT-Lizenz (Open Source)",
+    "en": "License: MIT License (Open Source)",
+    "es": "Licencia: Licencia MIT (Código abierto)",
+    "ja": "ライセンス: MIT ライセンス (オープンソース)",
+    "ru": "Лицензия: Лицензия MIT (с открытым исходным кодом)",
+    "zh": "许可证：MIT 许可证（开源）"
+  },
+  "about_menu_item": {
+    "de": "Über CloudLockFixer…",
+    "en": "About CloudLockFixer…",
+    "es": "Acerca de CloudLockFixer…",
+    "ja": "CloudLockFixer について…",
+    "ru": "О программе CloudLockFixer…",
+    "zh": "关于 CloudLockFixer…"
+  },
+  "about_zero_egress_label": {
+    "de": "Datenschutz: 100% lokal, kein Netzwerk-Egress, keine Telemetrie",
+    "en": "Privacy: 100% local-first, zero network egress, no telemetry",
+    "es": "Privacidad: 100% local primero, sin tráfico de red saliente, sin telemetría",
+    "ja": "プライバシー: 100% ローカルファースト、ネットワーク通信なし、テレメトリなし",
+    "ru": "Конфиденциальность: 100% локально, без исходящего сетевого трафика, без телеметрии",
+    "zh": "隐私：100% 本地优先，无网络流出，无遥测"
+  },
   "action_choose": {
     "de": "Aktion wählen:",
     "en": "Choose action:",
@@ -255,6 +303,14 @@
     "ru": "Обработать очередь сейчас",
     "zh": "立即处理任务队列"
   },
+  "close_button": {
+    "de": "Schließen",
+    "en": "Close",
+    "es": "Cerrar",
+    "ja": "閉じる",
+    "ru": "Закрыть",
+    "zh": "关闭"
+  },
   "confirm_delete": {
     "de": "'{src}' verzögert löschen?",
     "en": "Delete '{src}' (deferred)?",
@@ -471,6 +527,22 @@
     "ru": "Без ограничений (по умолчанию)",
     "zh": "无限制（默认）"
   },
+  "menu_accessible_desc": {
+    "de": "Verwaltung von Cloud-Sync-Dateisperren, Queue-Abarbeitung und Systemeinstellungen",
+    "en": "Management of cloud sync file locks, queue processing, and system settings",
+    "es": "Gestión de bloqueos de sincronización en la nube, procesamiento de colas y configuración del sistema",
+    "ja": "クラウド同期ファイルロックの管理、キュー処理、およびシステム設定",
+    "ru": "Управление блокировками файлов облачной синхронизации, обработкой очереди и системными настройками",
+    "zh": "管理云同步文件锁定、队列处理和系统设置"
+  },
+  "menu_accessible_name": {
+    "de": "CloudLockFixer Hauptmenü",
+    "en": "CloudLockFixer Main Menu",
+    "es": "Menú principal de CloudLockFixer",
+    "ja": "CloudLockFixer メインメニュー",
+    "ru": "Главное меню CloudLockFixer",
+    "zh": "CloudLockFixer 主菜单"
+  },
   "menu_export_snapshot": {
     "de": "Snapshot exportieren...",
     "en": "Export snapshot...",
@@ -655,6 +727,110 @@
     "ru": "Не удалось изменить {setting}. Сохранена предыдущая настройка.",
     "zh": "无法更改 {setting}。保留之前的设置。"
   },
+  "shortcuts_a11y_note": {
+    "de": "Alle Dialoge und Menüs unterstützen vollständige Tastatursteuerung und Screenreader-Attribute gemäß WCAG 2.1 AA.",
+    "en": "All dialogs and menus support full keyboard control and screen reader attributes according to WCAG 2.1 AA.",
+    "es": "Todos los diálogos y menús admiten control total por teclado y atributos de lector de pantalla según WCAG 2.1 AA.",
+    "ja": "すべてのダイアログとメニューは、WCAG 2.1 AAに準拠した完全なキーボード操作とスクリーンリーダー属性をサポートしています。",
+    "ru": "Все диалоговые окна и меню поддерживают полное управление с клавиатуры и атрибуты программ чтения с экрана согласно WCAG 2.1 AA.",
+    "zh": "所有对话框和菜单均根据 WCAG 2.1 AA 标准支持完整的键盘控制和屏幕阅读器属性。"
+  },
+  "shortcuts_col_action": {
+    "de": "Aktion / Beschreibung",
+    "en": "Action / Description",
+    "es": "Acción / Beschreibung",
+    "ja": "アクション / 説明",
+    "ru": "Действие / Описание",
+    "zh": "操作 / 描述"
+  },
+  "shortcuts_col_scope": {
+    "de": "Bereich",
+    "en": "Category",
+    "es": "Categoría",
+    "ja": "カテゴリ",
+    "ru": "Категория",
+    "zh": "类别"
+  },
+  "shortcuts_col_shortcut": {
+    "de": "Tastenkürzel",
+    "en": "Shortcut",
+    "es": "Atajo",
+    "ja": "ショートカット",
+    "ru": "Сочетание клавиш",
+    "zh": "快捷键"
+  },
+  "shortcuts_dialog_desc": {
+    "de": "Übersicht aller Tastenkombinationen und Navigationshilfen nach WCAG 2.1 AA.",
+    "en": "Overview of all keyboard shortcuts and navigation aids according to WCAG 2.1 AA.",
+    "es": "Descripción general de todos los atajos de teclado y ayudas de navegación según WCAG 2.1 AA.",
+    "ja": "WCAG 2.1 AAに準拠したすべてのキーボードショートカットとナビゲーション機能の概要。",
+    "ru": "Обзор всех сочетаний клавиш и средств навигации в соответствии с WCAG 2.1 AA.",
+    "zh": "符合 WCAG 2.1 AA 标准的所有键盘快捷键和导航辅助功能概览。"
+  },
+  "shortcuts_dialog_title": {
+    "de": "Tastaturkürzel & Barrierefreiheit",
+    "en": "Keyboard Shortcuts & Accessibility",
+    "es": "Atajos de teclado y accesibilidad",
+    "ja": "キーボードショートカットとアクセシビリティ",
+    "ru": "Горячие клавиши и доступность",
+    "zh": "键盘快捷键与辅助功能"
+  },
+  "shortcuts_group_folders": {
+    "de": "Verzeichnisse & Export",
+    "en": "Directories & Export",
+    "es": "Directorios y exportación",
+    "ja": "ディレクトリとエクスポート",
+    "ru": "Каталоги и экспорт",
+    "zh": "目录与导出"
+  },
+  "shortcuts_group_help": {
+    "de": "Hilfe & Information",
+    "en": "Help & Information",
+    "es": "Ayuda e información",
+    "ja": "ヘルプと情報",
+    "ru": "Справка и информация",
+    "zh": "帮助与信息"
+  },
+  "shortcuts_group_queue": {
+    "de": "Queue & Warteschlange",
+    "en": "Queue & Actions",
+    "es": "Cola y acciones",
+    "ja": "キューとアクション",
+    "ru": "Очередь и действия",
+    "zh": "队列与操作"
+  },
+  "shortcuts_group_system": {
+    "de": "System & Navigation",
+    "en": "System & Navigation",
+    "es": "Sistema y navegación",
+    "ja": "システムとナビゲーション",
+    "ru": "Система и навигация",
+    "zh": "系统与导航"
+  },
+  "shortcuts_menu_item": {
+    "de": "Tastaturkürzel & Hilfe",
+    "en": "Keyboard Shortcuts & Help",
+    "es": "Atajos de teclado y ayuda",
+    "ja": "キーボードショートカットとヘルプ",
+    "ru": "Горячие клавиши и справка",
+    "zh": "键盘快捷键与帮助"
+  },
+  "shortcuts_nav_arrows": {
+    "de": "Menüeinträge navigieren",
+    "en": "Navigate menu items",
+    "es": "Navegar por los elementos del menú",
+    "ja": "メニュー項目を移動",
+    "ru": "Перемещение по пунктам меню",
+    "zh": "导航菜单项"
+  },
+  "shortcuts_nav_escape": {
+    "de": "Menü / Dialog schließen",
+    "en": "Close menu / dialog",
+    "es": "Cerrar menú / diálogo",
+    "ja": "メニュー / ダイアログを閉じる",
+    "ru": "Закрыть меню / диалог",
+    "zh": "关闭菜单 / 对话框"
+  },
   "snapshot_exported": {
     "de": "Snapshot erfolgreich exportiert nach: {path}",
     "en": "Snapshot successfully exported to: {path}",
@@ -686,6 +862,14 @@
     "ja": "フォルダー",
     "ru": "Папка",
     "zh": "文件夹"
+  },
+  "status_accessible_name": {
+    "de": "Aktueller Queue- und Verarbeitungsstatus",
+    "en": "Current queue and processing status",
+    "es": "Estado actual de la cola y procesamiento",
+    "ja": "現在のキューと処理ステータス",
+    "ru": "Текущее состояние очереди и обработки",
+    "zh": "当前队列与处理状态"
   },
   "status_no_tasks": {
     "de": "keine offenen Aufgaben",

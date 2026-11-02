@@ -6,8 +6,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- WCAG 2.1 AA / BITV 2.0 Barrierefreiheit, Tastatur-Ergonomie & Dialog-Härtung (2026-11-02):
+  - Menü-Accessibility: `TrayApp.menu` mit deklariertem `accessibleName` ("CloudLockFixer Hauptmenü") und `accessibleDescription` ("Verwaltung von Cloud-Sync-Dateisperren, Queue-Abarbeitung und Systemeinstellungen") ausgestattet; Untermenüs für Intervall, Fehlversuche und Sprache mit barrierefreien Namen versehen.
+  - Tastatur-Ergonomie & Accelerators: Globale Tastaturkürzel auf allen Primäraktionen (`Ctrl+O` Task hinzufügen, `F5` Jetzt ausführen, `Ctrl+Shift+F5` Mit Sync-Pause, `Ctrl+R` Fehlgeschlagene wiederholen, `Ctrl+D` Datenordner öffnen, `Ctrl+S` Snapshot exportieren, `F1` Tastaturkürzel & Hilfe, `Shift+F1` Über CloudLockFixer, `Ctrl+Q` Beenden).
+  - Barrierefreier Tastaturkürzel-Referenzdialog (`ShortcutsDialog`): Hierarchischer `QTreeWidget`-Dialog in 4 Kategoriengruppen (Queue & Warteschlange, Verzeichnisse & Export, Hilfe & Information, System & Navigation) mit barrierefreien Namen, Standard-Schließen-Button und Escape-Taste-Handler nach WCAG 2.1 AA / BITV 2.0.
+  - Strukturierter Über-Dialog (`AboutDialog`): Modaler Dialog mit Version 0.2.3, MIT-Lizenz, 100% Local-First / Zero-Egress Reassurance und Barrierefreiheitsdeklaration inklusive Escape-Schließlogik.
+  - Dynamische Live-Neuübersetzung (`retranslate_ui()`): Sofortige Umschaltung aller A11y-Attribute und Beschriftungen bei Sprachwechsel ohne Neustart.
+  - Tier-2 6-Sprachen-Parität (Policy P-006): 23 neue Lokalisierungsschlüssel in `src/cloudlockfixer/i18n.py` und `locales/translations.json` mit 100% Parität über Deutsch, Englisch, Spanisch, Chinesisch, Japanisch und Russisch (124/124 Schlüssel, `manage_translations.py --check` bestanden).
+  - Automatisierte Vertragstests (`tests/test_ui_accessibility.py`): 8 hermetische Vertragstests für Barrierefreiheit, Shortcuts, Dialoge, dynamische Neuübersetzung, Parität und echte deutsche Umlaute implementiert (8/8 passed).
 - Test-Count-Parität & Dokumentations-Vertrag (2026-11-01):
-  - `README.es.md` auf aktuellen Stand von 395 gesammelten Tests (`395 pasadas`) synchronisiert.
+  - `README.es.md` auf aktuellen Stand von 395 gesammelten Tests (`403 pasadas`) synchronisiert.
   - `tests/test_docs_contract.py` um Prüfung von `README.es.md` erweitert (dauerhafte 3-Sprachen-Parität DE/EN/ES gegen Testcount-Drift).
 - Windows Store Readiness Audit & Packaging-Staging (2026-10-31):
   - WACK-Runner `scripts/run_windows_wack.py` implementiert (generiert hermetische Preflight-Berichte und validiert Manifest, runFullTrust, Kacheln, 16:9-Screenshots und Store-Policy 10.1.3).
@@ -106,7 +114,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 395 passing tests.
+- The verification contract reflects the current unreleased source state: 403 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
