@@ -246,6 +246,7 @@ sequenceDiagram
         Worker->>User: Fallback successful (status: done, zero data loss)
     else Irrecoverable Target Conflict
         Worker->>User: Mark task blocked (status: blocked, preserves data)
+    end
 ```
 
 ### ASCII Architectural Topology (Four-View Projection)
