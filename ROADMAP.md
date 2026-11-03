@@ -1,8 +1,10 @@
 # CloudLockFixer — Roadmap
 
-## Aktueller Source-Ausbau — 2026-09-30
+## Aktueller Source-Ausbau — 2026-11-03
 
+- [x] Translation Management CLI Gate (TW-CLF-11): `manage_translations.py` mit `--check`, `--stats`, `--scan`, `--json`, atomare Durability in `i18n.py`, Source-Platform-Smoke Gate, CI-Gate und 16 Vertragstests.
 - [x] Gedeckeltes Backoff für hohe persistierte Versuchszähler.
+
 - [x] Rein lesender Review historischer Fünfer-Limit-Fehler mit ausdrücklicher
   Entscheidung über gezielte Wiederaufnahme; keine automatische Migration.
 - [x] Automatisierter nativer Source-Tray-Smoke mit temporären Operationen,

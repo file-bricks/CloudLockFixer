@@ -6,8 +6,13 @@ für die Laufzeit konstant.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import locale
+import os
+import stat
+import sys
+import uuid
 from pathlib import Path
 from typing import Literal
 
@@ -1084,12 +1089,27 @@ def available_keys() -> list[str]:
 
 
 def export_catalog_json(target_path: Path | str | None = None) -> Path:
-    """Exportiert den Übersetzungskatalog nach locales/translations.json für Ökosystem-Parität."""
+    """Exportiert den Übersetzungskatalog atomar nach locales/translations.json für Ökosystem-Parität."""
     if target_path is None:
         target_path = Path(__file__).resolve().parents[2] / "locales" / "translations.json"
     else:
         target_path = Path(target_path)
+    target_path = target_path.resolve()
     target_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(target_path, "w", encoding="utf-8") as f:
-        json.dump(_CATALOG, f, indent=2, ensure_ascii=False, sort_keys=True)
+    nonce = f"{os.getpid()}_{uuid.uuid4().hex[:8]}"
+    tmp_path = target_path.parent / f".{target_path.name}.tmp.{nonce}"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump(_CATALOG, f, indent=2, ensure_ascii=False, sort_keys=True)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        if sys.platform == "win32" and target_path.exists():
+            with contextlib.suppress(OSError):
+                os.chmod(target_path, stat.S_IWRITE | stat.S_IREAD)
+        os.replace(tmp_path, target_path)
+    finally:
+        if tmp_path.exists():
+            with contextlib.suppress(OSError):
+                tmp_path.unlink()
     return target_path

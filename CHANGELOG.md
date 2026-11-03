@@ -6,6 +6,16 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Translation Management CLI Gate & Atomic Durability (TW-CLF-11)** (2026-11-03):
+  - Eigenständiges CLI- und Validierungs-Werkzeug `manage_translations.py` mit `--check` (Exit 0/1 CI-Gate), `--stats` (Formatierte Statistik-Tabelle je Sprache mit Abdeckungsgrad), `--scan` (Auto-Scanner für Quelltexte), `--dir` und `--json` nach Policy P-006 Tier-2 (DE, EN, ES, ZH, JA, RU).
+  - Modulare Fassaden-APIs (`load_translations`, `save_translations`, `validate_catalog`, `get_catalog_stats`, `print_catalog_stats`, `find_german_strings`, `scan_and_update`, `resolve_translation_file`).
+  - Package-Fassade `src/cloudlockfixer/manage_translations.py` für nahtlosen programmatischen Import.
+  - Crash-feste, atomare Persistenz in `manage_translations.py` (`save_translations`) und `src/cloudlockfixer/i18n.py` (`export_catalog_json`) via Staging-Datei (`.tmp.<pid>_<uuid>`), `flush()` und `fsync()` vor `os.replace` mit `stat.S_IWRITE` zum Schutz vor Dateibeschädigung und Schreibfehlern.
+  - Defensives Windows UTF-8 Konsolen-Encoding via `sys.stdout.reconfigure` / `sys.stderr.reconfigure`.
+  - Smoke-Gate: `tests/source_platform_smoke.py` um `test_translation_parity_gate` erweitert.
+  - CI-Workflow: `.github/workflows/tests.yml` um Schritt `Run translation parity gate` (`python manage_translations.py --check`) ergänzt.
+  - Testsuite: 16 neue hermetische Vertragstests in `tests/test_manage_translations.py` (Gesamtsuite auf 419 gesammelte Tests ausgebaut).
+  - Aufgaben-Synchronisation: `AUFGABEN.txt` neu angelegt und mit `TODO.md` und `ROADMAP.md` synchronisiert.
 - WCAG 2.1 AA / BITV 2.0 Barrierefreiheit, Tastatur-Ergonomie & Dialog-Härtung (2026-11-02):
   - Menü-Accessibility: `TrayApp.menu` mit deklariertem `accessibleName` ("CloudLockFixer Hauptmenü") und `accessibleDescription` ("Verwaltung von Cloud-Sync-Dateisperren, Queue-Abarbeitung und Systemeinstellungen") ausgestattet; Untermenüs für Intervall, Fehlversuche und Sprache mit barrierefreien Namen versehen.
   - Tastatur-Ergonomie & Accelerators: Globale Tastaturkürzel auf allen Primäraktionen (`Ctrl+O` Task hinzufügen, `F5` Jetzt ausführen, `Ctrl+Shift+F5` Mit Sync-Pause, `Ctrl+R` Fehlgeschlagene wiederholen, `Ctrl+D` Datenordner öffnen, `Ctrl+S` Snapshot exportieren, `F1` Tastaturkürzel & Hilfe, `Shift+F1` Über CloudLockFixer, `Ctrl+Q` Beenden).
@@ -114,7 +124,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 403 passing tests.
+- The verification contract reflects the current unreleased source state: 419 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

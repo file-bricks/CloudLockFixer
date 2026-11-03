@@ -221,3 +221,13 @@ def test_macos_contextmenu_smoke(tmp_path, monkeypatch):
 
     assert contextmenu.uninstall()
     assert not contextmenu.is_installed()
+
+def test_translation_parity_gate():
+    """Smoke test ensuring Tier-2 translation parity (de, en, es, zh, ja, ru) is 100% complete."""
+    import manage_translations as mt
+
+    trans_file = mt.resolve_translation_file()
+    assert trans_file.exists(), f"translations.json missing at {trans_file}"
+    is_valid, findings = mt.validate_catalog(trans_file)
+    assert is_valid is True, f"Translation catalog parity failed: {findings}"
+    assert len(findings) == 0

@@ -1,5 +1,15 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Translation Management CLI Gate & Atomic Durability (TW-CLF-11) — erledigt 2026-11-03
+
+- [x] `manage_translations.py`: Eigenständiges CLI- und Validierungs-Werkzeug mit `--check` (Exit 0/1 CI-Gate), `--stats` (Formatierte Statistik-Tabelle je Sprache mit Abdeckungsgrad), `--scan` (Auto-Scanner für Quelltexte), `--dir` und `--json` nach Policy P-006 Tier-2 (DE, EN, ES, ZH, JA, RU).
+- [x] `src/cloudlockfixer/manage_translations.py`: Package-Fassade für nahtlosen programmatischen Import.
+- [x] `src/cloudlockfixer/i18n.py`: `export_catalog_json()` und `manage_translations.save_translations()` auf Staging-Datei (`.tmp.<pid>_<uuid>`), `flush()` und `os.fsync()` vor `os.replace` mit `stat.S_IWRITE` umgestellt.
+- [x] `tests/source_platform_smoke.py`: `test_translation_parity_gate` hinzugefügt (100% Parität über alle 6 Sprachen verifiziert).
+- [x] `.github/workflows/tests.yml`: CI-Gate `Run translation parity gate` (`python manage_translations.py --check`) ergänzt.
+- [x] `tests/test_manage_translations.py`: 16 neue hermetische Vertragstests implementiert (Gesamtsuite auf 419 Tests ausgebaut).
+- [x] `AUFGABEN.txt`: Neu angelegt und mit `TODO.md` und `ROADMAP.md` synchronisiert.
+
 ## Web-Companion & Snapshot-Export (Task 170) — erledigt 2026-10-30
 
 - [x] `src/cloudlockfixer/snapshot.py`: `build_snapshot()` und atomarer `export_snapshot()` mit Schema `cloudlockfixer-snapshot-v1`.

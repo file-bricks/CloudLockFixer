@@ -45,6 +45,12 @@ jobs:
       - name: Compile Python bytecode
         run: python -m compileall -q .
 
+      - name: Run translation parity gate
+        env:
+          PYTHONPATH: src
+          PYTHONIOENCODING: utf-8
+        run: python manage_translations.py --check
+
       - name: Run tests
         env:
           PYTHONPATH: src
