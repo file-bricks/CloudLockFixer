@@ -138,40 +138,108 @@ _PCLOUD_VOLUME_LABELS = frozenset({"pcloud drive"})
 
 
 def _normalize_volume_label(label: str) -> str:
-    """Normalize a Windows volume label without changing its meaning."""
-    return " ".join(str(label).strip().casefold().split())
+    """Normalize a Windows volume label without changing its meaning.
+
+    Strips null bytes (from Win32 C string buffers), BOM (\ufeff), zero-width
+    spaces (\u200b..\u200d), collapses all Unicode whitespace down to single
+    ASCII spaces, and applies casefolding for reliable comparison.
+    """
+    if not label:
+        return ""
+    cleaned = (
+        str(label)
+        .replace("\x00", "")
+        .replace("\ufeff", "")
+        .replace("\u200b", "")
+        .replace("\u200c", "")
+        .replace("\u200d", "")
+        .strip()
+        .casefold()
+    )
+    return " ".join(cleaned.split())
 
 
-def _volume_label_matches(label: str, accepted: frozenset[str]) -> bool:
-    """Return whether *label* is one of the provider's known exact labels."""
-    return _normalize_volume_label(label) in accepted
+def _volume_label_matches(label: str, accepted: frozenset[str], drive_letter: str = "") -> bool:
+    """Return whether *label* is one of the provider's known exact labels.
+
+    Harden against real Windows volume label formats (Task 167 / TW-CLF-05):
+    - Exact match against *accepted* in normalized form.
+    - Suffix with drive letter in parentheses like ``"Google Drive (G:)"`` or
+      ``"pCloud Drive (P:)"`` when matching the queried *drive_letter*.
+    - Multi-account Google Drive: ``"Google Drive - <account>"`` where the
+      account name is non-empty.
+    - Consolidated name variants (e.g. ``"googledrive"``).
+    - Unrelated custom labels (e.g. ``"My Google Drive"``, ``"Google Drive Backup"``,
+      ``"pCloud Archive Disk"``) remain strictly excluded to prevent false-positive
+      process termination.
+    """
+    norm = _normalize_volume_label(label)
+    if not norm:
+        return False
+    if norm in accepted:
+        return True
+
+    # Check for drive letter suffix e.g. "Google Drive (G:)" or "pCloud Drive (P:)"
+    if drive_letter:
+        clean_letter = drive_letter.strip().rstrip(":\\/").casefold()
+        if clean_letter and len(clean_letter) == 1:
+            suffix = f"({clean_letter}:)"
+            if norm.endswith(suffix):
+                base = norm[:-len(suffix)].strip()
+                if base in accepted:
+                    return True
+
+    # Google Drive specific real-world multi-account and consolidated variants
+    if "google drive" in accepted:
+        if norm == "googledrive":
+            return True
+        if norm.startswith("google drive - "):
+            account = norm[len("google drive - "):].strip()
+            if account and not account.startswith("-"):
+                return True
+
+    return False
 
 
 def _get_volume_label(drive_letter: str) -> str:
     """Read volume label via Win32 API (no subprocess).
 
-    Robust gegen nicht bereite Wechsel-/CD-Laufwerke: der Fehlermodus wird
-    für die Dauer der Abfrage auf SEM_FAILCRITICALERRORS gesetzt (verhindert
-    die blockierende "Kein Datenträger"-Dialogbox) und danach wiederhergestellt.
-    Nur DRIVE_FIXED und DRIVE_REMOTE werden abgefragt — Cloud-Laufwerke
-    (Google Drive, pCloud) mounten als FIXED oder REMOTE, während echte
-    Wechseldatenträger/CD-ROMs übersprungen werden."""
+    Robust gegen nicht bereite Wechsel-/CD-Laufwerke, Netzlaufwerke und
+    ungewöhnliche Datenträgerkonfigurationen (Task 167 / TW-CLF-05):
+    - Der Laufwerksbuchstabe wird vorab validiert und auf [A-Z] normiert.
+    - Der Fehlermodus wird für die Dauer der Abfrage auf SEM_FAILCRITICALERRORS
+      gesetzt (verhindert blockierende Systemdialoge) und im finally-Block
+      garantiert wiederhergestellt.
+    - Nur DRIVE_FIXED und DRIVE_REMOTE werden abgefragt — Cloud-Laufwerke
+      (Google Drive, pCloud) mounten als FIXED oder REMOTE, während echte
+      Wechseldatenträger/CD-ROMs/RAM-Disks übersprungen werden.
+    - Fehlerhafte oder nicht erreichbare Netzlaufwerke (z. B. getrennte Shares)
+      fangen Win32-Fehler geräuschlos ab und geben einen leeren String zurück.
+    - Der Rückgabewert wird von C-Nullbyte-Resten und umgebendem Whitespace
+      bereinigt.
+    """
     if sys.platform != "win32":
         return ""
     try:
+        drive = str(drive_letter).strip().rstrip(":\\/").upper()
+        if not drive or len(drive) != 1 or drive not in string.ascii_uppercase:
+            return ""
+        root = f"{drive}:\\"
         k = ctypes.windll.kernel32
-        root = f"{drive_letter}:\\"
         old_mode = ctypes.c_uint(0)
         k.SetThreadErrorMode(_SEM_FAILCRITICALERRORS, ctypes.byref(old_mode))
         try:
-            if k.GetDriveTypeW(root) not in (_DRIVE_FIXED, _DRIVE_REMOTE):
+            drive_type = k.GetDriveTypeW(root)
+            if drive_type not in (_DRIVE_FIXED, _DRIVE_REMOTE):
                 return ""
             buf = ctypes.create_unicode_buffer(261)
             ok = k.GetVolumeInformationW(root, buf, 261, None, None, None, None, 0)
-            return buf.value if ok else ""
+            if not ok:
+                return ""
+            return buf.value.replace("\x00", "").strip() if buf.value else ""
         finally:
             k.SetThreadErrorMode(old_mode.value, None)
-    except (OSError, ValueError):
+    except (OSError, ValueError, AttributeError, TypeError):
         return ""
 
 
@@ -375,7 +443,7 @@ class GoogleDriveProvider(SyncProvider):
                 for i, letter in enumerate(string.ascii_uppercase):
                     if bitmask & (1 << i):
                         label = _get_volume_label(letter)
-                        if _volume_label_matches(label, _GOOGLE_DRIVE_VOLUME_LABELS):
+                        if _volume_label_matches(label, _GOOGLE_DRIVE_VOLUME_LABELS, drive_letter=letter):
                             roots.append(Path(f"{letter}:\\"))
             except (OSError, AttributeError):
                 pass
@@ -688,7 +756,7 @@ class PCloudProvider(SyncProvider):
                 for i, letter in enumerate(string.ascii_uppercase):
                     if bitmask & (1 << i):
                         label = _get_volume_label(letter)
-                        if _volume_label_matches(label, _PCLOUD_VOLUME_LABELS):
+                        if _volume_label_matches(label, _PCLOUD_VOLUME_LABELS, drive_letter=letter):
                             roots.append(Path(f"{letter}:\\"))
             except (OSError, AttributeError):
                 pass

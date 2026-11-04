@@ -6,6 +6,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Volume-Label-Erkennung & Netzlaufwerke-Härtung (TW-CLF-05 / Task 167)** (2026-11-05):
+  - Normalisierung von Volume-Labels (`_normalize_volume_label`): Bereinigung von C-Nullbyte-Puffern (`\x00`), Unicode-BOM (`\ufeff`), Zero-Width-Spaces (`\u200b`..`\u200d`), Non-Breaking Spaces (`\xa0`, `\u202f`, `\u3000`) und Whitespace-Kollabierung bei durchgehendem Casefolding.
+  - Erweiterte Label-Parität (`_volume_label_matches`): Unterstützung von Laufwerksbuchstaben-Suffixen in Klammern (`"Google Drive (G:)"`, `"pCloud Drive (P:)"`) synchron zum abgefragten Laufwerksbuchstaben; Unterstützung von Multi-Account-Google-Drive-Labels (`"Google Drive - <account>"`) und konsolidierten Varianten (`"googledrive"`).
+  - Strikter Prozessschutz vor Fehlpausierungen: Nicht verwandte oder modifizierte Labels (`"My Google Drive"`, `"Google Drive Backup"`, `"pCloud Archive Disk"`) bleiben strikt ausgeschlossen (Fail-Safe Invariante gemäß `RELEASE_GATE.md`).
+  - Härtung der Win32-Laufwerksabfrage (`_get_volume_label`): Defensive Eingabereinigung für Laufwerksbuchstaben auf `[A-Z]`, garantierte Fehler-Modus-Wiederherstellung im `finally`-Block, Unterdrückung blockierender Systemdialoge via `_SEM_FAILCRITICALERRORS`, Filterung auf `DRIVE_FIXED` und `DRIVE_REMOTE` (Ausschluss von `REMOVABLE`, `CDROM`, `RAMDISK`, `UNKNOWN`), und lautlose Fehlerbehandlung bei nicht erreichbaren Netzlaufwerken (`WinError 53`, `WinError 67`, `ERROR_NOT_READY`).
+  - Testsuite: 10 neue hermetische Vertragstests in `tests/test_volume_label_hardening.py` (Gesamtsuite auf 429 gesammelte Tests ausgebaut).
 - **Translation Management CLI Gate & Atomic Durability (TW-CLF-11)** (2026-11-03):
   - Eigenständiges CLI- und Validierungs-Werkzeug `manage_translations.py` mit `--check` (Exit 0/1 CI-Gate), `--stats` (Formatierte Statistik-Tabelle je Sprache mit Abdeckungsgrad), `--scan` (Auto-Scanner für Quelltexte), `--dir` und `--json` nach Policy P-006 Tier-2 (DE, EN, ES, ZH, JA, RU).
   - Modulare Fassaden-APIs (`load_translations`, `save_translations`, `validate_catalog`, `get_catalog_stats`, `print_catalog_stats`, `find_german_strings`, `scan_and_update`, `resolve_translation_file`).
@@ -124,7 +130,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 419 passing tests.
+- The verification contract reflects the current unreleased source state: 429 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

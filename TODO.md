@@ -227,7 +227,8 @@ Exit-0-Deep-Bündel des TASKWRITER-Selektors für CODING/REL-PUB_CloudLockFixer.
 - [x] TASKPLAN #853 / TW-CLF-02 — Testnachweis und Cross-Platform-Status synchronisieren — DONE 2026-07-22 (165 lokale Python-Tests; Linux/macOS nur Source-/CI-Nachweis, kein nativer Release)
 - [x] TASKPLAN #854 / TW-CLF-03 — Design-, Roadmap- und Sicherheitsvertrag angleichen — DONE 2026-08-11, Retry-Vertrag am 2026-08-12 korrigiert: 8 Provider, `&&`-Ketten, Datenordner-Aktion und unbegrenzter Default für retryfähige Tasks; native/integrative Gatter bleiben offen.
 - TASKPLAN #855 / TW-CLF-04 — Synology-Pause/Resume auf echtem Windows-Prozessmodell verifizieren (Task 166)
-- TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten (Task 167)
+- [x] TASKPLAN #856 / TW-CLF-05 — Volume-Label-Erkennung gegen reale Windows-Labels härten (Task 167)
+  DONE 2026-11-05: `src/cloudlockfixer/providers.py` gegen reale Windows-Labels (Suffixe mit Laufwerksbuchstaben, Multi-Account Google Drive, Unicode-BOM/Nullbytes) und unzuverlässige Netzlaufwerke gehärtet. 10 neue Vertragstests in `tests/test_volume_label_hardening.py` (Gesamtsuite auf 429 Tests ausgebaut).
 - [x] TASKPLAN #857 / TW-CLF-06 — Copy-Verifikation vor destruktivem Delete absichern.
   DONE 2026-07-22: Die vorherige Prüfung verglich nur Dateizahl und Gesamtgröße;
   gleich große, aber abweichende Inhalte hätten dadurch das Löschen der Quelle

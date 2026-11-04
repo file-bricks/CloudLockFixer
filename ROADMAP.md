@@ -2,6 +2,7 @@
 
 ## Aktueller Source-Ausbau — 2026-11-03
 
+- [x] Volume-Label-Erkennung & Netzlaufwerke-Härtung (TW-CLF-05 / Task 167): `providers.py` Normalisierung (C-Nullbytes, BOM, Zero-Width-Spaces), Laufwerksbuchstaben-Suffixe (`(G:)`, `(P:)`), Multi-Account-Google-Drive-Labels, DRIVE_REMOTE Resilienz und 10 Vertragstests (2026-11-05).
 - [x] Translation Management CLI Gate (TW-CLF-11): `manage_translations.py` mit `--check`, `--stats`, `--scan`, `--json`, atomare Durability in `i18n.py`, Source-Platform-Smoke Gate, CI-Gate und 16 Vertragstests.
 - [x] Gedeckeltes Backoff für hohe persistierte Versuchszähler.
 
