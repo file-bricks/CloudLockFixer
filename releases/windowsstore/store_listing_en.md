@@ -14,7 +14,7 @@ CloudLockFixer is a lightweight, local desktop and system tray utility designed 
 - **Intelligent Provider Detection:** Distinguishes between standard sync directories and virtual drive mounts to protect filesystem integrity.
 - **Preventive File Watcher:** Monitors active directories during bursts of modifications to prevent lockups proactively.
 - **Configurable Retry Limits:** Tailor retry policies and receive optional desktop toasts when permanent obstacles arise.
-- **Bilingual Interface:** Native support for English and German with automatic system language detection.
+- **Multilingual Interface:** Comprehensive support for 6 languages (English, German, Spanish, Chinese, Japanese, Russian) with automatic system language detection.
 - **Zero-Egress Privacy:** Operates entirely offline with no network connections, no telemetry, and no account requirements.
 
 ### Keywords

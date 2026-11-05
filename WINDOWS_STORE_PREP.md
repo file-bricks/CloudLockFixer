@@ -1,6 +1,6 @@
 # Windows Store Preparation & Packaging Guide — CloudLockFixer
 
-Stand: 2026-09-23
+Stand: 2026-11-05
 
 ## Übersicht
 
@@ -15,19 +15,19 @@ CloudLockFixer wird als modernes MSIX-Paket für den Microsoft Store paketiert. 
 - **Package Version:** 0.2.3.0
 - **Category:** Utilities
 - **Capabilities:** runFullTrust
-- **Languages:** de-DE, en-US
+- **Languages:** de-DE, en-US, es-ES, zh-CN, ja-JP, ru-RU
 - **Executable:** CloudLockFixer.exe
 
 ## Erledigte Vorbereitungsschritte
 
 1. **Paketierungs-Metadaten (`store_package.json`):**
    - Vollständige Publisher-DN, Identity-Name und Versionsangabe (`0.2.3.0`) konfiguriert.
-   - Lizenzfeld `license: "MIT"` und Sprachen `["de-DE", "en-US"]` hinterlegt.
+   - Lizenzfeld `license: "MIT"` und Sprachen `["de-DE", "en-US", "es-ES", "zh-CN", "ja-JP", "ru-RU"]` (Tier-2 nach Policy P-006) hinterlegt.
    - Validierte HTTPS-URLs für Datenschutzrichtlinie und GitHub-Issue-Support hinterlegt.
 
 2. **Windows Desktop AppxManifest (`store_package/CloudLockFixer/AppxManifest.xml`):**
    - Kanonisches AppxManifest mit `TargetDeviceFamily Windows.Desktop` (MinVersion `10.0.17763.0`, MaxVersionTested `10.0.26100.0`).
-   - Mehrsprachige Ressourcen (`de-de`, `en-us`) und VisualElements/Tile-Deklarationen eingebunden.
+   - Mehrsprachige Ressourcen (`de-de`, `en-us`, `es-es`, `zh-cn`, `ja-jp`, `ru-ru`) und VisualElements/Tile-Deklarationen eingebunden.
    - Eigenschaften-Logo `<Logo>icons\StoreLogo.png</Logo>` auf standardkonforme 50x50 StoreLogo-Kachel ausgerichtet.
 
 3. **MSIX Tile- und Icon-Assets:**
@@ -47,8 +47,8 @@ CloudLockFixer wird als modernes MSIX-Paket für den Microsoft Store paketiert. 
      - `03_preventive-watcher-settings.png`: Präventiver Wächter & konfigurierbare Wiederholungszyklen
      - `04_cross-platform-architecture.png`: Offline-First-, Local-First- & Zero-Egress-Architektur
 
-5. **Bilingualer Store-Listing-Entwurf (`STORE_LISTING.md`):**
-   - Vollständige deutsche und englische Beschreibungen mit Feature-Listen.
+5. **Sechssprachiger Store-Listing-Entwurf (`STORE_LISTING.md` & `releases/windowsstore/`):**
+   - Vollständige deutsche, englische, spanische, chinesische (vereinfacht), japanische und russische Beschreibungen mit Feature-Listen.
    - Strikt maximal 7 Suchbegriffe pro Sprache gemäß **Microsoft Store Policy 10.1.3** ohne Fremdmarkenverletzungen.
 
 6. **Automatisiertes Readiness-Audit (`scripts/check_store_readiness.py`):**

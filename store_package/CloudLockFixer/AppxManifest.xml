@@ -24,6 +24,10 @@
   <Resources>
     <Resource Language="de-de" />
     <Resource Language="en-us" />
+    <Resource Language="es-es" />
+    <Resource Language="zh-cn" />
+    <Resource Language="ja-jp" />
+    <Resource Language="ru-ru" />
   </Resources>
 
   <Capabilities>

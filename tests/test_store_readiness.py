@@ -53,6 +53,14 @@ def test_store_package_json_contract():
     assert data.get("support_url", "").startswith("https://")
 
 
+def test_store_package_json_has_six_tier2_languages():
+    data = json.loads((PROJECT_ROOT / "store_package.json").read_text(encoding="utf-8"))
+    langs = data.get("languages", [])
+    expected = ["de-DE", "en-US", "es-ES", "zh-CN", "ja-JP", "ru-RU"]
+    for lang in expected:
+        assert lang in langs, f"Language {lang} missing in store_package.json"
+
+
 def test_store_icons_match_specification():
     for name, req_w, req_h in REQUIRED_TILE_ICONS:
         for folder in (
@@ -104,6 +112,29 @@ def test_partner_center_10_1_3_keywords_max_7():
         assert len(k) <= 30, f"Keyword too long: '{k}'"
 
 
+def test_store_listing_has_tier2_six_languages():
+    content = (PROJECT_ROOT / "STORE_LISTING.md").read_text(encoding="utf-8")
+    headings = ["## Deutsch", "## English", "## Español", "## 简体中文", "## 日本語", "## Русский"]
+    for h in headings:
+        assert h in content, f"Heading {h} missing in STORE_LISTING.md"
+
+    kw_checks = [
+        (r"### Schlüsselwörter[^\n]*\n+([^\n#]+)", "German"),
+        (r"### Keywords[^\n]*\n+([^\n#]+)", "English"),
+        (r"### Palabras clave[^\n]*\n+([^\n#]+)", "Spanish"),
+        (r"### 关键词[^\n]*\n+([^\n#]+)", "Chinese"),
+        (r"### キーワード[^\n]*\n+([^\n#]+)", "Japanese"),
+        (r"### Ключевые слова[^\n]*\n+([^\n#]+)", "Russian"),
+    ]
+    for pattern, lang_name in kw_checks:
+        m = re.search(pattern, content)
+        assert m is not None, f"Keywords for {lang_name} not found in STORE_LISTING.md"
+        kws = [k.strip() for k in m.group(1).split(",") if k.strip()]
+        assert 1 <= len(kws) <= 7, f"{lang_name} keywords count invalid: {len(kws)}"
+        for k in kws:
+            assert len(k) <= 30, f"{lang_name} keyword '{k}' exceeds 30 chars"
+
+
 def test_appx_manifest_structure():
     manifest_path = PROJECT_ROOT / "store_package" / "CloudLockFixer" / "AppxManifest.xml"
     assert manifest_path.is_file()
@@ -115,6 +146,13 @@ def test_appx_manifest_structure():
     assert 'Square44x44Logo="icons\\icon_44x44.png"' in content
 
 
+def test_appx_manifest_has_six_tier2_languages():
+    manifest_path = PROJECT_ROOT / "store_package" / "CloudLockFixer" / "AppxManifest.xml"
+    content = manifest_path.read_text(encoding="utf-8")
+    for lang in ("de-de", "en-us", "es-es", "zh-cn", "ja-jp", "ru-ru"):
+        assert f'Language="{lang}"' in content, f"Resource language {lang} missing in AppxManifest.xml"
+
+
 def test_releases_windowsstore_staging_complete():
     staging = PROJECT_ROOT / "releases" / "windowsstore"
     assert staging.is_dir()
@@ -124,6 +162,10 @@ def test_releases_windowsstore_staging_complete():
         "store_settings.json",
         "store_listing_de.md",
         "store_listing_en.md",
+        "store_listing_es.md",
+        "store_listing_zh.md",
+        "store_listing_ja.md",
+        "store_listing_ru.md",
         "StoreLogo.png",
     ):
         path = staging / req
@@ -165,3 +207,18 @@ def test_releases_windowsstore_staging_complete():
     protocol_content = (staging / "WACK_PROTOCOL.md").read_text(encoding="utf-8")
     assert "PASS" in protocol_content
     assert CANONICAL_IDENTITY in protocol_content
+
+
+def test_releases_windowsstore_staging_has_six_languages():
+    staging = PROJECT_ROOT / "releases" / "windowsstore"
+    for lang in ("de", "en", "es", "zh", "ja", "ru"):
+        listing_file = staging / f"store_listing_{lang}.md"
+        assert listing_file.is_file(), f"Missing staging listing: {listing_file.name}"
+        assert listing_file.stat().st_size > 50
+
+    settings_data = json.loads((staging / "store_settings.json").read_text(encoding="utf-8"))
+    for lang in ("de", "en", "es", "zh", "ja", "ru"):
+        kws = settings_data.get(f"keywords_{lang}", [])
+        assert isinstance(kws, list) and 1 <= len(kws) <= 7, f"Missing or invalid keywords_{lang}"
+        desc = settings_data.get(f"description_{lang}", "")
+        assert isinstance(desc, str) and 1 <= len(desc) <= 100, f"description_{lang} out of bounds: {len(desc)}"

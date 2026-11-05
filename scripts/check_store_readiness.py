@@ -46,6 +46,24 @@ REQUIRED_TILE_ICONS = (
     ("StoreLogo.png", 50, 50),
 )
 
+REQUIRED_TIER2_LANGUAGES = (
+    "de-DE",
+    "en-US",
+    "es-ES",
+    "zh-CN",
+    "ja-JP",
+    "ru-RU",
+)
+
+MANIFEST_RESOURCE_LANGUAGES = (
+    "de-de",
+    "en-us",
+    "es-es",
+    "zh-cn",
+    "ja-jp",
+    "ru-ru",
+)
+
 
 def _read_nonempty(path: Path) -> str | None:
     try:
@@ -117,6 +135,12 @@ def _check_repository(project_root: Path) -> list[str]:
         languages = config.get("languages")
         if not isinstance(languages, list) or not languages:
             findings.append("[repository] store_package.json field 'languages' is missing or empty")
+        else:
+            missing_langs = set(REQUIRED_TIER2_LANGUAGES) - set(languages)
+            if missing_langs:
+                findings.append(
+                    f"[repository] store_package.json lacks required Tier-2 languages: {sorted(missing_langs)}"
+                )
 
         app_name = config.get("name") or config.get("app_name")
         if not isinstance(app_name, str) or not app_name.strip():
@@ -172,12 +196,20 @@ def _check_repository(project_root: Path) -> list[str]:
                 if token not in manifest:
                     findings.append(f"[repository] AppxManifest.xml lacks {label}")
 
+            for lang_code in MANIFEST_RESOURCE_LANGUAGES:
+                if f'Language="{lang_code}"' not in manifest:
+                    findings.append(f"[repository] AppxManifest.xml lacks resource language '{lang_code}'")
+
     for name in REQUIRED_DOCUMENTS:
         doc_path = project_root / name
         content = _read_nonempty(doc_path)
         if content is None:
             findings.append(f"[repository] {name} is missing or empty")
-        elif name in ("STORE_LISTING.md", "SUPPORT.md"):
+        elif name == "STORE_LISTING.md":
+            for heading in ("Deutsch", "English", "Español", "简体中文", "日本語", "Русский"):
+                if f"## {heading}" not in content:
+                    findings.append(f"[repository] STORE_LISTING.md lacks heading ## {heading}")
+        elif name == "SUPPORT.md":
             for heading in ("Deutsch", "English"):
                 if heading not in content:
                     findings.append(f"[repository] {name} lacks heading {heading}")
@@ -190,23 +222,30 @@ def _check_repository(project_root: Path) -> list[str]:
     if readme_content is None or "PRIVACY_POLICY.md" not in readme_content:
         findings.append("[repository] README.md does not reference PRIVACY_POLICY.md")
 
-    # Check Store Listing keywords according to Policy 10.1.3 (max 7 per language)
+    # Check Store Listing keywords according to Policy 10.1.3 (max 7 per language, max 30 chars each)
     listing_content = _read_nonempty(project_root / "STORE_LISTING.md")
     if listing_content:
-        de_match = re.search(r"### Schlüsselwörter\s*\n+([^\n#]+)", listing_content)
-        if de_match:
-            de_kw = [k.strip() for k in de_match.group(1).split(",") if k.strip()]
-            if len(de_kw) > 7:
-                findings.append(
-                    f"[repository] STORE_LISTING.md German keywords exceed Policy 10.1.3 limit (max 7, found {len(de_kw)})"
-                )
-        en_match = re.search(r"### Keywords\s*\n+([^\n#]+)", listing_content)
-        if en_match:
-            en_kw = [k.strip() for k in en_match.group(1).split(",") if k.strip()]
-            if len(en_kw) > 7:
-                findings.append(
-                    f"[repository] STORE_LISTING.md English keywords exceed Policy 10.1.3 limit (max 7, found {len(en_kw)})"
-                )
+        keyword_patterns = [
+            (r"### Schlüsselwörter\s*\n+([^\n#]+)", "German"),
+            (r"### Keywords\s*\n+([^\n#]+)", "English"),
+            (r"### Palabras clave\s*\n+([^\n#]+)", "Spanish"),
+            (r"### 关键词\s*\n+([^\n#]+)", "Chinese"),
+            (r"### キーワード\s*\n+([^\n#]+)", "Japanese"),
+            (r"### Ключевые слова\s*\n+([^\n#]+)", "Russian"),
+        ]
+        for pattern, lang_name in keyword_patterns:
+            match = re.search(pattern, listing_content)
+            if not match:
+                findings.append(f"[repository] STORE_LISTING.md {lang_name} keywords section missing")
+            else:
+                kws = [k.strip() for k in match.group(1).split(",") if k.strip()]
+                if not (1 <= len(kws) <= 7):
+                    findings.append(
+                        f"[repository] STORE_LISTING.md {lang_name} keywords count invalid: expected 1-7, found {len(kws)}"
+                    )
+                for k in kws:
+                    if len(k) > 30:
+                        findings.append(f"[repository] STORE_LISTING.md {lang_name} keyword too long (>30 chars): {k!r}")
 
     # Verify tile icons across store_assets, store_package and releases/windowsstore
     for icon_name, expected_w, expected_h in REQUIRED_TILE_ICONS:
@@ -253,9 +292,29 @@ def _check_repository(project_root: Path) -> list[str]:
     if not win_store_dir.is_dir():
         findings.append("[repository] releases/windowsstore directory is missing")
     else:
-        for req_name in ("BUILD.md", "WACK_PROTOCOL.md", "store_settings.json", "store_listing_de.md", "store_listing_en.md", "StoreLogo.png"):
+        for req_name in (
+            "BUILD.md",
+            "WACK_PROTOCOL.md",
+            "store_settings.json",
+            "store_listing_de.md",
+            "store_listing_en.md",
+            "store_listing_es.md",
+            "store_listing_zh.md",
+            "store_listing_ja.md",
+            "store_listing_ru.md",
+            "StoreLogo.png",
+        ):
             if not (win_store_dir / req_name).is_file():
                 findings.append(f"[repository] releases/windowsstore lacks {req_name}")
+
+        settings_obj = _load_json(win_store_dir / "store_settings.json")
+        if isinstance(settings_obj, dict):
+            for lang_code in ("de", "en", "es", "zh", "ja", "ru"):
+                desc = settings_obj.get(f"description_{lang_code}")
+                if isinstance(desc, str) and len(desc) > 100:
+                    findings.append(
+                        f"[repository] store_settings.json description_{lang_code} exceeds 100 chars: {len(desc)}"
+                    )
 
     return findings
 

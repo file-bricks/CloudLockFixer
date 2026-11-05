@@ -6,6 +6,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Windows Store Release Target & Tier-2 6-Sprachen-Harmonisierung (TW-CLF-12 / Store Release)** (2026-11-05):
+  - Metadaten- & Manifest-Harmonisierung: Deklaration aller 6 Zielsprachen (`de-DE`, `en-US`, `es-ES`, `zh-CN`, `ja-JP`, `ru-RU`) in `store_package.json` und `releases/windowsstore/store_settings.json`; vollständige Deklaration von `<Resource Language="..." />` für alle 6 Sprachen (`de-de`, `en-us`, `es-es`, `zh-cn`, `ja-jp`, `ru-ru`) in `store_package/CloudLockFixer/AppxManifest.xml`.
+  - Multilinguale Store-Listings: `STORE_LISTING.md` um vollständige Abschnitte für `## Español`, `## 简体中文`, `## 日本語` und `## Русский` erweitert (Kurzbeschreibungen <= 100 Zeichen, strukturierte Feature-Übersichten, Zero-Egress-Garantien und strikt maximal 7 suchbegriffskonforme Keywords <= 30 Zeichen je Sprache gemäß Microsoft Store Richtlinie 10.1.3).
+  - Staging-Dateien synchronisiert: `store_listing_es.md`, `store_listing_zh.md`, `store_listing_ja.md`, `store_listing_ru.md` in `releases/windowsstore/` angelegt; `store_settings.json` um `keywords_es`, `keywords_zh`, `keywords_ja`, `keywords_ru` erweitert.
+  - Store-Readiness-Audit: `scripts/check_store_readiness.py` erweitert um Validierung aller 6 Tier-2 Sprachen in `store_package.json`, `AppxManifest.xml`, `STORE_LISTING.md` und `releases/windowsstore/`.
+  - Testsuite: 4 neue Vertragstests in `tests/test_store_readiness.py` (`test_store_package_json_has_six_tier2_languages`, `test_store_listing_has_tier2_six_languages`, `test_appx_manifest_has_six_tier2_languages`, `test_releases_windowsstore_staging_has_six_languages`); Gesamtsuite auf 433 gesammelte Tests ausgebaut.
 - **Volume-Label-Erkennung & Netzlaufwerke-Härtung (TW-CLF-05 / Task 167)** (2026-11-05):
   - Normalisierung von Volume-Labels (`_normalize_volume_label`): Bereinigung von C-Nullbyte-Puffern (`\x00`), Unicode-BOM (`\ufeff`), Zero-Width-Spaces (`\u200b`..`\u200d`), Non-Breaking Spaces (`\xa0`, `\u202f`, `\u3000`) und Whitespace-Kollabierung bei durchgehendem Casefolding.
   - Erweiterte Label-Parität (`_volume_label_matches`): Unterstützung von Laufwerksbuchstaben-Suffixen in Klammern (`"Google Drive (G:)"`, `"pCloud Drive (P:)"`) synchron zum abgefragten Laufwerksbuchstaben; Unterstützung von Multi-Account-Google-Drive-Labels (`"Google Drive - <account>"`) und konsolidierten Varianten (`"googledrive"`).
@@ -130,7 +136,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 429 passing tests.
+- The verification contract reflects the current unreleased source state: 433 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

@@ -1,5 +1,19 @@
 # CloudLockFixer — Aktive Aufgaben
 
+## Windows Store Target & Tier-2 6-Sprachen-Harmonisierung (TW-CLF-12) — erledigt 2026-11-05
+
+- [x] `store_package.json`: Sprachen auf alle 6 Tier-2 Sprachen nach Policy P-006 (`["de-DE", "en-US", "es-ES", "zh-CN", "ja-JP", "ru-RU"]`) harmonisiert.
+- [x] `store_package/CloudLockFixer/AppxManifest.xml`: Mehrsprachige Ressourcen-Deklaration (`<Resource Language="..."/>`) für alle 6 Sprachen (`de-de`, `en-us`, `es-es`, `zh-cn`, `ja-jp`, `ru-ru`) ergänzt.
+- [x] `STORE_LISTING.md`: Vollständige lokalisierte Store-Listings für alle 6 Sprachen (DE, EN, ES, ZH, JA, RU) mit Kurzbeschreibung (strikt <= 100 Zeichen), Feature-Listen und jeweils exakt 7 Microsoft Store Policy 10.1.3 konformen Suchbegriffen (ohne Fremdmarken, <= 30 Zeichen).
+- [x] `releases/windowsstore/`:
+  - `store_listing_es.md` (Spanisch), `store_listing_zh.md` (Chinesisch vereinfacht), `store_listing_ja.md` (Japanisch), `store_listing_ru.md` (Russisch) angelegt.
+  - `store_listing_de.md` und `store_listing_en.md` auf 6-Sprachen-Standard synchronisiert.
+  - `store_settings.json`: `languages`-Array erweitert, Beschreibungen und Policy-10.1.3-Keywords für alle 6 Sprachen hinterlegt.
+  - `.gitignore`: Pattern `!releases/windowsstore/store_listing_*.md` freigegeben.
+- [x] `scripts/check_store_readiness.py`: Automatisiertes Audit auf 6 Tier-2 Sprachen in Manifest, `store_package.json`, `STORE_LISTING.md` und `releases/windowsstore/` erweitert.
+- [x] `tests/test_store_readiness.py`: 4 neue hermetische Vertragstests implementiert (12/12 Tests bestanden).
+- [x] Synchronisation der Dokumentation & Verträge: Testanzahl in `README.md`, `README.de.md`, `README.es.md`, `llms.txt`, `CHANGELOG.md` von 429 auf 433 Tests synchronisiert.
+
 ## Translation Management CLI Gate & Atomic Durability (TW-CLF-11) — erledigt 2026-11-03
 
 - [x] `manage_translations.py`: Eigenständiges CLI- und Validierungs-Werkzeug mit `--check` (Exit 0/1 CI-Gate), `--stats` (Formatierte Statistik-Tabelle je Sprache mit Abdeckungsgrad), `--scan` (Auto-Scanner für Quelltexte), `--dir` und `--json` nach Policy P-006 Tier-2 (DE, EN, ES, ZH, JA, RU).
