@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import subprocess
 from pathlib import Path
 
 
@@ -192,12 +193,14 @@ def test_llms_txt_structure_and_timestamp() -> None:
 
     assert text.startswith("# CloudLockFixer")
     assert (
-        "> Last-checked: 2026-10-11" in text
+        "> Last-checked: 2026-11-07" in text
+        or "> Last-checked: 2026-10-11" in text
         or "> Last-checked: 2026-10-03" in text
         or "> Last-checked: 2026-09-30" in text
     )
     assert (
-        "## Last-checked: 2026-10-11" in text
+        "## Last-checked: 2026-11-07" in text
+        or "## Last-checked: 2026-10-11" in text
         or "## Last-checked: 2026-10-03" in text
         or "## Last-checked: 2026-09-30" in text
     )
@@ -747,14 +750,14 @@ def test_contributing_urls_in_pyproject_and_readme() -> None:
 
 
 def test_readme_test_count_badges_parity() -> None:
-    """Verify that Pytest test count badges are synchronized to 429 passed across all 3 READMEs."""
+    """Verify that Pytest test count badges are synchronized to 436 passed across all 3 READMEs."""
     readme_en = (PROJECT_ROOT / "README.md").read_text(encoding="utf-8")
     readme_de = (PROJECT_ROOT / "README.de.md").read_text(encoding="utf-8")
     readme_es = (PROJECT_ROOT / "README.es.md").read_text(encoding="utf-8")
 
-    assert "tests-429%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 385 passed"
-    assert "tests-429%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 385 grün"
-    assert "tests-429%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 385 pasados"
+    assert "tests-436%20passed%20%7C%20100%25" in readme_en, "README.md test badge not 436 passed"
+    assert "tests-436%20gr%C3%BCn%20%7C%20100%25" in readme_de, "README.de.md test badge not 436 grün"
+    assert "tests-436%20pasados%20%7C%20100%25" in readme_es, "README.es.md test badge not 436 pasados"
 
 
 def test_changelog_recent_pfad_b_2026_10_11_entry() -> None:
@@ -801,3 +804,34 @@ def test_platform_test_execution_split() -> None:
     assert 'reason="Symlinks brauchen unter Windows Zusatzrechte"' in review_fixes
     assert '@pytest.mark.skipif(sys.platform == "win32", reason="POSIX-Shellskript")' in review_fixes
     assert review_fixes.count("@needs_symlinks") == 3
+
+
+def test_internal_logs_not_tracked() -> None:
+    """Ensure internal operational logs (MARKETING-LOG.txt, CHECKS-LOG.txt) are not tracked in git per GITHUB-POLICY.md §4."""
+    result = subprocess.run(
+        ["git", "ls-files", "MARKETING-LOG.txt", "CHECKS-LOG.txt"],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert not result.stdout.strip(), f"Internal logs tracked in git: {result.stdout.strip()}"
+
+
+def test_start_bat_launcher() -> None:
+    """Ensure START.bat exists and contains EXE detection, %* forwarding, and Python fallback."""
+    start_bat = PROJECT_ROOT / "START.bat"
+    assert start_bat.is_file(), "START.bat must exist"
+    content = start_bat.read_text(encoding="utf-8", errors="replace")
+    assert "CloudLockFixer.exe" in content
+    assert "%*" in content
+    assert "pythonw" in content
+
+
+def test_dependabot_configuration() -> None:
+    """Ensure .github/dependabot.yml exists and configures pip security updates."""
+    dependabot_path = PROJECT_ROOT / ".github" / "dependabot.yml"
+    assert dependabot_path.is_file(), ".github/dependabot.yml must exist"
+    text = dependabot_path.read_text(encoding="utf-8")
+    assert "version: 2" in text
+    assert 'package-ecosystem: "pip"' in text

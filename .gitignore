@@ -44,6 +44,8 @@ TESTS.txt
 TESTERGEBNISSE.txt
 BUGREPORT.md
 DIAGNOSE_REPORT.md
+MARKETING-LOG.txt
+CHECKS-LOG.txt
 
 # ---- Build-Artefakte & Releases ----
 releases/
@@ -53,8 +55,7 @@ releases/*
 releases/windowsstore/*
 !releases/windowsstore/BUILD.md
 !releases/windowsstore/WACK_PROTOCOL.md
-!releases/windowsstore/store_listing_de.md
-!releases/windowsstore/store_listing_en.md
+!releases/windowsstore/store_listing_*.md
 !releases/windowsstore/store_settings.json
 !releases/windowsstore/StoreLogo.png
 !releases/windowsstore/icon_*.png

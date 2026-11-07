@@ -13,7 +13,11 @@
   "license": "MIT",
   "languages": [
     "de-DE",
-    "en-US"
+    "en-US",
+    "es-ES",
+    "zh-CN",
+    "ja-JP",
+    "ru-RU"
   ],
   "privacy_url": "https://github.com/file-bricks/CloudLockFixer/blob/main/PRIVACY_POLICY.md",
   "support_url": "https://github.com/file-bricks/CloudLockFixer/issues",

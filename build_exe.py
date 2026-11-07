@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Baut CloudLockFixer.exe via PyInstaller in einem lokalen Mirror
 (C:\\_Local_DEV\\clf_build) -- vermeidet OneDrive-Sync-Last bei build/dist --
-und legt die fertige App nach C:\\_Local_DEV\\CloudLockFixer.
+und legt die fertige App nach C:\\_Local_DEV\\CloudLockFixer sowie in dist\\CloudLockFixer.
 
 Aufruf:  python build_exe.py
 Voraussetzung: pip install pyinstaller pillow pyside6
@@ -40,4 +40,9 @@ PyInstaller.__main__.run([
 # fertige App an stabilen, OneDrive-freien Ort
 shutil.rmtree(APP, ignore_errors=True)
 shutil.copytree(os.path.join(B, "dist", "CloudLockFixer"), APP)
+
+# auch im lokalen Repo-dist bereitstellen (gitignored)
+repo_dist = os.path.join(HERE, "dist", "CloudLockFixer")
+shutil.rmtree(repo_dist, ignore_errors=True)
+shutil.copytree(os.path.join(B, "dist", "CloudLockFixer"), repo_dist)
 print("Fertig:", os.path.join(APP, "CloudLockFixer.exe"))

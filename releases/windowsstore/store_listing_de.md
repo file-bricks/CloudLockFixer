@@ -14,7 +14,7 @@ CloudLockFixer ist ein schlankes, lokales Desktop- und Tray-Werkzeug für Window
 - **Intelligente Provider-Erkennung:** Automatische Unterscheidung zwischen synchronisierten Ordnern und virtuell gemounteten Laufwerken zum Schutz des Dateisystems.
 - **Präventiver Wächter:** Überwacht Verzeichnisse bei hoher Änderungsrate und verhindert Sperren vorausschauend.
 - **Konfigurierbare Wiederholungen:** Einstellbare Wiederholungszyklen und verlässliche Desktop-Benachrichtigungen bei dauerhaft blockierten Aufgaben.
-- **Mehrsprachige Benutzeroberfläche:** Vollständige Unterstützung für Deutsch und Englisch mit automatischer Spracherkennung.
+- **Mehrsprachige Benutzeroberfläche:** Vollständige Unterstützung für 6 Sprachen (Deutsch, Englisch, Spanisch, Chinesisch, Japanisch, Russisch) mit automatischer Spracherkennung.
 - **Zero-Egress & Datenschutz:** 100 % lokal ohne Internetverbindung, ohne Telemetrie und ohne Registrierungszwang.
 
 ### Schlüsselwörter

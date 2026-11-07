@@ -157,10 +157,10 @@ worker; auf Linux zusätzlich den XDG-Autostart-Roundtrip und auf macOS den
 LaunchAgent-plist-Roundtrip. Kein Cloud-Client, kein GUI, kein pip-Extra (nur
 pytest). Stand: 2026-07-22.
 
-Revalidiert 2026-09-23: Die vollständige lokale Suite umfasst 285 Tests (100% grün).
+Revalidiert 2026-11-05: Die vollständige lokale Suite umfasst 436 Tests (432 passed, 4 skipped).
 Damit sind Linux-/macOS-Source-Smokes, Linux-XDG-Autostart, macOS-LaunchAgent und
 plattformübergreifende Kontextmenüs (Linux Nautilus & KDE Dolphin, macOS Services)
-sowie Windows Store Readiness (MSIX Desktop Bridge, Kacheln, Listings, Validierungs-Suite)
+sowie Windows Store Readiness (MSIX Desktop Bridge, Kacheln, 6-Sprachen-Listings DE/EN/ES/ZH/JA/RU, Validierungs-Suite)
 auf Source-Ebene vollständig umgesetzt und abgesichert. Offen bleiben native
 Linux-/macOS-Pakete/Installer (Task 171) und ein nativer Mac-Login-/`launchctl`-Smoke.
 

@@ -15,20 +15,30 @@
   "pfx_path": "",
   "pfx_password": "",
   "timestamp_url": "http://timestamp.digicert.com",
-  "license_files": ["../../LICENSE"],
+  "license_files": [
+    "../../LICENSE"
+  ],
   "license": "MIT",
   "enable_i18n": true,
   "languages": [
     "de-DE",
-    "en-US"
+    "en-US",
+    "es-ES",
+    "zh-CN",
+    "ja-JP",
+    "ru-RU"
   ],
   "capabilities": "runFullTrust",
   "privacy_url": "https://github.com/file-bricks/CloudLockFixer/blob/main/PRIVACY_POLICY.md",
   "support_url": "https://github.com/file-bricks/CloudLockFixer/issues",
   "category": "Utilities",
   "age_rating": "3+",
-  "description_de": "Windows-Tray- und Hintergrundwerkzeug zur automatischen und verzögerten Auflösung von Dateisperren in Cloud-Sync-Ordnern.",
-  "description_en": "Windows tray and background utility for delayed file operations in locked cloud synchronization folders.",
+  "description_de": "Lokales Windows-Werkzeug zur verzögerten Ausführung von Dateisperren in Cloud-Sync-Ordnern.",
+  "description_en": "Local Windows utility for delayed file operations in locked cloud synchronization folders.",
+  "description_es": "Utilidad de Windows para resolver bloqueos de archivos en carpetas sincronizadas en la nube.",
+  "description_zh": "用于在云同步文件夹中解决文件锁定并延迟执行文件操作的 Windows 本地工具。",
+  "description_ja": "クラウド同期フォルダ内のファイルロックを遅延処理で解決するWindows用ローカルユーティリティ。",
+  "description_ru": "Утилита Windows для отложенных файловых операций при блокировках в папках облачной синхронизации.",
   "keywords": "Dateisperre, Cloud-Sync, Warteschlange, Hintergrundtool, Datei-Entsperrer, Tray-Tool, Task-Manager",
   "keywords_de": [
     "Dateisperre",
@@ -47,5 +57,41 @@
     "task queue",
     "background tool",
     "file manager"
+  ],
+  "keywords_es": [
+    "bloqueo de archivos",
+    "sincronizacion",
+    "desbloqueador",
+    "bandeja del sistema",
+    "cola de tareas",
+    "segundo plano",
+    "gestor de archivos"
+  ],
+  "keywords_zh": [
+    "文件锁定",
+    "云同步",
+    "文件解锁",
+    "系统托盘",
+    "任务队列",
+    "后台工具",
+    "文件管理"
+  ],
+  "keywords_ja": [
+    "ファイルロック",
+    "クラウド同期",
+    "ロック解除",
+    "システムトレイ",
+    "タスクキュー",
+    "バックグラウンド",
+    "ファイル管理"
+  ],
+  "keywords_ru": [
+    "блокировка файлов",
+    "синхронизация",
+    "разблокировка",
+    "системный трей",
+    "очередь задач",
+    "фоновый режим",
+    "управление файлами"
   ]
 }
