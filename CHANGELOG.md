@@ -6,6 +6,13 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Software Pipeline Wartung & Git-Hygiene (T-20260926-455218633 / GITHUB-POLICY.md §4)** (2026-11-07):
+  - Git-Hygiene: `MARKETING-LOG.txt` aus Git-Tracking entfernt (`git rm --cached`) und `.gitignore` um Ausschlussregeln für interne Logs (`MARKETING-LOG.txt`, `CHECKS-LOG.txt`) gehärtet.
+  - GitHub Governance: `.github/dependabot.yml` angelegt (Security-Only Updates für Pip-Ökosystem mit `open-pull-requests-limit: 0` und Gruppierung).
+  - Universal-Launcher: `START.bat` um Erkennung von `dist\CloudLockFixer\CloudLockFixer.exe`, `dist\CloudLockFixer.exe` und `C:\_Local_DEV\CloudLockFixer\CloudLockFixer.exe`, Argumentweiterleitung (`%*`) und Pythonw-/Python-Fallback erweitert.
+  - Executable-Generierung: Standalone Windows-Binary `dist\CloudLockFixer\CloudLockFixer.exe` und `C:\_Local_DEV\CloudLockFixer\CloudLockFixer.exe` via PyInstaller aus aktuellem Stand v0.2.3 gebaut und verifiziert.
+  - Vertragstests: `tests/test_metadata.py` um `test_internal_logs_not_tracked`, `test_start_bat_launcher` und `test_dependabot_configuration` erweitert; Gesamtsuite auf 436 gesammelte Tests ausgebaut (100% grün).
+  - Dokumentation & Metadaten: `README.md`, `README.de.md`, `README.es.md`, `llms.txt`, `TODO.md` und `AUFGABEN.txt` auf 436 Tests und Prüfdatum 2026-11-07 synchronisiert.
 - **Windows Store Release Target & Tier-2 6-Sprachen-Harmonisierung (TW-CLF-12 / Store Release)** (2026-11-05):
   - Metadaten- & Manifest-Harmonisierung: Deklaration aller 6 Zielsprachen (`de-DE`, `en-US`, `es-ES`, `zh-CN`, `ja-JP`, `ru-RU`) in `store_package.json` und `releases/windowsstore/store_settings.json`; vollständige Deklaration von `<Resource Language="..." />` für alle 6 Sprachen (`de-de`, `en-us`, `es-es`, `zh-cn`, `ja-jp`, `ru-ru`) in `store_package/CloudLockFixer/AppxManifest.xml`.
   - Multilinguale Store-Listings: `STORE_LISTING.md` um vollständige Abschnitte für `## Español`, `## 简体中文`, `## 日本語` und `## Русский` erweitert (Kurzbeschreibungen <= 100 Zeichen, strukturierte Feature-Übersichten, Zero-Egress-Garantien und strikt maximal 7 suchbegriffskonforme Keywords <= 30 Zeichen je Sprache gemäß Microsoft Store Richtlinie 10.1.3).
@@ -136,7 +143,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 433 passing tests.
+- The verification contract reflects the current unreleased source state: 436 passing tests.
 
 ## [0.2.3] - 2026-09-10
 

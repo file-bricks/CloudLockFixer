@@ -12,7 +12,7 @@
   - `.gitignore`: Pattern `!releases/windowsstore/store_listing_*.md` freigegeben.
 - [x] `scripts/check_store_readiness.py`: Automatisiertes Audit auf 6 Tier-2 Sprachen in Manifest, `store_package.json`, `STORE_LISTING.md` und `releases/windowsstore/` erweitert.
 - [x] `tests/test_store_readiness.py`: 4 neue hermetische Vertragstests implementiert (12/12 Tests bestanden).
-- [x] Synchronisation der Dokumentation & Verträge: Testanzahl in `README.md`, `README.de.md`, `README.es.md`, `llms.txt`, `CHANGELOG.md` von 429 auf 433 Tests synchronisiert.
+- [x] Synchronisation der Dokumentation & Verträge: Testanzahl in `README.md`, `README.de.md`, `README.es.md`, `llms.txt`, `CHANGELOG.md` auf 436 Tests synchronisiert.
 
 ## Translation Management CLI Gate & Atomic Durability (TW-CLF-11) — erledigt 2026-11-03
 
