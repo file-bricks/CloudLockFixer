@@ -6,6 +6,12 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Permanent Failure Management, Resume-Garantie & CLI-Erweiterungen (Ticket T-20261108-938423777)** (2026-11-08):
+  - **Resume-Garantie am Vorher-Zustand:** `worker.run_once` umschließt die gesamte Pause- und Ausführungsschleife mit einem `try/finally`-Block und registriert alle vorab laufenden Provider in `to_resume`. Selbst wenn `pause()` `False` zurückgibt (z. B. bei langsamem Beenden nach 1,5-s-Timeout) oder ein Provider eine Ausnahme wirft, wird jeder Provider im `finally`-Block garantiert wieder gestartet. Fehlgeschlagene `pause()`- und `resume()`-Aufrufe werden mit `log.warning`/`log.error` vollständig protokolliert.
+  - **Dauerhafte Fehlererkennung & Idempotenter Fix-Ticket-Hook:** Nicht-sperrbedingte oder dauerhaft scheiternde Tasks (`blocked` und `failed_permanent`) werden nach der Ausführung über `_record_permanent_failure` audit-sicher in `failed.txt` im Datenordner festgehalten. Über die optionale Einstellung `on_permanent_failure` (Befehlstag mit Platzhaltern `{task_id}`, `{op}`, `{src}`, `{dst}`, `{error}`) kann ein externer Fix-Ticket-Writer angebunden werden. Durch das Feld `failure_reported: bool = False` auf `Task` erfolgt die Meldung pro Task strikt idempotent (höchstens einmal).
+  - **CLI-Befehle `clf cancel` und `clf list --failed`:** Ergänzung von `clf cancel <task-id>` zum sicheren Abbrechen hängender Aufgaben (setzt Status atomar auf `failed`, `last_outcome = "permanent"` und `failure_reported = True`, kein manuelles Editieren von `queue.json` mehr nötig). `clf list` um `--failed` (Filter auf `failed` und `blocked`) sowie `--status <status>` erweitert.
+  - **Internationalisierung (Tier-2):** Vollständige 6-Sprachen-Übersetzungen (DE, EN, ES, JA, RU, ZH) für alle neuen CLI-Hilfetexte und Aufgabenmeldungen in `i18n.py` und synchronisiert in `locales/translations.json`.
+  - **Testsuite:** 13 neue hermetische Unit-Tests in `tests/test_permanent_failures_and_cli.py` mit Fake-Providern (Gesamtsuite auf 442 gesammelte Tests ausgebaut).
 - **Volume-Label-Erkennung & Netzlaufwerke-Härtung (TW-CLF-05 / Task 167)** (2026-11-05):
   - Normalisierung von Volume-Labels (`_normalize_volume_label`): Bereinigung von C-Nullbyte-Puffern (`\x00`), Unicode-BOM (`\ufeff`), Zero-Width-Spaces (`\u200b`..`\u200d`), Non-Breaking Spaces (`\xa0`, `\u202f`, `\u3000`) und Whitespace-Kollabierung bei durchgehendem Casefolding.
   - Erweiterte Label-Parität (`_volume_label_matches`): Unterstützung von Laufwerksbuchstaben-Suffixen in Klammern (`"Google Drive (G:)"`, `"pCloud Drive (P:)"`) synchron zum abgefragten Laufwerksbuchstaben; Unterstützung von Multi-Account-Google-Drive-Labels (`"Google Drive - <account>"`) und konsolidierten Varianten (`"googledrive"`).
@@ -130,7 +136,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 429 passing tests.
+- The verification contract reflects the current unreleased source state: 442 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
