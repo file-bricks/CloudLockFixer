@@ -167,6 +167,22 @@
     "ru": "Множитель роста задержки после каждой неудачи (1.0–100.0, по умолчанию: settings.json или 2.0)",
     "zh": "每次失败后等待时间的增长因子（1.0–100.0，默认：settings.json 或 2.0）"
   },
+  "cli_cancel_help": {
+    "de": "Bricht eine offene oder blockierte Aufgabe ab",
+    "en": "Cancel a pending or blocked task",
+    "es": "Cancelar una tarea pendiente o bloqueada",
+    "ja": "保留中またはブロックされたタスクをキャンセル",
+    "ru": "Отменить ожидающую или заблокированную задачу",
+    "zh": "取消待处理或被阻止的任务"
+  },
+  "cli_cancel_id_help": {
+    "de": "Aufgaben-ID (8-stelliger Hex-Code)",
+    "en": "Task ID (8-char hex code)",
+    "es": "ID de tarea (código hexadecimal de 8 caracteres)",
+    "ja": "タスク ID（8 桁の 16 進コード）",
+    "ru": "Идентификатор задачи (8-значный шестнадцатеричный код)",
+    "zh": "任务 ID（8 位十六进制代码）"
+  },
   "cli_context_help": {
     "de": "Explorer-Kontextmenü verwalten",
     "en": "Manage Explorer context menu",
@@ -239,6 +255,14 @@
     "ru": "queue.json для проверки (только чтение)",
     "zh": "要检查的 queue.json（只读）"
   },
+  "cli_list_failed_help": {
+    "de": "Nur fehlgeschlagene und blockierte Aufgaben anzeigen",
+    "en": "Show only failed and blocked tasks",
+    "es": "Mostrar solo tareas fallidas y bloqueadas",
+    "ja": "失敗およびブロックされたタスクのみを表示",
+    "ru": "Показать только неудавшиеся и заблокированные задачи",
+    "zh": "仅显示失败和被阻止的任务"
+  },
   "cli_list_help": {
     "de": "Queue anzeigen",
     "en": "Show queue",
@@ -246,6 +270,14 @@
     "ja": "キューを表示",
     "ru": "Показать очередь",
     "zh": "显示任务队列"
+  },
+  "cli_list_status_help": {
+    "de": "Aufgaben nach Status filtern (pending, running, done, failed, blocked)",
+    "en": "Filter tasks by status (pending, running, done, failed, blocked)",
+    "es": "Filtrar tareas por estado (pending, running, done, failed, blocked)",
+    "ja": "ステータスでタスクをフィルタ (pending, running, done, failed, blocked)",
+    "ru": "Фильтровать задачи по статусу (pending, running, done, failed, blocked)",
+    "zh": "按状态筛选任务 (pending, running, done, failed, blocked)"
   },
   "cli_max_delay_help": {
     "de": "Obergrenze der Wartezeit in Sekunden (Standard: settings.json oder 3600)",
@@ -894,6 +926,38 @@
     "ja": "実行中…",
     "ru": "выполняется…",
     "zh": "正在运行…"
+  },
+  "task_already_done": {
+    "de": "Aufgabe {id} ist bereits erledigt und kann nicht abgebrochen werden.",
+    "en": "Task {id} is already completed and cannot be canceled.",
+    "es": "La tarea {id} ya está completada y no se puede cancelar.",
+    "ja": "タスク {id} は既に完了しているためキャンセルできません。",
+    "ru": "Задача {id} уже завершена и не может быть отменена.",
+    "zh": "任务 {id} 已完成，无法取消。"
+  },
+  "task_cancel_failed": {
+    "de": "Aufgabe {id} konnte nicht abgebrochen werden.",
+    "en": "Failed to cancel task {id}.",
+    "es": "No se pudo cancelar la tarea {id}.",
+    "ja": "タスク {id} のキャンセルに失敗しました。",
+    "ru": "Не удалось отменить задачу {id}.",
+    "zh": "无法取消任务 {id}。"
+  },
+  "task_canceled": {
+    "de": "Abgebrochen",
+    "en": "Canceled",
+    "es": "Cancelado",
+    "ja": "キャンセル済み",
+    "ru": "Отменено",
+    "zh": "已取消"
+  },
+  "task_canceled_msg": {
+    "de": "Aufgabe {id} abgebrochen: {desc}",
+    "en": "Task {id} canceled: {desc}",
+    "es": "Tarea {id} cancelada: {desc}",
+    "ja": "タスク {id} をキャンセルしました: {desc}",
+    "ru": "Задача {id} отменена: {desc}",
+    "zh": "任务 {id} 已取消：{desc}"
   },
   "task_failed_max_retries": {
     "de": "Nach {n} Fehlversuchen aufgegeben: {err}",
