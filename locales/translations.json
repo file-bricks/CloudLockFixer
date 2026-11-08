@@ -591,6 +591,14 @@
     "ru": "Неудачные или заблокированные задачи не найдены.",
     "zh": "没有失败或受阻的任务。"
   },
+  "no_tasks_with_status": {
+    "de": "Keine Aufgaben mit Status '{status}' vorhanden.",
+    "en": "No tasks with status '{status}' found.",
+    "es": "No se encontraron tareas con el estado '{status}'.",
+    "ja": "ステータス '{status}' のタスクは見つかりませんでした。",
+    "ru": "Задачи со статусом '{status}' не найдены.",
+    "zh": "未找到状态为 '{status}' 的任务。"
+  },
   "no_tray": {
     "de": "Kein System-Tray verfügbar.",
     "en": "No system tray available.",

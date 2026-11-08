@@ -190,6 +190,8 @@ def main(argv: list[str] | None = None) -> int:
         if not tasks:
             if args.failed:
                 print(t("no_failed_tasks"))
+            elif args.status:
+                print(t("no_tasks_with_status", status=args.status))
             else:
                 print(t("queue_empty"))
             return 0

@@ -230,6 +230,15 @@ def test_cli_cancel_pending_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert saved.failure_reported is True
     assert "Abgebrochen" in saved.last_error or "Canceled" in saved.last_error
 
+    # Idempotenz bei erneutem Cancel eines bereits 'failed' Tasks (Befund 4):
+    first_last_error = saved.last_error
+    exit_code_again = cli.main(["cancel", "abc12345"])
+    assert exit_code_again == 0
+    reloaded2 = Queue(tmp_path)
+    saved2 = reloaded2.get_task("abc12345")
+    assert saved2.status == "failed"
+    assert saved2.last_error == first_last_error
+
 
 def test_cli_cancel_blocked_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(cli, "data_dir", lambda: tmp_path)
@@ -304,3 +313,65 @@ def test_cli_list_status_filter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
     out = capsys.readouterr().out
     assert "t_pend" in out
     assert "t_fail" not in out
+
+    # Status-Filter ohne Treffer liefert differenzierte Rueckmeldung statt "Queue leer" (Befund 3)
+    assert cli.main(["list", "--status", "done"]) == 0
+    out_empty = capsys.readouterr().out
+    assert "done" in out_empty
+    assert "Queue leer" not in out_empty
+
+
+def test_on_permanent_failure_hook_injection_safety(tmp_path: Path):
+    """Regressionstest gegen Command- und Argument-Injection im on_permanent_failure Hook.
+
+    Verifiziert, dass shell=False gesetzt ist, Platzhalter mit Shell-Metazeichen
+    (&, ;, ", Leerzeichen) sicher als diskrete Argumente und Umgebungsvariablen
+    uebergeben werden und keine Shell-Ausfuehrung stattfindet.
+    """
+    from cloudlockfixer.worker import _record_permanent_failure
+
+    data_dir = tmp_path / "data"
+    evil_src = tmp_path / 'foo & calc.exe ; "bar".txt'
+    evil_dst = tmp_path / 'dest & echo evil.txt'
+    evil_err = 'Access denied & format c: ; "quoted error"'
+    task = Task(
+        chain=[Step(op="move", src=str(evil_src), arg=str(evil_dst))],
+        last_error=evil_err,
+        status="failed",
+        last_outcome="permanent",
+    )
+
+    hook_template = 'myhook --src "{src}" --dst "{dst}" --error "{error}" --task-id {task_id} --op {op}'
+
+    with patch("cloudlockfixer.worker.subprocess.run") as mock_run:
+        _record_permanent_failure(task, data_dir, hook_template)
+
+    assert mock_run.call_count == 1
+    call_args, call_kwargs = mock_run.call_args
+
+    assert call_kwargs.get("shell") is False, "shell=False muss explizit gesetzt sein"
+    assert call_kwargs.get("check") is False
+    assert call_kwargs.get("timeout") == 30
+
+    expected_args = [
+        "myhook",
+        "--src",
+        str(evil_src),
+        "--dst",
+        str(evil_dst),
+        "--error",
+        evil_err,
+        "--task-id",
+        task.id,
+        "--op",
+        "move",
+    ]
+    assert call_args[0] == expected_args
+
+    env = call_kwargs.get("env")
+    assert env is not None
+    assert env.get("CLF_TASK_ID") == task.id
+    assert env.get("CLF_OP") == "move"
+    assert env.get("CLF_SRC") == str(evil_src)
+    assert env.get("CLF_DST") == str(evil_dst)
+    assert env.get("CLF_ERROR") == evil_err

@@ -672,6 +672,14 @@ _CATALOG: dict[str, dict[Language, str]] = {
         'ja': '失敗またはブロックされたタスクはありません。',
         'ru': 'Неудачные или заблокированные задачи не найдены.',
     },
+    'no_tasks_with_status': {
+        'de': "Keine Aufgaben mit Status '{status}' vorhanden.",
+        'en': "No tasks with status '{status}' found.",
+        'es': "No se encontraron tareas con el estado '{status}'.",
+        'zh': "未找到状态为 '{status}' 的任务。",
+        'ja': "ステータス '{status}' のタスクは見つかりませんでした。",
+        'ru': "Задачи со статусом '{status}' не найдены.",
+    },
     'retry_failed_tasks': {
         'de': 'Fehlgeschlagene wiederholen',
         'en': 'Retry failed tasks',

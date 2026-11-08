@@ -354,12 +354,16 @@ class Queue:
         """Bricht einen offenen oder blockierten Task ab und setzt ihn auf 'failed'.
 
         Ein bereits erledigter Task ('done') kann nicht abgebrochen werden.
+        Ein bereits dauerhaft fehlgeschlagener Task ('failed') wird idempotent
+        zurückgegeben, ohne Fehlermeldung oder Status erneut zu mutieren.
         """
         with self._lock:
             for t in self.tasks:
                 if t.id == task_id:
                     if t.status == "done":
                         return None
+                    if t.status == "failed":
+                        return t
                     t.status = "failed"
                     t.last_outcome = "permanent"
                     t.next_try_at = ""

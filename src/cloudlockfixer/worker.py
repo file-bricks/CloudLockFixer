@@ -7,7 +7,10 @@ zuständige Sync-Provider für den Lauf pausiert (M2) und danach wieder gestarte
 from __future__ import annotations
 
 import logging
+import os
+import shlex
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -46,7 +49,9 @@ def _record_permanent_failure(
     err = task.last_error or ""
 
     # 1. Fallback-Eintrag in failed.txt im Datenordner
+    reported_file = False
     try:
+        data_dir.mkdir(parents=True, exist_ok=True)
         failed_file = data_dir / "failed.txt"
         now_str = datetime.now(timezone.utc).isoformat()
         line = (
@@ -55,13 +60,15 @@ def _record_permanent_failure(
         )
         with failed_file.open("a", encoding="utf-8") as f:
             f.write(line)
+        reported_file = True
     except OSError as e:
         log.error("Failed to write to failed.txt: %s", e)
 
-    # 2. Optionaler on_permanent_failure Hook
+    # 2. Optionaler on_permanent_failure Hook (ohne Shell, injection-sicher)
+    hook_ran = False
     if hook_cmd_template and hook_cmd_template.strip():
         try:
-            cmd = hook_cmd_template
+            raw_tokens = shlex.split(hook_cmd_template, posix=(sys.platform != "win32"))
             replacements = {
                 "{task_id}": task.id,
                 "{op}": op,
@@ -69,14 +76,31 @@ def _record_permanent_failure(
                 "{dst}": dst,
                 "{error}": err,
             }
-            for placeholder, val in replacements.items():
-                cmd = cmd.replace(placeholder, str(val))
-            log.info("Executing on_permanent_failure hook for task %s", task.id)
-            subprocess.run(cmd, shell=True, check=False, timeout=30)
+            args: list[str] = []
+            for tok in raw_tokens:
+                if sys.platform == "win32":
+                    if tok.startswith('"') and tok.endswith('"') and len(tok) >= 2:
+                        tok = tok[1:-1]
+                    elif tok.startswith("'") and tok.endswith("'") and len(tok) >= 2:
+                        tok = tok[1:-1]
+                for placeholder, val in replacements.items():
+                    tok = tok.replace(placeholder, str(val))
+                args.append(tok)
+            if args:
+                env = os.environ.copy()
+                env["CLF_TASK_ID"] = task.id
+                env["CLF_OP"] = op
+                env["CLF_SRC"] = str(src)
+                env["CLF_DST"] = str(dst)
+                env["CLF_ERROR"] = str(err)
+                log.info("Executing on_permanent_failure hook for task %s", task.id)
+                subprocess.run(args, env=env, shell=False, check=False, timeout=30)
+                hook_ran = True
         except Exception as exc:
             log.error("Failed executing on_permanent_failure hook for task %s: %s", task.id, exc)
 
-    task.failure_reported = True
+    if reported_file or hook_ran:
+        task.failure_reported = True
 
 
 def _task_paths(task: Task) -> list[Path]:
