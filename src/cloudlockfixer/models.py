@@ -49,6 +49,7 @@ class Task:
     last_outcome: Outcome = "retryable"
     step_index: int = 0  # nächster auszuführender Schritt (für Wiederaufnahme)
     next_try_at: str = ""  # ISO-UTC Zeitstempel für gedeckeltes exponentielles Backoff
+    failure_reported: bool = False  # Idempotenz-Flag für failed.txt und on_permanent_failure Hook
 
     def is_due(self, now_dt: datetime | None = None) -> bool:
         """Prüft, ob der Task jetzt ausgeführt werden darf (Backoff abgelaufen oder nicht gesetzt)."""
@@ -349,6 +350,31 @@ class Queue:
         with self._lock:
             return next((t for t in self.tasks if t.id == task_id), None)
 
+    def cancel_task(self, task_id: str) -> Task | None:
+        """Bricht einen offenen oder blockierten Task ab und setzt ihn auf 'failed'.
+
+        Ein bereits erledigter Task ('done') kann nicht abgebrochen werden.
+        """
+        with self._lock:
+            for t in self.tasks:
+                if t.id == task_id:
+                    if t.status == "done":
+                        return None
+                    t.status = "failed"
+                    t.last_outcome = "permanent"
+                    t.next_try_at = ""
+                    t.failure_reported = True
+                    from .i18n import t as tr
+                    note = tr("task_canceled")
+                    if t.last_error:
+                        if note not in t.last_error:
+                            t.last_error = f"{t.last_error} ({note})"
+                    else:
+                        t.last_error = note
+                    self._save_unlocked()
+                    return t
+            return None
+
     def retry_task(self, task_id: str) -> Task | None:
         """Setzt nur fehlgeschlagene oder blockierte Tasks atomar auf 'pending' zurück.
 
@@ -362,6 +388,7 @@ class Queue:
                     t.retry_count = 0
                     t.last_outcome = "retryable"
                     t.next_try_at = ""
+                    t.failure_reported = False
                     self._save_unlocked()
                     return t
             return None
@@ -379,6 +406,7 @@ class Queue:
                 t.retry_count = 0
                 t.last_outcome = "retryable"
                 t.next_try_at = ""
+                t.failure_reported = False
                 retried.append(t)
             if retried:
                 self._save_unlocked()

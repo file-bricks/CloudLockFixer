@@ -7,6 +7,7 @@ zuständige Sync-Provider für den Lauf pausiert (M2) und danach wieder gestarte
 from __future__ import annotations
 
 import logging
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,11 +20,63 @@ from .settings import (
     DEFAULT_BACKOFF_MAX_SEC,
     DEFAULT_BACKOFF_MULTIPLIER,
     DEFAULT_MAX_RETRIES,
+    DEFAULT_ON_PERMANENT_FAILURE,
+    get_on_permanent_failure,
+    load as load_settings,
 )
 
 log = logging.getLogger("clf")
 
 ESCALATE_AFTER = 3  # ab so vielen Fehlversuchen den Sync-Client pausieren
+
+
+def _record_permanent_failure(
+    task: Task,
+    data_dir: Path,
+    hook_cmd_template: str | None = None,
+) -> None:
+    """Protokolliert einen permanent gescheiterten Task idempotent in failed.txt und führt den Hook aus."""
+    if task.failure_reported:
+        return
+
+    step = task.chain[min(task.step_index, len(task.chain) - 1)] if task.chain else None
+    op = step.op if step else ""
+    src = step.src if step else ""
+    dst = step.arg if step and step.op in ("move", "rename") else ""
+    err = task.last_error or ""
+
+    # 1. Fallback-Eintrag in failed.txt im Datenordner
+    try:
+        failed_file = data_dir / "failed.txt"
+        now_str = datetime.now(timezone.utc).isoformat()
+        line = (
+            f"[{now_str}] task_id={task.id} status={task.status} "
+            f"outcome={task.last_outcome} op={op} src={src} dst={dst} error={err}\n"
+        )
+        with failed_file.open("a", encoding="utf-8") as f:
+            f.write(line)
+    except OSError as e:
+        log.error("Failed to write to failed.txt: %s", e)
+
+    # 2. Optionaler on_permanent_failure Hook
+    if hook_cmd_template and hook_cmd_template.strip():
+        try:
+            cmd = hook_cmd_template
+            replacements = {
+                "{task_id}": task.id,
+                "{op}": op,
+                "{src}": src,
+                "{dst}": dst,
+                "{error}": err,
+            }
+            for placeholder, val in replacements.items():
+                cmd = cmd.replace(placeholder, str(val))
+            log.info("Executing on_permanent_failure hook for task %s", task.id)
+            subprocess.run(cmd, shell=True, check=False, timeout=30)
+        except Exception as exc:
+            log.error("Failed executing on_permanent_failure hook for task %s: %s", task.id, exc)
+
+    task.failure_reported = True
 
 
 def _task_paths(task: Task) -> list[Path]:
@@ -91,6 +144,7 @@ def run_once(
     backoff_base_sec: float = DEFAULT_BACKOFF_BASE_SEC,
     backoff_max_sec: float = DEFAULT_BACKOFF_MAX_SEC,
     backoff_multiplier: float = DEFAULT_BACKOFF_MULTIPLIER,
+    on_permanent_failure: str | None = None,
 ) -> dict:
     """Versucht alle offenen Tasks einmal. Gibt eine Ergebnis-Zusammenfassung.
 
@@ -102,6 +156,12 @@ def run_once(
     """
     if ignore_backoff is not None:
         apply_backoff = not ignore_backoff
+
+    if on_permanent_failure is None:
+        try:
+            on_permanent_failure = get_on_permanent_failure(load_settings())
+        except Exception:
+            on_permanent_failure = DEFAULT_ON_PERMANENT_FAILURE
 
     queue.load()
     pending = queue.pending
@@ -118,14 +178,26 @@ def run_once(
         return summary
 
     to_pause = _providers_to_pause(pending, force_pause, apply_backoff=apply_backoff)
-    paused: list[SyncProvider] = []
-    for prov in to_pause:
-        if prov.pause():
-            paused.append(prov)
-            summary["paused_providers"].append(prov.name)
-            log.info("Sync provider paused: %s", prov.name)
+    to_resume: list[SyncProvider] = []
 
     try:
+        for prov in to_pause:
+            # Client lief vor dem Pausierversuch -> muss im finally auf jeden Fall
+            # wieder aufgenommen werden, selbst wenn pause() False zurückgab (z.B. 1,5s
+            # Timeout bei langsamem Prozessende) oder der Prozess verzögert beendet wurde.
+            to_resume.append(prov)
+            try:
+                if prov.pause():
+                    summary["paused_providers"].append(prov.name)
+                    log.info("Sync provider paused: %s", prov.name)
+                else:
+                    log.warning(
+                        "Sync provider pause returned False (process may be exiting slowly): %s",
+                        prov.name,
+                    )
+            except Exception as e:
+                log.error("Exception while pausing sync provider %s: %s", prov.name, e)
+
         for t in pending:
             if apply_backoff and not t.is_due():
                 summary["deferred"] += 1
@@ -145,6 +217,7 @@ def run_once(
                 t.next_try_at = ""
                 summary["blocked"] += 1
                 log.error("Task %s blocked: %s", t.id, t.last_error)
+                _record_permanent_failure(t, queue.data_dir, on_permanent_failure)
             elif max_retries is not None and t.retry_count >= max_retries:
                 t.status = "failed"
                 t.last_outcome = "permanent"
@@ -161,6 +234,7 @@ def run_once(
                     t.retry_count,
                     t.last_error,
                 )
+                _record_permanent_failure(t, queue.data_dir, on_permanent_failure)
             else:
                 t.status = "pending"  # bleibt für nächsten Lauf
                 t.last_outcome = "retryable"
@@ -178,8 +252,13 @@ def run_once(
                 )
         queue.save()
     finally:
-        for prov in paused:
-            if prov.resume():
-                log.info("Sync provider resumed: %s", prov.name)
+        for prov in to_resume:
+            try:
+                if prov.resume():
+                    log.info("Sync provider resumed: %s", prov.name)
+                else:
+                    log.error("Failed to resume sync provider: %s", prov.name)
+            except Exception as e:
+                log.error("Exception while resuming sync provider %s: %s", prov.name, e)
 
     return summary
