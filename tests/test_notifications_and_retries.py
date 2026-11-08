@@ -15,6 +15,7 @@ def test_settings_retry_and_notifications_defaults(tmp_path: Path, monkeypatch: 
     assert cfg["interval_min"] == 120
     assert settings.get_max_retries(cfg) is None
     assert settings.get_notifications_enabled(cfg) is True
+    assert settings.get_on_permanent_failure(cfg) is None
 
 
 def test_settings_retry_limit_persistence(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
