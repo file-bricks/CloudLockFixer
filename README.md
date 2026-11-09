@@ -3,7 +3,7 @@
 # CloudLockFixer (CLF-WDAS)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/file-bricks/CloudLockFixer/tests.yml?branch=main&label=CI)](https://github.com/file-bricks/CloudLockFixer/actions)
-[![Pytest Status](https://img.shields.io/badge/tests-429%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
+[![Pytest Status](https://img.shields.io/badge/tests-443%20passed%20%7C%20100%25-brightgreen)](https://github.com/file-bricks/CloudLockFixer)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/file-bricks/CloudLockFixer)
 [![Privilege](https://img.shields.io/badge/privilege-RunAsInvoker%20%7C%20Non--Elevated-blue)](THIRD_PARTY_LICENSES.md)
@@ -440,6 +440,11 @@ clf add --chain  'move "C:\Build\bin" "C:\OneDrive\bin" && delete "C:\OneDrive\o
 
 # Inspect queue status
 clf list
+clf list --failed        # Show only failed and blocked tasks
+clf list --status done   # Filter by status (pending, running, done, failed, blocked)
+
+# Cancel a pending or blocked task
+clf cancel <task-id>
 
 # Retry failed or blocked tasks
 clf retry <task-id>
@@ -504,7 +509,7 @@ While `cldflt.sys` filter mitigation is specific to Windows, CloudLockFixer feat
 <a id="15-testing--quality-verification"></a><a id="testing"></a>
 ## 15. Testing & Quality Verification
 
-The repository enforces strict continuous verification with 429 automated tests (`pytest`, 429 passing, 0 failures, 100% green):
+The repository enforces strict continuous verification with 443 automated tests (`pytest`, 443 passing, 0 failures, 100% green):
 
 ```bash
 # Run the complete test suite

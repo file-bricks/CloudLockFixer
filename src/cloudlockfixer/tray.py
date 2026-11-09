@@ -540,6 +540,7 @@ class TrayApp:
                     backoff_base_sec=settings.get_backoff_base(self.settings),
                     backoff_max_sec=settings.get_backoff_max(self.settings),
                     backoff_multiplier=settings.get_backoff_multiplier(self.settings),
+                    on_permanent_failure=settings.get_on_permanent_failure(self.settings),
                 )
             except Exception as e:  # pragma: no cover
                 log.exception("Worker run failed")

@@ -80,7 +80,15 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--chain", metavar="AUSDRUCK",
                    help="z.B. 'move \"a\" \"b\" && delete \"c\"'")
 
-    sub.add_parser("list", help=t("cli_list_help"))
+    p_list = sub.add_parser("list", help=t("cli_list_help"))
+    g_list = p_list.add_mutually_exclusive_group()
+    g_list.add_argument("--failed", action="store_true", help=t("cli_list_failed_help"))
+    g_list.add_argument("--status", choices=["pending", "running", "done", "failed", "blocked"],
+                        help=t("cli_list_status_help"))
+
+    p_cancel = sub.add_parser("cancel", help=t("cli_cancel_help"))
+    p_cancel.add_argument("task_id", metavar="ID", help=t("cli_cancel_id_help"))
+
     p_run = sub.add_parser("run-now", help=t("cli_run_help"))
     p_run.add_argument("--pause", action="store_true",
                        help=t("cli_pause_help"))
@@ -173,14 +181,40 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "list":
-        if not queue.tasks:
-            print(t("queue_empty"))
+        tasks = queue.tasks
+        if args.failed:
+            tasks = [tk for tk in tasks if tk.status in ("failed", "blocked")]
+        elif args.status:
+            tasks = [tk for tk in tasks if tk.status == args.status]
+
+        if not tasks:
+            if args.failed:
+                print(t("no_failed_tasks"))
+            elif args.status:
+                print(t("no_tasks_with_status", status=args.status))
+            else:
+                print(t("queue_empty"))
             return 0
-        for tk in queue.tasks:
+        for tk in tasks:
             next_info = f"  ({t('list_next_try', at=tk.next_try_at)})" if tk.next_try_at else ""
             print(f"[{tk.status:7}] {tk.id}  ({t('list_attempts', n=tk.retry_count)}){next_info}"
                   f"  {tk.describe()}"
                   + (f"  ! {tk.last_error}" if tk.last_error else ""))
+        return 0
+
+    if args.cmd == "cancel":
+        existing = queue.get_task(args.task_id)
+        if existing is None:
+            print(t("task_not_found", id=args.task_id), file=sys.stderr)
+            return 1
+        if existing.status == "done":
+            print(t("task_already_done", id=existing.id), file=sys.stderr)
+            return 1
+        task = queue.cancel_task(args.task_id)
+        if task is None:
+            print(t("task_cancel_failed", id=args.task_id), file=sys.stderr)
+            return 1
+        print(t("task_canceled_msg", id=task.id, desc=task.describe()))
         return 0
 
     if args.cmd == "run-now":
@@ -192,6 +226,7 @@ def main(argv: list[str] | None = None) -> int:
                        else settings.get_backoff_max(cfg))
         backoff_multiplier = (args.backoff_multiplier if args.backoff_multiplier is not None
                               else settings.get_backoff_multiplier(cfg))
+        on_permanent_failure = settings.get_on_permanent_failure(cfg)
         # Manuelle Läufe arbeiten sofort; Aufschieben nur mit explizitem --backoff.
         apply_backoff = args.backoff and not args.ignore_backoff
         summary = run_once(
@@ -202,6 +237,7 @@ def main(argv: list[str] | None = None) -> int:
             backoff_base_sec=backoff_base,
             backoff_max_sec=backoff_max,
             backoff_multiplier=backoff_multiplier,
+            on_permanent_failure=on_permanent_failure,
         )
         paused = ""
         if summary["paused_providers"]:

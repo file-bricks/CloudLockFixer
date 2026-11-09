@@ -13,6 +13,7 @@ DEFAULT_NOTIFICATIONS_ENABLED: bool = True
 DEFAULT_BACKOFF_BASE_SEC: int = 60  # Basis-Backoff: 60 s
 DEFAULT_BACKOFF_MAX_SEC: int = 3600  # Maximaler Backoff: 1 h (3600 s)
 DEFAULT_BACKOFF_MULTIPLIER: float = 2.0  # Verdopplung je Fehlversuch
+DEFAULT_ON_PERMANENT_FAILURE: str | None = None
 
 
 def _path():
@@ -37,6 +38,7 @@ def load() -> dict:
         "backoff_base_sec": DEFAULT_BACKOFF_BASE_SEC,
         "backoff_max_sec": DEFAULT_BACKOFF_MAX_SEC,
         "backoff_multiplier": DEFAULT_BACKOFF_MULTIPLIER,
+        "on_permanent_failure": DEFAULT_ON_PERMANENT_FAILURE,
     }
 
 
@@ -85,9 +87,10 @@ def resolve_language(cfg: dict) -> str:
 
 def get_max_retries(cfg: dict) -> int | None:
     """Return stored max_retries limit or DEFAULT_MAX_RETRIES (None = infinite)."""
-    val = cfg.get("max_retries")
-    if val is None or (isinstance(val, int) and val > 0 and not isinstance(val, bool)):
-        return val
+    if "max_retries" in cfg:
+        val = cfg.get("max_retries")
+        if val is None or (isinstance(val, int) and val > 0 and not isinstance(val, bool)):
+            return val
     return DEFAULT_MAX_RETRIES
 
 
@@ -96,6 +99,22 @@ def set_max_retries(cfg: dict, val: int | None) -> None:
     if val is not None and (not isinstance(val, int) or val <= 0 or isinstance(val, bool)):
         raise ValueError("max_retries must be None or a positive integer")
     cfg["max_retries"] = val
+    save(cfg)
+
+
+def get_on_permanent_failure(cfg: dict) -> str | None:
+    """Return stored on_permanent_failure command template or None."""
+    val = cfg.get("on_permanent_failure")
+    if isinstance(val, str) and val.strip():
+        return val.strip()
+    return DEFAULT_ON_PERMANENT_FAILURE
+
+
+def set_on_permanent_failure(cfg: dict, val: str | None) -> None:
+    """Set and persist on_permanent_failure command template."""
+    if val is not None and not isinstance(val, str):
+        raise ValueError("on_permanent_failure must be None or a string")
+    cfg["on_permanent_failure"] = val.strip() if val else None
     save(cfg)
 
 
