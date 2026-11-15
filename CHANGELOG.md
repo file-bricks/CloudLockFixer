@@ -136,7 +136,7 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
   * `models.py`: `Task.from_dict` fängt `chain=None` und nicht-dictionarische Elemente defensiv ab. `Queue.load` parst Tasks einzeln und verhindert, dass ein isolierter korrupter Task-Eintrag die gesamte `queue.json` verwirft. `parse_txt_line` weist `.` / `./` / `.\\` als Quelle oder Ziel für `move`-Operationen mit `ValueError` ab.
   * `cli.py`: `clf add --move` validiert Quelle und Ziel gegen Arbeitsverzeichnisbezeichner (`.`, `./`, `.\\`) mit Exit-Code 2.
   * `ops.py`: `_payload_signature` bezieht Verzeichnisstrukturen (inklusive leerer Ordner) ein (`D:<relpath>\0`). `_do_move` erkennt und finalisiert unterbrochene Case-Renames aus vorangegangenen `.clf_tmp_*`-Zwischenschritten und behandelt gebrochene Symlinks resilient.
-- The verification contract reflects the current unreleased source state: 443 passing tests.
+- The verification contract reflects the current unreleased source state: 444 passing tests.
 
 ## [0.2.3] - 2026-09-10
 
