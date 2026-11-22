@@ -2,6 +2,9 @@
  * CloudLockFixer — Web Companion Service Worker (PWA Offline Cache)
  */
 const CACHE_NAME = 'clf-companion-v1';
+// Inhalts-Hash aller STATIC_ASSETS-Dateien inkl. Manifest und Icons (web_companion/tests/sw_asset_hash.test.mjs prueft ihn):
+// aendert sich eine davon, CACHE_NAME erhoehen, sonst behalten installierte PWAs den alten Code.
+const ASSET_HASH = 'ec240c8ffae3'; // eslint-disable-line no-unused-vars
 const STATIC_ASSETS = [
   './',
   './index.html',
